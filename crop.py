@@ -1,4 +1,4 @@
-import sys, argparse
+import argparse
 import face_recognition
 from PIL import Image
 
