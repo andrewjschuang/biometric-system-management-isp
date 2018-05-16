@@ -1,5 +1,7 @@
 import face_recognition
 import cv2
+import save_encodings
+from pathlib import Path
 
 # This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
 # other example, but it includes some basic performance tweaks to make things run a lot faster:
@@ -13,28 +15,16 @@ import cv2
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0)
 
-# Load a sample picture and learn how to recognize it.
-obama_image = face_recognition.load_image_file("people-cropped-1.jpg")
-obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
+# andrew_image = face_recognition.load_image_file("/home/andrewjschuang/Pictures/icloud/download.png")
+# andrew_face_encoding = face_recognition.face_encodings(andrew_image)[0]
 
-# Load a second sample picture and learn how to recognize it.
-biden_image = face_recognition.load_image_file("people-cropped-2.jpg")
-biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
-
-andrew_image = face_recognition.load_image_file("/home/andrewjschuang/Pictures/icloud/download.png")
-andrew_face_encoding = face_recognition.face_encodings(andrew_image)[0]
-
-# Create arrays of known face encodings and their names
-known_face_encodings = [
-    obama_face_encoding,
-    biden_face_encoding,
-    andrew_face_encoding
-]
-known_face_names = [
-    "Barack Obama",
-    "Joe Biden",
-    "Andrew Chuang"
-]
+known_face_encodings = []
+known_face_names = []
+pathlist = Path('encodings/').glob('**/*.pk')
+for path in pathlist:
+    path_in_str = str(path)
+    known_face_encodings.append(save_encodings.load(path_in_str)['encoding'])
+    known_face_names.append(save_encodings.load(path_in_str)['name'])
 
 # Initialize some variables
 face_locations = []
@@ -61,7 +51,7 @@ while True:
         face_names = []
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.45)
             name = "Unknown"
 
             # If a match was found in known_face_encodings, just use the first one.
