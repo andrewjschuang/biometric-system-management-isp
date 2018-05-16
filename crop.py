@@ -3,15 +3,16 @@ import face_recognition
 from PIL import Image
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('filename', help='filename of picture to crop')
-    parser.add_argument('-nl', '--notlocal', help='save cropped images in original directory', action='store_true')
-    args = parser.parse_args()
+    args = createArgsParser()
 
+    # loads image
     image = face_recognition.load_image_file(args.filename)
+    # gets coordinates for each face in picture
     face_locations = face_recognition.face_locations(image)
 
+    # counter for number of cropped faces
     count = 1
+    # crops face image and saves it
     for face_location in face_locations:
         top, right, bottom, left = face_location
         face_image = image[top:bottom, left:right]
@@ -23,10 +24,19 @@ def main():
         pil_image.save(out)
         count += 1
 
+# parses arguments from command line
+def createArgsParser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename', help='filename of picture to crop')
+    parser.add_argument('-nl', '--notlocal', help='save cropped images in original directory', action='store_true')
+    return parser.parse_args()
+
+# returns original directory path
 def saveOriginalDirectory(fp, count):
     fp, extension = fp.split('.')
     return fp + "-cropped-" + str(count) + '.' + extension
 
+# returns current working directory path
 def saveLocally(fp, count):
     fp = fp.split('/')[-1]
     fp, extension = fp.split('.')
