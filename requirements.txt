@@ -1,0 +1,7 @@
+click==6.7
+dlib==19.10.0
+face-recognition==1.2.2
+face-recognition-models==0.3.0
+numpy==1.14.3
+Pillow==5.1.0
+pkg-resources==0.0.0
