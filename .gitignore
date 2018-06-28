@@ -1,1 +1,4 @@
 ve/**
+__pycache__/**
+pictures/**
+encodings/**

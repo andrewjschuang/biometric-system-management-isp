@@ -23,6 +23,7 @@ def main():
             out = saveLocally(args.filename, count)
         pil_image.save(out)
         count += 1
+    print('%s faces cropped' % (count-1))
 
 # parses arguments from command line
 def createArgsParser():
