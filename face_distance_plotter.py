@@ -23,7 +23,8 @@ def main():
     if args.folder:
         distances = []
         results = {'true':0, 'false':0}
-        f = open(args.folder+'/summary-'+args.encoding[10:-3]+'.txt', 'w')
+        # f = open(args.folder+'/summary-'+args.encoding[10:-3]+'.txt', 'w')
+        f = open(args.folder+'/'+args.encoding[10:-3]+'.txt', 'w')
         files, filenames = list_of_files(args.folder)
 
         # iterates through all picture files
