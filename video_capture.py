@@ -1,6 +1,6 @@
 import face_recognition
 import cv2
-import save_encodings
+import fr_encodings
 from pathlib import Path
 
 # This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
@@ -23,8 +23,8 @@ known_face_names = []
 pathlist = Path('encodings/').glob('**/*.pk')
 for path in pathlist:
     path_in_str = str(path)
-    known_face_encodings.append(save_encodings.load(path_in_str)['encoding'])
-    known_face_names.append(save_encodings.load(path_in_str)['name'])
+    known_face_encodings.append(fr_encodings.load(path_in_str)['encoding'])
+    known_face_names.append(fr_encodings.load(path_in_str)['name'])
 
 # Initialize some variables
 face_locations = []
@@ -51,7 +51,8 @@ while True:
         face_names = []
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=4)
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.45)
+
             name = "Unknown"
 
             # If a match was found in known_face_encodings, just use the first one.

@@ -14,6 +14,8 @@ def main():
     print(result)
 
 def save(encoding, name, fp):
+    if fp.lower().endswith('.jpg') or fp.lower().endswith('.png'):
+        fp = fp[:-4] + '.pk'
     try:
         with open(fp, 'wb') as f:
             pickle.dump({'name': name, 'encoding': encoding}, f)
