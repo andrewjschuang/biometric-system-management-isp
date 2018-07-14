@@ -75,7 +75,7 @@ def main():
         plt.xticks(rotation=90)
         plt.axhline(y=tolerance, color='r', linestyle='-')
         plt.gcf().subplots_adjust(bottom=0.4)
-        plt.savefig(args.folder+'/face_distances-'+args.encoding[10:-3]+'.png')
+        plt.savefig(args.folder+'/'+args.encoding[10:-3]+'.png')
         # plt.show()
 
     # compares with only one picture
