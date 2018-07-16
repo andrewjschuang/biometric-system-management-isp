@@ -1,4 +1,6 @@
-ve/**
-__pycache__/**
-pictures/**
-encodings/**
+ve/
+__pycache__/
+**/*.png
+**/*.PNG
+**/*.jpg
+**/*.JPG
