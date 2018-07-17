@@ -1,0 +1,33 @@
+july 07 2018
+
+objectives
+get one person's encoding (best for a set of encodings) and test to see if there
+are false positives and false negatives.
+find good tolerance value
+obtain measures for good accuracy
+
+encoding(s) used
+top_smilling_glasses
+
+strategy employed
+scan for all faces in picture
+get the one with least face distance
+
+results
+almost no false positives (except 0.4 and 0.39)
+very few false negatives due to sideways faces and/or low resolution (not focused)
+most detections in the interval [0.25, 0.35]
+very few "false positives" in the interval [0.42, 0.45]
+
+conclusions
+tolerance=0.4 is acceptable
+measures for good accuracy
+    - pictures up close
+    - good resolution
+    - frontal face (no sideways)
+    - encoding with glasses for whoever wears them
+    - decent lighting (not too bright nor too dark)
+
+next steps
+would getting average of encodings be better for accuracy?
+use a set of encodings and see if problems arise
