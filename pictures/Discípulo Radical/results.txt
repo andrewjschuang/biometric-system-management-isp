@@ -1,0 +1,12 @@
+discípulo radical
+536 pictures
+
+tolerance=0.4
+
+false positive
+1 boxed-IMG_4186.JPG, 0.4
+2 boxed-IMG_4200.JPG, 0.39
+
+false negative
+a few (too sideways)
+
