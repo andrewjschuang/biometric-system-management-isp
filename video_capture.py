@@ -1,3 +1,4 @@
+import os
 import datetime
 from PIL import Image
 from pathlib import Path
@@ -32,6 +33,10 @@ found = []
 face_locations = []
 face_encodings = []
 process_this_frame = True
+
+# creates directory if it doesn't exist
+directory = './found'
+os.makedirs(directory, exist_ok=True)
 
 # run forever until Ctrl+C
 while True:
@@ -71,8 +76,8 @@ while True:
                 timestamp = datetime.datetime.now().strftime("%c")
                 filename = name + ' - ' + timestamp + '.png'
                 pil_image = Image.fromarray(frame)
-                pil_image.save('./found/' + filename)
-                with open('./found/out.txt', 'a') as f:
+                pil_image.save(os.path.join(directory, filename))
+                with open(os.path.join(directory, 'out.txt'), 'a') as f:
                     f.write(str({'name': name, 'ts': timestamp, 'image': filename}) + '\n')
 
     # process every other frame
