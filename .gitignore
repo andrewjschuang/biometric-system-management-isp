@@ -1,5 +1,6 @@
 ve/
 __pycache__/
+found/
 **/*.png
 **/*.PNG
 **/*.jpg
