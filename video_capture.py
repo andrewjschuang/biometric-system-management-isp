@@ -22,7 +22,7 @@ video_capture = cv2.VideoCapture(0)
 # gets all saved encodings
 known_face_encodings = []
 known_face_names = []
-pathlist = Path('encodings/').glob('**/*.pk')
+pathlist = Path('./encodings/').glob('**/*.pk')
 for path in pathlist:
     path_in_str = str(path)
     known_face_encodings.append(fr_encodings.load(path_in_str)['encoding'])
