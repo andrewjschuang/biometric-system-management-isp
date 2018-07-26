@@ -1,6 +1,6 @@
 import os
 import datetime
-from PIL import Image
+from PIL import Image, ImageDraw
 from pathlib import Path
 
 import face_recognition
@@ -58,7 +58,8 @@ while True:
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
         # checks for all faces
-        for face_encoding in face_encodings:
+        # for face_encoding in face_encodings:
+        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.4)
 
@@ -75,8 +76,13 @@ while True:
                 # save info
                 timestamp = datetime.datetime.now().strftime("%c")
                 filename = name + ' - ' + timestamp + '.png'
-                pil_image = Image.fromarray(frame)
+
+                pil_image = Image.fromarray(rgb_small_frame)
+                draw = ImageDraw.Draw(pil_image)
+                draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+                del draw
                 pil_image.save(os.path.join(directory, filename))
+
                 with open(os.path.join(directory, 'out.txt'), 'a') as f:
                     f.write(str({'name': name, 'ts': timestamp, 'image': filename}) + '\n')
 
