@@ -1,4 +1,7 @@
-# Biometric System Management using Face Recognition
+# Biometric System Management ISP using Face Recognition
+
+Thanks to:
+https://github.com/ageitgey/face_recognition
 
 ## Files and scripts
 
