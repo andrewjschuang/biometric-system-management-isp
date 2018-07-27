@@ -135,6 +135,7 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
     video_capture.release()
     cv2.destroyAllWindows()
 
+    # returns output path
     return os.path.abspath(output)
 
 # python argument parser
