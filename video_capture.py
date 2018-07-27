@@ -31,7 +31,7 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
     # default values
     video_source = 0 if video_source is None else video_source
     display_image = False if display_image is None else display_image
-    output = './found' if output is None else output
+    output = './found/temp' if output is None else output
     encodings = './encodings' if encodings is None else encodings
     tolerance = 0.4 if tolerance is None else tolerance
 
