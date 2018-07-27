@@ -131,11 +131,11 @@ def run(video_source=None, display_image=None, output=None, encodings=None, tole
 # python argument parser
 def createArgsParser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--source', help="video input source. may be a video file")
-    parser.add_argument('--display', help='whether to display the source video')
-    parser.add_argument('--output', help='folder to save output files')
-    parser.add_argument('--tolerance', type=float, help='tolerance for face distance')
-    parser.add_argument('--encodings', help='folder of encoding files')
+    parser.add_argument('-s', '--source', help="video input source. may be a video file")
+    parser.add_argument('-d', '--display', help='whether to display the source video')
+    parser.add_argument('-o', '--output', help='folder to save output files')
+    parser.add_argument('-e', '--encodings', help='folder of encoding files')
+    parser.add_argument('-t', '--tolerance', type=float, help='tolerance for face distance')
     return parser.parse_args()
 
 if __name__ == '__main__':
