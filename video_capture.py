@@ -82,7 +82,8 @@ def run(video_source=None, display_image=None, output=None, encodings=None, tole
 
             # checks for all faces
             for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-                
+                # Draw a box around the face
+                cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
 
                 # See if the face is a match for the known face(s)
                 matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=tolerance)
