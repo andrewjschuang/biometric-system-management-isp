@@ -1,4 +1,5 @@
 import os
+import signal
 import argparse
 import datetime
 from PIL import Image, ImageDraw
@@ -17,8 +18,16 @@ import fr_encodings
 # OpenCV is *not* required to use the face_recognition library. It's only required if you want to run this
 # specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
 
+# global variable to run (loop) or not
+run = True
+
+# ends process when Ctrl+C is hit
+def signal_handler(signal, frame):
+    global run
+    run = False
+
 # run face recognition in video source
-def run(video_source=None, display_image=None, output=None, encodings=None, tolerance=None):
+def main(video_source=None, display_image=None, output=None, encodings=None, tolerance=None):
     # default values
     video_source = 0 if video_source is None else video_source
     display_image = False if display_image is None else display_image
@@ -57,7 +66,7 @@ def run(video_source=None, display_image=None, output=None, encodings=None, tole
     process_this_frame = True
 
     # run forever until Ctrl+C
-    while True:
+    while run:
         # Grab a single frame of video
         ret, frame = video_capture.read()
         if not ret:
@@ -164,8 +173,11 @@ if __name__ == '__main__':
         raise Exception('tolerance not in range [0,1]')
         exit(1)
 
+    # Ctrl+C signal handler
+    signal.signal(signal.SIGINT, signal_handler)
+
     # run face recognition
-    output = run(video_source=args.source, display_image=args.display, output=args.output, encodings=args.encodings, tolerance=args.tolerance)
+    output = main(video_source=args.source, display_image=args.display, output=args.output, encodings=args.encodings, tolerance=args.tolerance)
 
     # print output information
     print('saved information in %s' % output)
