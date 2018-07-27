@@ -60,6 +60,8 @@ def run(video_source=None, display_image=None, output=None, encodings=None, tole
     while True:
         # Grab a single frame of video
         ret, frame = video_capture.read()
+        if not ret:
+            return os.path.abspath(output)
 
         # Resize frame of video to 1/4 size for faster face recognition processing
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
@@ -69,15 +71,6 @@ def run(video_source=None, display_image=None, output=None, encodings=None, tole
 
         # process every other frame
         process_this_frame = not process_this_frame
-
-        # option to display image
-        if display_image:
-             # Display the resulting image
-            cv2.imshow('Biometric System Management', frame)
-
-             # Hit 'q' on the keyboard to quit!
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
 
         # Only process every other frame of video to save time
         if process_this_frame:
@@ -89,6 +82,8 @@ def run(video_source=None, display_image=None, output=None, encodings=None, tole
 
             # checks for all faces
             for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+                
+
                 # See if the face is a match for the known face(s)
                 matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=tolerance)
 
@@ -117,12 +112,20 @@ def run(video_source=None, display_image=None, output=None, encodings=None, tole
                     with open(os.path.join(output, 'out.txt'), 'a') as f:
                         f.write(str({'name': name, 'ts': timestamp, 'image': filename}) + '\n')
 
+        # option to display image
+        if display_image:
+             # Display the resulting image
+            cv2.imshow('Biometric System Management', frame)
+
+             # Hit 'q' on the keyboard to quit!
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
     # Release handle to the webcam
     video_capture.release()
     cv2.destroyAllWindows()
 
-    # print output information
-    print('saved information in %s' % output)
+    return os.path.abspath(output)
 
 # python argument parser
 def createArgsParser():
@@ -161,6 +164,7 @@ if __name__ == '__main__':
         exit(1)
 
     # run face recognition
-    run(video_source=args.source, display_image=args.display, output=args.output, encodings=args.encodings, tolerance=args.tolerance)
+    output = run(video_source=args.source, display_image=args.display, output=args.output, encodings=args.encodings, tolerance=args.tolerance)
 
-# TODO: squares in face in display, video file fps speed
+    # print output information
+    print('saved information in %s' % output)
