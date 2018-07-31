@@ -9,15 +9,14 @@ results
 1. some false positives
 2. still some false negatives
     2a. maybe the true positives weren't collected due to [1]
-    2b. some seems that were do to capturing side of face
-3. a bit of slow performance
+    2b. some seem that were do to capturing side of face
+3. a bit of a laggy performance
 
 next strategies / changes to do
-- rename saved files putting date first for ordering
-- save more than 1 photo per person
-- use an unknown database for less duplicates for unknown people
-- use the various average strategy
-- saving which encoding was used to compare (or encodings if average used)
-- face encodings without smile (more natural)
-- log face distance
-- possibly lower tolerance
+- rename saved files putting the date first for file ordering
+- have more than 1 encoding photo per person (use the average strategy)
+- use a separate and temporary database to avoid duplicates for unknown people (may cause performance issues)
+- saving which encoding was used to compare (or encodings if average strategy was used)
+- face encodings without smiling (more natural)
+- save face distance
+- possibly use a lower tolerance
