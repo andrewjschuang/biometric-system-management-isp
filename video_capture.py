@@ -5,8 +5,9 @@ import datetime
 from PIL import Image, ImageDraw
 from pathlib import Path
 
-import face_recognition
 import cv2
+import imutils
+import face_recognition
 import fr_encodings
 
 # This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
@@ -73,10 +74,10 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
             return os.path.abspath(output)
 
         # Resize frame of video to 1/4 size for faster face recognition processing
-        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+        # small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
 
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-        rgb_small_frame = small_frame[:, :, ::-1]
+        rgb_frame = frame[:, :, ::-1]
 
         # process every other frame
         process_this_frame = not process_this_frame
@@ -84,10 +85,10 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
         # Only process every other frame of video to save time
         if process_this_frame:
             # Find all the faces and face encodings in the current frame of video
-            face_locations = face_recognition.face_locations(rgb_small_frame)
+            face_locations = face_recognition.face_locations(rgb_frame)
 
             # only this takes long
-            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+            face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
             # checks for all faces
             for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
@@ -106,21 +107,28 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
                     if name in found:
                         continue
                     found.append(name)
+                else:
+                    name = 'unknown'
 
-                    # save information
-                    timestamp = datetime.datetime.now().strftime("%c")
-                    filename = name + ' - ' + timestamp + '.png'
+                # save information
+                timestamp = datetime.datetime.now().strftime("%c")
+                filename = name + ' - ' + timestamp + '.png'
 
-                    # save picture file
-                    pil_image = Image.fromarray(rgb_small_frame)
-                    draw = ImageDraw.Draw(pil_image)
-                    draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
-                    del draw
-                    pil_image.save(os.path.join(output, filename))
+                # save picture file
+                pil_image = Image.fromarray(frame)
+                draw = ImageDraw.Draw(pil_image)
+                draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+                del draw
+                pil_image.save(os.path.join(output, filename))
 
-                    # save output text file
-                    with open(os.path.join(output, 'out.txt'), 'a') as f:
-                        f.write(str({'name': name, 'ts': timestamp, 'image': filename}) + '\n')
+                # save output text file
+                out = str({'name': name, 'ts': timestamp, 'image': filename}) + '\n'
+                with open(os.path.join(output, 'out.txt'), 'a') as f:
+                    f.write(out)
+
+                # print output
+                if display_image:
+                    print(out, end="")
 
         # option to display image
         if display_image:
