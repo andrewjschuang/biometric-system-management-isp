@@ -9,7 +9,7 @@ results
 1. some false positives
 2. still some false negatives
     2a. maybe the true positives weren't collected due to [1]
-    2b. some seem that were do to capturing side of face
+    2b. some seem that were due to capturing side of face
 3. a bit of a laggy performance
 
 next strategies / changes to do
@@ -19,4 +19,4 @@ next strategies / changes to do
 - saving which encoding was used to compare (or encodings if average strategy was used)
 - face encodings without smiling (more natural)
 - save face distance
-- possibly use a lower tolerance
+- possibly use a stricter tolerance
