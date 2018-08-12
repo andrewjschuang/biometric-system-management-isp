@@ -116,7 +116,7 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
 
                 # save information
                 timestamp = datetime.datetime.now().strftime("%c")
-                filename = name + ' - ' + timestamp + '.png'
+                filename = timestamp + '- ' + name + '.png'
 
                 # save picture file
                 pil_image = Image.fromarray(frame)
