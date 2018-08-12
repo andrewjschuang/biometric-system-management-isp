@@ -41,11 +41,13 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
 
     # gets all saved encodings
     known_face_encodings = []
+    known_face_paths = []
     known_face_names = []
     pathlist = Path(encodings).glob('**/*.pk')
     for path in pathlist:
         path_in_str = str(path)
         known_face_encodings.append(fr_encodings.load(path_in_str)['encoding'])
+        known_face_paths.append(path_in_str)
         known_face_names.append(fr_encodings.load(path_in_str)['name'])
 
     # must have at least one encoding
@@ -102,6 +104,7 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
                 if True in matches:
                     first_match_index = matches.index(True)
                     name = known_face_names[first_match_index]
+                    face_path = known_face_paths[first_match_index]
 
                     # don't repeat for found faces
                     if name in found:
@@ -109,6 +112,7 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
                     found.append(name)
                 else:
                     name = 'unknown'
+                    face_path = 'unknown'
 
                 # save information
                 timestamp = datetime.datetime.now().strftime("%c")
@@ -122,7 +126,7 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
                 pil_image.save(os.path.join(output, filename))
 
                 # save output text file
-                out = str({'name': name, 'ts': timestamp, 'image': filename}) + '\n'
+                out = str({'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path}) + '\n'
                 with open(os.path.join(output, 'out.txt'), 'a') as f:
                     f.write(out)
 
