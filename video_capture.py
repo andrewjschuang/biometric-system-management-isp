@@ -5,6 +5,7 @@ import datetime
 from PIL import Image, ImageDraw
 from pathlib import Path
 
+import numpy as np
 import cv2
 import imutils
 import face_recognition
@@ -97,41 +98,44 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
                 # Draw a box around the face
                 cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
 
-                # See if the face is a match for the known face(s)
-                matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=tolerance)
+                # Gets the face distance for each known faces
+                face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
 
-                # If a match was found in known_face_encodings, just use the first one.
-                if True in matches:
-                    first_match_index = matches.index(True)
-                    name = known_face_names[first_match_index]
-                    face_path = known_face_paths[first_match_index]
+                # Minimum face distance and its index
+                min_face_distance = np.min(face_distances)
+                min_face_distance_index = np.argmin(face_distances)
+
+                # Gets match
+                if min_face_distance <= tolerance:
+                    name = known_face_names[min_face_distance_index]
+                    face_path = known_face_paths[min_face_distance_index]
 
                     # don't repeat for found faces
-                    if name in found:
-                        continue
-                    found.append(name)
-                else:
-                    name = 'unknown'
-                    face_path = 'unknown'
+                    # if name in found:
+                    #     continue
+                    # found.append(name)
+                # else:
+                #     name = 'unknown'
+                #     face_path = 'unknown'
 
-                # save information
-                timestamp = datetime.datetime.now().strftime("%c")
-                filename = timestamp + '- ' + name + '.png'
+                    # save information
+                    timestamp = datetime.datetime.now().strftime("%c")
+                    filename = timestamp + '- ' + name + '.png'
 
-                # save picture file
-                pil_image = Image.fromarray(frame)
-                draw = ImageDraw.Draw(pil_image)
-                draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
-                del draw
-                pil_image.save(os.path.join(output, filename))
+                    # save picture file
+                    pil_image = Image.fromarray(frame)
+                    draw = ImageDraw.Draw(pil_image)
+                    draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+                    del draw
+                    pil_image.save(os.path.join(output, filename))
 
-                # save output text file
-                out = str({'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path}) + '\n'
-                with open(os.path.join(output, 'out.txt'), 'a') as f:
-                    f.write(out)
+                    # save output text file
+                    out = str({'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path, 'face distance': min_face_distance}) + '\n'
+                    with open(os.path.join(output, 'out.txt'), 'a') as f:
+                        f.write(out)
 
-                # print output
-                if display_image:
+                    # print output
+                    # if display_image:
                     print(out, end="")
 
         # option to display image
