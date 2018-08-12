@@ -1,5 +1,6 @@
 ve/
 __pycache__/
+.vscode/
 found/**/*.png
 found/temp/
 **/*.png
