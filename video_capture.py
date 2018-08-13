@@ -89,6 +89,7 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
         if process_this_frame:
             # Find all the faces and face encodings in the current frame of video
             face_locations = face_recognition.face_locations(rgb_frame)
+            # face_locations = face_recognition.face_locations(rgb_frame, number_of_times_to_upsample=0, model="cnn")
 
             # only this takes long
             face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
