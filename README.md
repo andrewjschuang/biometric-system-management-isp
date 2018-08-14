@@ -1,15 +1,47 @@
 # Biometric System Management using Face Recognition
 
+## How to use
+
+Clone repository
+
+`git clone git@github.com:andrewjschuang/biometric-system-management-isp.git`
+
+Create virtual environment
+
+`cd biometric-system-management-isp/`
+
+`python3 -m venv ve`
+
+Activate virtual environment
+
+`source ve/bin/activate`
+
+Install requirements
+
+`pip install -r requirements.txt`
+
+Add some pictures
+
+`python fr_encodings.py path/to/picture.jpg "name of person" --filename=path/to/save/file`
+
+Fire up webcam to begin using Face Recognition
+
+`python video_capture.py --display=true --encodings=path/to/encoding/files --tolerance=0.4`
+
 ## Files and scripts
 
-### `crop.py`
-#### Crops faces in a set of pictures
+Crops faces in a set of pictures
 
-### `compare.py`
-#### Compares faces in pictures
+`python crop.py filename_to_save`
 
-### `save_encodings.py`
-#### Saves face encodings from pictures
+Compares faces in pictures
 
-### `video_capture.py`
-#### Detects and recognizes faces in camera
+`python compare.py picture1 picture2`
+
+Saves face encodings from pictures
+
+`python fr_encodings.py path/to/picture.jpg "name of person" --filename=path/to/save/file`
+
+Detects and recognizes faces in camera
+
+`python video_capture.py --display=true --encodings=path/to/encoding/files --tolerance=0.4`
