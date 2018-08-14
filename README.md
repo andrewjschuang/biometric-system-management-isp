@@ -1,7 +1,32 @@
-# Biometric System Management ISP using Face Recognition
+# Biometric System Management using Face Recognition
 
-Thanks to:
-https://github.com/ageitgey/face_recognition
+## How to use
+
+Clone repository
+
+`git clone git@github.com:andrewjschuang/biometric-system-management-isp.git`
+
+Create virtual environment
+
+`cd biometric-system-management-isp/`
+
+`python3 -m venv ve`
+
+Activate virtual environment
+
+`source ve/bin/activate`
+
+Install requirements
+
+`pip install -r requirements.txt`
+
+Add some pictures
+
+`python fr_encodings.py path/to/picture.jpg "name of person" --filename=path/to/save/file`
+
+Fire up webcam to begin using Face Recognition
+
+`python video_capture.py --display=true --encodings=path/to/encoding/files --tolerance=0.4`
 
 ## How to use
 
