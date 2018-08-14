@@ -1,10 +1,18 @@
 # Biometric System Management using Face Recognition
 
+## Current branch in development
+
+`git checkout 0.1.1`
+
 ## How to use
 
 Clone repository
 
 `git clone git@github.com:andrewjschuang/biometric-system-management-isp.git`
+
+Switch to latest branch - check above for latest branch
+
+`git checkout x.x.x`
 
 Create virtual environment
 
