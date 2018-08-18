@@ -7,14 +7,21 @@ def main():
 
     # loads image
     image = face_recognition.load_image_file(args.filename)
-    # gets coordinates for each face in picture
-    face_locations = face_recognition.face_locations(image)
+    # gets coordinates for each face in picturel=
+    face_locations = face_recognition.face_locations(image, model='hog')
 
     # counter for number of cropped faces
     count = 1
     # crops face image and saves it
     for face_location in face_locations:
         top, right, bottom, left = face_location
+
+        expansion = 1.05
+        top = int(top/expansion)
+        left = int(left/expansion)
+        bottom = int(bottom + abs(top*(expansion-1)))
+        right = int(right + abs(left*(expansion-1)))
+
         face_image = image[top:bottom, left:right]
         pil_image = Image.fromarray(face_image)
         if args.notlocal:
