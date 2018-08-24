@@ -4,6 +4,7 @@ import argparse
 import datetime
 from PIL import Image, ImageDraw
 from pathlib import Path
+import io
 
 import numpy as np
 import cv2
@@ -27,6 +28,87 @@ run = True
 def signal_handler(signal, frame):
     global run
     run = False
+
+def identify_people(frame):
+    # gets all saved encodings
+    known_face_encodings = []
+    known_face_paths = []
+    known_face_names = []
+    pathlist = Path('./encodings').glob('**/*.pk')
+    for path in pathlist:
+        path_in_str = str(path)
+        known_face_encodings.append(fr_encodings.load(path_in_str)['encoding'])
+        known_face_paths.append(path_in_str)
+        known_face_names.append(fr_encodings.load(path_in_str)['name'])
+
+    # must have at least one encoding
+    # if len(known_face_encodings) == 0:
+    #     raise Exception('no face encodings found in directory %s' % './encodings')
+        # exit(1)
+
+    # Initialize some variables
+    found = []
+    face_locations = []
+    face_encodings = []
+
+    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+    rgb_frame = frame[:, :, ::-1]
+
+    # Find all the faces and face encodings in the current frame of video
+    face_locations = face_recognition.face_locations(rgb_frame)
+    # face_locations = face_recognition.face_locations(rgb_frame, number_of_times_to_upsample=0, model="cnn")
+
+    # only this takes long
+    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+
+    # checks for all faces
+    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+        # Draw a box around the face
+        # cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
+
+        # Gets the face distance for each known faces
+        face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+
+        # Minimum face distance and its index
+        min_face_distance = np.min(face_distances)
+        min_face_distance_index = np.argmin(face_distances)
+
+        tolerance = 0.4
+
+        # Gets match
+        if min_face_distance <= tolerance:
+            name = known_face_names[min_face_distance_index]
+            found.append(name)
+            # face_path = known_face_paths[min_face_distance_index]
+
+            # don't repeat for found faces
+            # if name in found:
+            #     continue
+            # found.append(name)
+        # else:
+        #     name = 'unknown'
+        #     face_path = 'unknown'
+
+            # save information
+            # timestamp = datetime.datetime.now().strftime("%c")
+            # filename = timestamp + '- ' + name + '.png'
+
+            # save picture file
+            # pil_image = Image.fromarray(frame)
+            # draw = ImageDraw.Draw(pil_image)
+            # draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+            # del draw
+            # pil_image.save(os.path.join(output, filename))
+
+            # save output text file
+            # out = str({'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path, 'face distance': min_face_distance}) + '\n'
+            # with open(os.path.join(output, 'out.txt'), 'a') as f:
+            #     f.write(out)
+
+            # print output
+            # if display_image:
+            # print(out, end="")
+    return str(found)
 
 # run face recognition in video source
 def main(video_source=None, display_image=None, output=None, encodings=None, tolerance=None):
