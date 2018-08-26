@@ -1,0 +1,9 @@
+*.md
+__pycache__/
+.vscode/
+backup_encodings/
+found/
+photos_for_encoding/
+test_encodings/
+results/
+ve/
