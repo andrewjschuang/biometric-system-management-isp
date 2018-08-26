@@ -2,15 +2,15 @@ import os
 import signal
 import argparse
 import datetime
-from PIL import Image, ImageDraw
 from pathlib import Path
-import io
+from PIL import Image, ImageDraw
 
 import numpy as np
 import cv2
 import imutils
 import face_recognition
 import fr_encodings
+import config
 
 # This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
 # other example, but it includes some basic performance tweaks to make things run a lot faster:
@@ -29,42 +29,35 @@ def signal_handler(signal, frame):
     global run
     run = False
 
-def identify_people(frame):
-    # gets all saved encodings
+def get_known_encodings(encodings):
     known_face_encodings = []
     known_face_paths = []
     known_face_names = []
-    pathlist = Path('./encodings').glob('**/*.pk')
+
+    pathlist = Path(encodings).glob('**/*.pk')
     for path in pathlist:
         path_in_str = str(path)
         known_face_encodings.append(fr_encodings.load(path_in_str)['encoding'])
         known_face_paths.append(path_in_str)
         known_face_names.append(fr_encodings.load(path_in_str)['name'])
 
-    # must have at least one encoding
-    # if len(known_face_encodings) == 0:
-    #     raise Exception('no face encodings found in directory %s' % './encodings')
-        # exit(1)
+    if len(known_face_encodings) == 0:
+        raise Exception('no face encodings found in directory %s' % pathlist)
+        exit(1)
 
-    # Initialize some variables
-    found = []
-    face_locations = []
-    face_encodings = []
+    return known_face_encodings, known_face_paths, known_face_names
 
-    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+def get_faces_from_picture(frame, model='hog'):
     rgb_frame = frame[:, :, ::-1]
-
-    # Find all the faces and face encodings in the current frame of video
-    face_locations = face_recognition.face_locations(rgb_frame)
-    # face_locations = face_recognition.face_locations(rgb_frame, number_of_times_to_upsample=0, model="cnn")
-
-    # only this takes long
+    face_locations = face_recognition.face_locations(rgb_frame, model=model)
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+    return face_locations, face_encodings
 
-    # checks for all faces
+def identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, save=False):
+    found = []
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
         # Draw a box around the face
-        # cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
+        cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
 
         # Gets the face distance for each known faces
         face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
@@ -73,70 +66,57 @@ def identify_people(frame):
         min_face_distance = np.min(face_distances)
         min_face_distance_index = np.argmin(face_distances)
 
-        tolerance = 0.4
-
         # Gets match
-        if min_face_distance <= tolerance:
+        if min_face_distance <= config.tolerance:
             name = known_face_names[min_face_distance_index]
-            found.append(name)
-            # face_path = known_face_paths[min_face_distance_index]
+            face_path = known_face_paths[min_face_distance_index]
 
             # don't repeat for found faces
             # if name in found:
             #     continue
-            # found.append(name)
+            found.append(name)
+        
+        # unknown person
         # else:
         #     name = 'unknown'
-        #     face_path = 'unknown'
+            # face_path = 'unknown'
 
-            # save information
-            # timestamp = datetime.datetime.now().strftime("%c")
-            # filename = timestamp + '- ' + name + '.png'
-
-            # save picture file
-            # pil_image = Image.fromarray(frame)
-            # draw = ImageDraw.Draw(pil_image)
-            # draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
-            # del draw
-            # pil_image.save(os.path.join(output, filename))
-
-            # save output text file
-            # out = str({'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path, 'face distance': min_face_distance}) + '\n'
-            # with open(os.path.join(output, 'out.txt'), 'a') as f:
-            #     f.write(out)
+            timestamp = datetime.datetime.now().strftime("%c")
+            filename = timestamp + '- ' + name + '.png'
+            out = {'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path, 'face distance': min_face_distance}
+            if save:
+                picture = save_picture(frame, output, filename, str(out), (top, right, bottom, left))
 
             # print output
             # if display_image:
-            # print(out, end="")
-    return str(found)
+            # print(str(out))
+
+    if len(found) == 0:
+        return 'Unknown'
+    return found
+
+def save_picture(frame, output, filename, out, xxx):
+    top, right, bottom, left = xxx
+    pil_image = Image.fromarray(frame)
+    draw = ImageDraw.Draw(pil_image)
+    draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+    del draw
+    pil_image.save(os.path.join(output, filename))
+
+    with open(os.path.join(output, 'out.txt'), 'a') as f:
+        f.write(out)
+    
+    return pil_image
+
+def identify_people(frame):
+    known_face_encodings, known_face_paths, known_face_names = get_known_encodings(config.encodings)
+    face_locations, face_encodings = get_faces_from_picture(frame, model='hog')
+    return identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names)
 
 # run face recognition in video source
-def main(video_source=None, display_image=None, output=None, encodings=None, tolerance=None):
-    # default values
-    video_source = 0 if video_source is None else video_source
-    display_image = False if display_image is None else display_image
-    output = './found/temp' if output is None else output
-    encodings = './encodings' if encodings is None else encodings
-    tolerance = 0.4 if tolerance is None else tolerance
-
+def main(video_source, display_image, output, encodings, tolerance, save=False):
     # Get a reference to webcam #0 (the default one)
     video_capture = cv2.VideoCapture(video_source)
-
-    # gets all saved encodings
-    known_face_encodings = []
-    known_face_paths = []
-    known_face_names = []
-    pathlist = Path(encodings).glob('**/*.pk')
-    for path in pathlist:
-        path_in_str = str(path)
-        known_face_encodings.append(fr_encodings.load(path_in_str)['encoding'])
-        known_face_paths.append(path_in_str)
-        known_face_names.append(fr_encodings.load(path_in_str)['name'])
-
-    # must have at least one encoding
-    if len(known_face_encodings) == 0:
-        raise Exception('no face encodings found in directory %s' % encodings)
-        exit(1)
 
     # creates directory if it doesn't exist
     try:
@@ -145,11 +125,8 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
         raise Exception('not able to create output directory %s' % output)
         exit(1)
 
-    # Initialize some variables
-    found = []
-    face_locations = []
-    face_encodings = []
     process_this_frame = True
+    known_face_encodings, known_face_paths, known_face_names = get_known_encodings(encodings)
 
     # run forever until Ctrl+C
     while run:
@@ -158,68 +135,10 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
         if not ret:
             return os.path.abspath(output)
 
-        # Resize frame of video to 1/4 size for faster face recognition processing
-        # small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
-
-        # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-        rgb_frame = frame[:, :, ::-1]
-
-        # process every other frame
-        process_this_frame = not process_this_frame
-
         # Only process every other frame of video to save time
         if process_this_frame:
-            # Find all the faces and face encodings in the current frame of video
-            face_locations = face_recognition.face_locations(rgb_frame)
-            # face_locations = face_recognition.face_locations(rgb_frame, number_of_times_to_upsample=0, model="cnn")
-
-            # only this takes long
-            face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
-
-            # checks for all faces
-            for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-                # Draw a box around the face
-                cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
-
-                # Gets the face distance for each known faces
-                face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-
-                # Minimum face distance and its index
-                min_face_distance = np.min(face_distances)
-                min_face_distance_index = np.argmin(face_distances)
-
-                # Gets match
-                if min_face_distance <= tolerance:
-                    name = known_face_names[min_face_distance_index]
-                    face_path = known_face_paths[min_face_distance_index]
-
-                    # don't repeat for found faces
-                    # if name in found:
-                    #     continue
-                    # found.append(name)
-                # else:
-                #     name = 'unknown'
-                #     face_path = 'unknown'
-
-                    # save information
-                    timestamp = datetime.datetime.now().strftime("%c")
-                    filename = timestamp + '- ' + name + '.png'
-
-                    # save picture file
-                    pil_image = Image.fromarray(frame)
-                    draw = ImageDraw.Draw(pil_image)
-                    draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
-                    del draw
-                    pil_image.save(os.path.join(output, filename))
-
-                    # save output text file
-                    out = str({'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path, 'face distance': min_face_distance}) + '\n'
-                    with open(os.path.join(output, 'out.txt'), 'a') as f:
-                        f.write(out)
-
-                    # print output
-                    # if display_image:
-                    print(out, end="")
+            face_locations, face_encodings = get_faces_from_picture(frame, model='hog')
+            found = identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, save=save)
 
         # option to display image
         if display_image:
@@ -229,6 +148,9 @@ def main(video_source=None, display_image=None, output=None, encodings=None, tol
              # Hit 'q' on the keyboard to quit!
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+
+        # process every other frame
+        process_this_frame = not process_this_frame
 
     # Release handle to the webcam
     video_capture.release()
@@ -276,8 +198,15 @@ if __name__ == '__main__':
     # Ctrl+C signal handler
     signal.signal(signal.SIGINT, signal_handler)
 
+    # default values
+    video_source = config.video_source if args.source is None else args.source
+    display_image = config.display_image if args.display is None else args.display
+    output = config.output if args.output is None else args.output
+    encodings = config.encodings if args.encodings is None else args.encodings
+    tolerance = config.tolerance if args.tolerance is None else args.tolerance
+
     # run face recognition
-    output = main(video_source=args.source, display_image=args.display, output=args.output, encodings=args.encodings, tolerance=args.tolerance)
+    output = main(video_source, display_image, output, encodings, tolerance, save=True)
 
     # print output information
     print('saved information in %s' % output)

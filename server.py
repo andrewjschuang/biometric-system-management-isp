@@ -1,5 +1,4 @@
 from flask import Flask, request
-from werkzeug.utils import secure_filename
 import io
 import cv2
 import numpy as np
@@ -29,16 +28,17 @@ def upload_file():
             data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
             color_image_flag = 1
             img = cv2.imdecode(data, color_image_flag)
-            return video_capture.identify_people(img)
+            found = video_capture.identify_people(img)
+            return str(found)
     return  '''
             <!doctype html>
             <title>Biometric System Management ISP</title>
-            <p>Upload new File</p>
+            <p>Selecionar foto</p>
             <form method=post enctype=multipart/form-data>
-            <input type=file name=file>
-            <input type=submit value=Upload>
+            <p><input type=file name=file></p>
+            <input type=submit value=Enviar>
             </form>
             '''
 
 # curl -X GET http://localhost:5000
-# curl -F "image=@/home/andrewjschuang/dev/biometric-system-management/photos_for_encoding/random/andrew.jpg" -X POST http://localhost:5000
+# curl -F "file=@/home/andrewjschuang/dev/biometric-system-management/photos_for_encoding/random/andrew.jpg" -X POST http://localhost:5000
