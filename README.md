@@ -64,4 +64,5 @@ Fire up webcam to begin using Face Recognition
 
 `python video_capture.py --display=true --encodings=path/to/encoding/files --tolerance=0.4`
 
+## Special thanks to:
 https://github.com/ageitgey/face_recognition
