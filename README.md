@@ -64,24 +64,4 @@ Fire up webcam to begin using Face Recognition
 
 `python video_capture.py --display=true --encodings=path/to/encoding/files --tolerance=0.4`
 
-## Files and scripts
-
-Crops faces in a set of pictures
-
-`python crop.py filename_to_save`
-
-Compares faces in pictures
-
-`python compare.py picture1 picture2`
-
-Saves face encodings from pictures
-
-`python fr_encodings.py path/to/picture.jpg "name of person" --filename=path/to/save/file`
-
-Detects and recognizes faces in camera
-
-`python video_capture.py --display=true --encodings=path/to/encoding/files --tolerance=0.4`
-
-## Special thanks to:
-
 https://github.com/ageitgey/face_recognition
