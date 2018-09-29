@@ -1,9 +1,12 @@
-from flask import Flask, request
+from flask import Flask, request, redirect, url_for
 import io
 import cv2
 import numpy as np
+import psutil
+import _thread
 
 import video_capture
+import config
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -39,6 +42,30 @@ def upload_file():
             <input type=submit value=Enviar>
             </form>
             '''
+
+@app.route('/capture', methods=['GET'])
+def capture():
+    _thread.start_new_thread(video_capture.main, (config.video_source, config.display_image, config.output, config.encodings, config.tolerance, True))
+    return  '''
+            <!doctype html>
+            <title>Biometric System Management ISP</title>
+            <p>Gravando...</p>
+            '''
+
+@app.route('/stop', methods=['GET'])
+def stop():
+    p_name = 'flask'
+    for proc in psutil.process_iter():
+        if proc.name() == p_name:
+            proc.kill()
+    return '''
+            <!doctype html>
+            <title>Biometric System Management ISP</title>
+            <p>Gravação finalizada</p>
+            '''
+
+if __name__ == '__main__':
+    app.run()
 
 # curl -X GET http://localhost:5000
 # curl -F "file=@/home/andrewjschuang/dev/biometric-system-management/photos_for_encoding/random/andrew.jpg" -X POST http://localhost:5000

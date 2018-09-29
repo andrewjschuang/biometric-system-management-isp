@@ -1,6 +1,7 @@
 FROM python:3.6-slim-stretch
 
 RUN apt-get -y update
+
 RUN apt-get install -y --fix-missing \
     build-essential \
     cmake \
@@ -31,7 +32,9 @@ RUN cd ~ && \
     python3 setup.py install --yes USE_AVX_INSTRUCTIONS
 
 COPY . /app
+
 RUN pip install -r /app/requirements.txt
-WORKDIR app/
-ENV FLASK_APP=server.py
+
+WORKDIR /app
+
 CMD flask run --host=0.0.0.0
