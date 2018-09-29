@@ -2,7 +2,7 @@
 
 ## Current branch in development
 
-`git checkout 0.1.1`
+`git checkout 0.1.2`
 
 ## How to use
 
@@ -63,6 +63,11 @@ Add some pictures
 Fire up webcam to begin using Face Recognition
 
 `python video_capture.py --display=true --encodings=path/to/encoding/files --tolerance=0.4`
+
+## Docker Compose
+You may use Docker to run the application
+
+`docker-compose up -d`
 
 ## Special thanks to:
 https://github.com/ageitgey/face_recognition
