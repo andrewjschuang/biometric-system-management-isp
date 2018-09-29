@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   bmsisp:
-    image: bmsisp:latest
+    image: achuang/bmsisp:latest
     restart: always
     environment:
       FLASK_APP: server.py
