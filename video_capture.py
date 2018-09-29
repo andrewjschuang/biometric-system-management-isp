@@ -53,7 +53,7 @@ def get_faces_from_picture(frame, model='hog'):
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
     return face_locations, face_encodings
 
-def identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, save=False):
+def identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, tolerance, output, save=False):
     found = []
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
         # Draw a box around the face
@@ -67,7 +67,7 @@ def identify(frame, face_locations, face_encodings, known_face_encodings, known_
         min_face_distance_index = np.argmin(face_distances)
 
         # Gets match
-        if min_face_distance <= config.tolerance:
+        if min_face_distance <= tolerance:
             name = known_face_names[min_face_distance_index]
             face_path = known_face_paths[min_face_distance_index]
 
@@ -111,7 +111,7 @@ def save_picture(frame, output, filename, out, xxx):
 def identify_people(frame):
     known_face_encodings, known_face_paths, known_face_names = get_known_encodings(config.encodings)
     face_locations, face_encodings = get_faces_from_picture(frame, model='hog')
-    return identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names)
+    return identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, config.tolerance, config.output)
 
 # run face recognition in video source
 def main(video_source, display_image, output, encodings, tolerance, save=False):
@@ -138,7 +138,7 @@ def main(video_source, display_image, output, encodings, tolerance, save=False):
         # Only process every other frame of video to save time
         if process_this_frame:
             face_locations, face_encodings = get_faces_from_picture(frame, model='hog')
-            found = identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, save=save)
+            found = identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, tolerance, output, save=save)
 
         # option to display image
         if display_image:
