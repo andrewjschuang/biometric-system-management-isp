@@ -66,8 +66,12 @@ Fire up webcam to begin using Face Recognition
 
 ## Docker Compose
 You may use Docker to run the application
-
 `docker-compose up -d`
+
+Before executing the command above, add a volume in docker-compose.yml to copy your encodings folder to inside the container
+`volumes:`
+`  - /local/path/to/encodings:/app/encodings`
+
 
 ## Special thanks to:
 https://github.com/ageitgey/face_recognition
