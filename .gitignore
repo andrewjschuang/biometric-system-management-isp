@@ -1,7 +1,10 @@
 ve/
 __pycache__/
 .vscode/
-found/
+**/found/
+**/photos*/
+**/pictures/
+**/results/
 **/*.png
 **/*.PNG
 **/*.jpg
