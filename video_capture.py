@@ -48,9 +48,9 @@ def get_known_encodings(encodings):
     return known_face_encodings, known_face_paths, known_face_names
 
 def get_faces_from_picture(frame, model='hog'):
-    rgb_frame = frame[:, :, ::-1]
-    face_locations = face_recognition.face_locations(rgb_frame, model=model)
-    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    face_locations = face_recognition.face_locations(frame, model=model)
+    face_encodings = face_recognition.face_encodings(frame, face_locations)
     return face_locations, face_encodings
 
 def identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, tolerance, output, save=False):
@@ -95,8 +95,9 @@ def identify(frame, face_locations, face_encodings, known_face_encodings, known_
         return 'Unknown'
     return found
 
-def save_picture(frame, output, filename, out, xxx):
-    top, right, bottom, left = xxx
+def save_picture(frame, output, filename, out, coordinates):
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    top, right, bottom, left = coordinates
     pil_image = Image.fromarray(frame)
     draw = ImageDraw.Draw(pil_image)
     draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
