@@ -38,6 +38,7 @@ RUN pip install -r /app/requirements.txt
 WORKDIR /app
 
 ENV FLASK_APP=server.py
+
 ENV OPENCV_FFMPEG_CAPTURE_OPTIONS=null
 
 CMD flask run --host=0.0.0.0
