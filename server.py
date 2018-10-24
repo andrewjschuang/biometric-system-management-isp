@@ -25,7 +25,6 @@ def upload_file():
         if image.filename == '':
             return 'No selected image\n'
         if image and allowed_file(image.filename):
-            # filename = secure_filename(image.filename)
             in_memory_file = io.BytesIO()
             image.save(in_memory_file)
             data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
@@ -45,7 +44,12 @@ def upload_file():
 
 @app.route('/capture', methods=['GET'])
 def capture():
-    _thread.start_new_thread(video_capture.main, (config.video_source, config.display_image, config.output, config.encodings, config.tolerance, True))
+    video_source = request.args.get('source', default=config.video_source)
+    display_image = request.args.get('display', default=config.display_image)
+    output = request.args.get('output', default=config.output)
+    encodings = request.args.get('encodings', default=config.encodings)
+    tolerance = request.args.get('tolerance', default=config.tolerance)
+    _thread.start_new_thread(video_capture.main, (video_source, display_image, output, encodings, tolerance, True))
     return  '''
             <!doctype html>
             <title>Biometric System Management ISP</title>
