@@ -112,7 +112,7 @@ def save_picture(frame, output, filename, out, coordinates):
 def identify_people(frame):
     known_face_encodings, known_face_paths, known_face_names = get_known_encodings(config.encodings)
     face_locations, face_encodings = get_faces_from_picture(frame, model='hog')
-    return identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, config.tolerance, config.output)
+    return identify(frame, face_locations, face_encodings, known_face_encodings, known_face_paths, known_face_names, config.tolerance, config.output, save=True)
 
 # run face recognition in video source
 def main(video_source, display_image, output, encodings, tolerance, save=False):
