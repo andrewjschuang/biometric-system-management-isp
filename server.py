@@ -48,8 +48,8 @@ def upload_file():
             </form>
             '''
 
-@app.route('/register/<name>', methods=['GET', 'POST'])
-def register(name):
+@app.route('/register/', methods=['GET', 'POST'])
+def register():
     if request.method == 'POST':
         if 'file' not in request.files:
             return 'No image received\n'
@@ -64,6 +64,7 @@ def register(name):
             data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
             color_image_flag = 1
             img = cv2.imdecode(data, color_image_flag)
+            name = request.form['name']
 
             if fr_encodings.persist(img, name):
                 return 'Cadastro para %s salvo' % name
@@ -73,13 +74,14 @@ def register(name):
     return  '''
             <!doctype html>
             <title>Biometric System Management ISP</title>
-            <p>Envie uma foto para cadastrar a pessoa: %s</p>
+            <p>Envie uma foto para cadastrar</p>
             <form method=post enctype=multipart/form-data>
+            <p>Nome:</p>
+            <p><input type="text" name="name"></p>
             <p><input type=file name=file></p>
             <input type=submit value=Enviar>
             </form>
-            ''' % name
-
+            '''
 
 @app.route('/capture', methods=['GET'])
 def capture():

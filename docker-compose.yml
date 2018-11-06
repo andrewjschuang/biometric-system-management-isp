@@ -4,8 +4,6 @@ services:
   bmsisp:
     image: achuang/bmsisp:0.1.4
     restart: always
-    environment:
-      FLASK_APP: server.py
     ports:
       - 5000:5000
     devices:
