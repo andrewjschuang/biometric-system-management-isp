@@ -12,6 +12,7 @@ RUN apt-get install -y --fix-missing \
     graphicsmagick \
     libgraphicsmagick1-dev \
     libatlas-dev \
+    # libatlas-base-dev \
     libavcodec-dev \
     libavformat-dev \
     libgtk2.0-dev \
