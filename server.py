@@ -3,14 +3,16 @@ import io
 import cv2
 import numpy as np
 import psutil
-import _thread
+import threading
 
-import video_capture
+import Recognition
+import fr_encodings
 import config
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
+recognition = Recognition.Recognition()
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -22,25 +24,62 @@ def upload_file():
         if 'file' not in request.files:
             return 'No image received\n'
         image = request.files['file']
+
         if image.filename == '':
             return 'No selected image\n'
+
         if image and allowed_file(image.filename):
             in_memory_file = io.BytesIO()
             image.save(in_memory_file)
             data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
             color_image_flag = 1
             img = cv2.imdecode(data, color_image_flag)
-            found = video_capture.identify_people(img)
+
+            found = recognition.recognize(img)
             return str(found)
+
     return  '''
             <!doctype html>
             <title>Biometric System Management ISP</title>
-            <p>Selecionar foto</p>
+            <p>Envie uma foto para reconhecimento facial</p>
             <form method=post enctype=multipart/form-data>
             <p><input type=file name=file></p>
             <input type=submit value=Enviar>
             </form>
             '''
+
+@app.route('/register/<name>', methods=['GET', 'POST'])
+def register(name):
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return 'No image received\n'
+        image = request.files['file']
+
+        if image.filename == '':
+            return 'No selected image\n'
+
+        if image and allowed_file(image.filename):
+            in_memory_file = io.BytesIO()
+            image.save(in_memory_file)
+            data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
+            color_image_flag = 1
+            img = cv2.imdecode(data, color_image_flag)
+
+            if fr_encodings.persist(img, name):
+                return 'Cadastro para %s salvo' % name
+            else:
+                return 'Erro no cadastro de %s' % name
+
+    return  '''
+            <!doctype html>
+            <title>Biometric System Management ISP</title>
+            <p>Envie uma foto para cadastrar a pessoa: %s</p>
+            <form method=post enctype=multipart/form-data>
+            <p><input type=file name=file></p>
+            <input type=submit value=Enviar>
+            </form>
+            ''' % name
+
 
 @app.route('/capture', methods=['GET'])
 def capture():
@@ -49,7 +88,10 @@ def capture():
     output = request.args.get('output', default=config.output)
     encodings = request.args.get('encodings', default=config.encodings)
     tolerance = request.args.get('tolerance', default=config.tolerance)
-    _thread.start_new_thread(video_capture.main, (video_source, display_image, output, encodings, tolerance, True))
+
+    recognition.update(video_source, display_image, output, encodings, tolerance)
+    threading.Thread(target=recognition.start).start()
+
     return  '''
             <!doctype html>
             <title>Biometric System Management ISP</title>
@@ -62,7 +104,7 @@ def stop():
     for proc in psutil.process_iter():
         if proc.name() == p_name:
             proc.kill()
-    return '''
+    return  '''
             <!doctype html>
             <title>Biometric System Management ISP</title>
             <p>Gravação finalizada</p>

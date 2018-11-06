@@ -1,4 +1,5 @@
 import os
+import time
 import signal
 import argparse
 import datetime
@@ -76,7 +77,8 @@ class Recognition:
                 face_path = self.known_face_paths[min_face_distance_index]
                 timestamp = datetime.datetime.now().strftime("%c")
                 filename = timestamp + '- ' + name + '.png'
-                out = {'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path, 'face distance': min_face_distance, 'coordinates': (top, right, bottom, left)}
+                out = { 'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path, \
+                        'face distance': min_face_distance, 'coordinates': (top, right, bottom, left)}
                 results.append(out)
 
         return results
@@ -111,7 +113,7 @@ class Recognition:
         ret, frame = video_capture.read()
         if ret:
             print('got new frame')
-            threading.Thread(target=recognize, args=(frame,)).start()
+            threading.Thread(target=self.recognize, args=(frame,)).start()
             print('started recognition thread')
             time.sleep(sleep)
             return frame
