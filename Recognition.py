@@ -149,6 +149,8 @@ class Recognition:
                 self.known_face_encodings.append(encoding)
                 self.known_face_paths.append(path_in_str)
                 self.known_face_names.append(fr_encodings.load(path_in_str)['name'])
+            else:
+                print('warning. found empty encoding: %s' % path_in_str)
 
         if len(self.known_face_encodings) == 0:
             print('no face encodings found in directory %s' % encodings)
