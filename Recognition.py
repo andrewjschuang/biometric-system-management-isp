@@ -52,12 +52,15 @@ class Recognition:
         self.connect()
 
     # identifies faces and info
-    def identify(self, face_locations, face_encodings):
+    def identify(self, frame, face_locations, face_encodings):
         found = []
         results = []
 
         # iterates through each face
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            # Draw a box around the face
+            cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
+
             face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
 
             min_face_distance = np.min(face_distances)
@@ -66,7 +69,7 @@ class Recognition:
             # detected and found face in database
             if min_face_distance <= self.tolerance:
                 name = self.known_face_names[min_face_distance_index]
-                # print('%s found' % name)
+                print('%s found' % name)
 
                 # don't repeat for already found faces
                 if name in found:
@@ -123,7 +126,7 @@ class Recognition:
     # identifies faces in frame and persists it
     def recognize(self, frame):
         face_locations, face_encodings = self.get_faces_from_picture(frame, model='hog')
-        results = self.identify(face_locations, face_encodings)
+        results = self.identify(frame, face_locations, face_encodings)
 
         # save_cache(result)
         # print('saved new person %s to cache' % result.name)

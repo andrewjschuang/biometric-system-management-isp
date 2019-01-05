@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, render_template
 import io
 import cv2
 import numpy as np
@@ -48,7 +48,7 @@ def upload_file():
             </form>
             '''
 
-@app.route('/register/', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -70,7 +70,10 @@ def register():
                 return 'Cadastro para %s salvo' % name
             else:
                 return 'Erro no cadastro de %s' % name
+        
+        return render_template('registered.html')
 
+    return render_template('register.html')
     return  '''
             <!doctype html>
             <title>Biometric System Management ISP</title>

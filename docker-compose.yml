@@ -10,6 +10,9 @@ services:
       - /dev/video0:/dev/video0
     volumes:
       - bmsisp-volume:/app/found
+      - /home/andrewjsc/dev/biometric-system-management/encodings:/app/encodings
+      - /home/andrewjsc/dev/biometric-system-management/templates:/app/templates
+      - /home/andrewjsc/dev/biometric-system-management/server.py:/app/server.py
 
 volumes:
   bmsisp-volume:

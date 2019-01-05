@@ -32,9 +32,9 @@ def persist(image, name):
         if filename.lower().endswith('.jpg') or filename.lower().endswith('.png'):
             filename = filename[:-4] + '.pk'
         
-            with open(filename, 'wb') as f:
-                pickle.dump({'name': name, 'encoding': encoding}, f)
-                return True
+        with open(filename, 'wb') as f:
+            pickle.dump({'name': name, 'encoding': encoding}, f)
+            return True
         return False
     except:
         return False
