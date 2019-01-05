@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   bmsisp:
-    image: achuang/bmsisp:0.1.4
+    image: andrewjsc/bmsisp:0.1.4
     restart: always
     ports:
       - 5000:5000
@@ -13,6 +13,7 @@ services:
       - /home/andrewjsc/dev/biometric-system-management/encodings:/app/encodings
       - /home/andrewjsc/dev/biometric-system-management/templates:/app/templates
       - /home/andrewjsc/dev/biometric-system-management/server.py:/app/server.py
+      - /home/andrewjsc/dev/biometric-system-management/Recognition.py:/app/Recognition.py
 
 volumes:
   bmsisp-volume:

@@ -42,4 +42,4 @@ ENV FLASK_APP=server.py
 
 ENV OPENCV_FFMPEG_CAPTURE_OPTIONS=null
 
-CMD flask run --host=0.0.0.0
+CMD ["flask", "run", "--host", "0.0.0.0"]

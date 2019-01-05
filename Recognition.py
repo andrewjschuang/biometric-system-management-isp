@@ -144,9 +144,11 @@ class Recognition:
         pathlist = Path(encodings).glob('**/*.pk')
         for path in pathlist:
             path_in_str = str(path)
-            self.known_face_encodings.append(fr_encodings.load(path_in_str)['encoding'])
-            self.known_face_paths.append(path_in_str)
-            self.known_face_names.append(fr_encodings.load(path_in_str)['name'])
+            encoding = fr_encodings.load(path_in_str)['encoding']
+            if len(encoding) > 0:
+                self.known_face_encodings.append(encoding)
+                self.known_face_paths.append(path_in_str)
+                self.known_face_names.append(fr_encodings.load(path_in_str)['name'])
 
         if len(self.known_face_encodings) == 0:
             print('no face encodings found in directory %s' % encodings)
