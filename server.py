@@ -36,17 +36,9 @@ def upload_file():
             img = cv2.imdecode(data, color_image_flag)
 
             found = recognition.recognize(img)
-            return str(found)
+            return render_template('found.html', found=found)
 
-    return  '''
-            <!doctype html>
-            <title>Biometric System Management ISP</title>
-            <p>Envie uma foto para reconhecimento facial</p>
-            <form method=post enctype=multipart/form-data>
-            <p><input type=file name=file></p>
-            <input type=submit value=Enviar>
-            </form>
-            '''
+    return render_template('upload.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -74,17 +66,6 @@ def register():
         return render_template('registered.html')
 
     return render_template('register.html')
-    return  '''
-            <!doctype html>
-            <title>Biometric System Management ISP</title>
-            <p>Envie uma foto para cadastrar</p>
-            <form method=post enctype=multipart/form-data>
-            <p>Nome:</p>
-            <p><input type="text" name="name"></p>
-            <p><input type=file name=file></p>
-            <input type=submit value=Enviar>
-            </form>
-            '''
 
 @app.route('/capture', methods=['GET'])
 def capture():
@@ -97,11 +78,7 @@ def capture():
     recognition.update(video_source, display_image, output, encodings, tolerance)
     threading.Thread(target=recognition.start).start()
 
-    return  '''
-            <!doctype html>
-            <title>Biometric System Management ISP</title>
-            <p>Gravando...</p>
-            '''
+    return render_template('capture.html')
 
 @app.route('/stop', methods=['GET'])
 def stop():
@@ -109,11 +86,8 @@ def stop():
     for proc in psutil.process_iter():
         if proc.name() == p_name:
             proc.kill()
-    return  '''
-            <!doctype html>
-            <title>Biometric System Management ISP</title>
-            <p>Gravação finalizada</p>
-            '''
+    
+    return render_template('stop.html')
 
 if __name__ == '__main__':
     app.run()
