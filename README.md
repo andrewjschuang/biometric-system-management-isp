@@ -2,7 +2,7 @@
 
 ## Current branch in development
 
-`git checkout 0.1.2`
+`git checkout 1.0.0`
 
 ## How to use
 
