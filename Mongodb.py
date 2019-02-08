@@ -9,6 +9,9 @@ class Mongodb:
         self.client = MongoClient(host, port)
         self.db = self.client[db]
 
+    def getObjectIdDocument(self, _id):
+        return { '_id': ObjectId(_id) }
+
     def get_collection(self, collection):
         return self.db[collection]
 
@@ -18,21 +21,26 @@ class Mongodb:
         return ids
 
     def delete(self, collection, document):
-        return self.db[collection].delete_one(document)
+        if type(document) == str:
+            return self.db[collection].delete_many(self.getObjectIdDocument(document))
+        else:
+            return self.db[collection].delete_many(document)
 
     def delete_all(self, collection, confirmation=False):
         if confirmation:
-            return self.db[collection].delete_many({})
+            return self.delete(collection, {})
         else:
-            print('error noop. confirmation is set to false')
+            print('ERROR: confirmation is set to false')
             return None
 
     def find(self, collection, document):
-        return self.db[collection].find(document)
-
-    def increment(self, collection, document, id=False):
-        if id:
-            return self.db[collection].update( { '_id': ObjectId(document) }, { '$inc': { 'n': 1 } } )
+        if type(document) == str:
+            return self.db[collection].find(self.getObjectIdDocument(document))
         else:
-            print('increment not using id')
+            return self.db[collection].find(document)
+
+    def increment(self, collection, document):
+        if type(document) == str:
+            return self.db[collection].update(self.getObjectIdDocument(document), { '$inc': { 'n': 1 } } )
+        else:
             return self.db[collection].update_many( document, { '$inc' : { 'n': 1 } } )
