@@ -21,7 +21,7 @@ class Mongodb:
         return ids
 
     def delete(self, collection, document):
-        if type(document) == str:
+        if type(document) == str or type(document) == ObjectId:
             return self.db[collection].delete_many(self.getObjectIdDocument(document))
         else:
             return self.db[collection].delete_many(document)
@@ -34,13 +34,13 @@ class Mongodb:
             return None
 
     def find(self, collection, document):
-        if type(document) == str:
+        if type(document) == str or type(document) == ObjectId:
             return self.db[collection].find(self.getObjectIdDocument(document))
         else:
             return self.db[collection].find(document)
 
     def increment(self, collection, document):
-        if type(document) == str:
+        if type(document) == str or type(document) == ObjectId:
             return self.db[collection].update(self.getObjectIdDocument(document), { '$inc': { 'n': 1 } } )
         else:
-            return self.db[collection].update_many( document, { '$inc' : { 'n': 1 } } )
+            return self.db[collection].update_many(document, { '$inc' : { 'n': 1 } } )
