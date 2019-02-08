@@ -11,3 +11,4 @@ __pycache__/
 **/*.JPG
 **/*.pk
 isp.txt
+mongodb/

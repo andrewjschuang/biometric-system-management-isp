@@ -8,3 +8,4 @@ encodings/*
 **/test_encodings/
 **/results/
 **/ve/
+mongodb/

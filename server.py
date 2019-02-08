@@ -75,8 +75,11 @@ def capture():
     encodings = request.args.get('encodings', default=config.encodings)
     tolerance = request.args.get('tolerance', default=config.tolerance)
 
-    recognition.update(video_source, display_image, output, encodings, tolerance)
-    threading.Thread(target=recognition.start).start()
+    result = recognition.update(video_source, display_image, output, encodings, tolerance)
+    if result:
+        return result
+    else:
+        threading.Thread(target=recognition.start).start()
 
     return render_template('capture.html')
 

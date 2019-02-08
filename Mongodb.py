@@ -1,8 +1,9 @@
 from pymongo import MongoClient
-import db_config
+from bson.objectid import ObjectId
+from config import mongodb
 
 class Mongodb:
-    def __init__(self, host=db_config.host, port=db_config.port, db=db_config.db):
+    def __init__(self, host=mongodb['host'], port=mongodb['port'], db=mongodb['db']):
         self.host = host
         self.port = port
         self.client = MongoClient(host, port)
@@ -28,3 +29,10 @@ class Mongodb:
 
     def find(self, collection, document):
         return self.db[collection].find(document)
+
+    def increment(self, collection, document, id=False):
+        if id:
+            return self.db[collection].update( { '_id': ObjectId(document) }, { '$inc': { 'n': 1 } } )
+        else:
+            print('increment not using id')
+            return self.db[collection].update_many( document, { '$inc' : { 'n': 1 } } )
