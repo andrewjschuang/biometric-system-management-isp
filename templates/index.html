@@ -15,17 +15,20 @@
 
 <body>
     <div class="p-3 mb-2 bg-light text-dark">
-        <h2>Envie uma foto para reconhecimento facial</h2>
+        <h2>Select an image for facial recognition</h2>
 
         <form method=post enctype="multipart/form-data">
             <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Upload</span>
+                </div>
                 <div class="custom-file">
                     <input type="file" name="file" class="custom-file-input" id="file" required>
-                    <label class="custom-file-label" for="inputGroupFile01">Escolher foto</label>
+                    <label class="custom-file-label" for="inputGroupFile01">Click here to choose image</label>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-outline-primary">Enviar</button>
+            <button type="submit" class="btn btn-outline-primary">Submit</button>
         </form>
     </div>
 

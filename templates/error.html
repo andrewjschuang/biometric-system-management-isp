@@ -15,14 +15,7 @@
 
 <body>
     <div class="p-3 mb-2 bg-light text-dark">
-        {% if not found %}
-            <h2>No one found</h2>
-        {% else %}
-            <h2>Found:</h2>
-            {% for s in found %}
-                <p>{{ s }}</p>
-            {% endfor %}
-        {% endif %}
+        <h2>Error: {{ error }}</h2>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

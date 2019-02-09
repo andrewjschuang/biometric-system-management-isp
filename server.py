@@ -14,55 +14,63 @@ app = Flask(__name__)
 recognition = Recognition.Recognition()
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def image_validation(request):
+    if 'file' not in request.files:
+        return { 'error': True, 'message': 'no image received' }
+    
+    file = request.files['file']
+
+    if file.filename == '':
+            return { 'error': True, 'message': 'no selected image' }
+
+    if not (file and allowed_file(file.filename)):
+        return { 'error': True, 'message': 'file is not an image' }
+
+    return { 'error': False }
+
+def get_image(image):
+    in_memory_file = io.BytesIO()
+    image.save(in_memory_file)
+    data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
+    color_image_flag = 1
+    img = cv2.imdecode(data, color_image_flag)
+    
+    return img
 
 @app.route('/', methods=['GET', 'POST'])
-def upload_file():
+def index():
     if request.method == 'POST':
-        if 'file' not in request.files:
-            return 'No image received\n'
-        image = request.files['file']
+        result = image_validation(request)
 
-        if image.filename == '':
-            return 'No selected image\n'
+        if result['error']:
+            return render_template('error.html', error=result['message'])
+        
+        image = get_image(request.files['file'])
+        found = recognition.recognize(image)
 
-        if image and allowed_file(image.filename):
-            in_memory_file = io.BytesIO()
-            image.save(in_memory_file)
-            data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
-            color_image_flag = 1
-            img = cv2.imdecode(data, color_image_flag)
+        return render_template('found.html', found=found)
 
-            found = recognition.recognize(img)
-            return render_template('found.html', found=found)
-
-    return render_template('upload.html')
+    return render_template('index.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        if 'file' not in request.files:
-            return 'No image received\n'
-        image = request.files['file']
+        result = image_validation(request)
 
-        if image.filename == '':
-            return 'No selected image\n'
-
-        if image and allowed_file(image.filename):
-            in_memory_file = io.BytesIO()
-            image.save(in_memory_file)
-            data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
-            color_image_flag = 1
-            img = cv2.imdecode(data, color_image_flag)
-            name = request.form['name']
+        if result['error']:
+            return render_template('error.html', error=result['message'])
         
-        return render_template('registered.html')
+        image = get_image(request.files['file'])
+        name = request.form['name']
+
+        return render_template('registered.html', name=name)
 
     return render_template('register.html')
 
-@app.route('/capture', methods=['GET'])
-def capture():
+@app.route('/start', methods=['GET'])
+def start():
     video_source = request.args.get('source', default=config.video_source)
     display_image = request.args.get('display', default=config.display_image)
     tolerance = request.args.get('tolerance', default=config.tolerance)
@@ -73,7 +81,7 @@ def capture():
     else:
         threading.Thread(target=recognition.start).start()
 
-    return render_template('capture.html')
+    return render_template('start.html')
 
 @app.route('/stop', methods=['GET'])
 def stop():
