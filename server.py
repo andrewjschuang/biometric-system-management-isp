@@ -1,7 +1,6 @@
 from flask import Flask, request, redirect, url_for, render_template
 import io
 import cv2
-import psutil
 import datetime
 import threading
 import numpy as np
@@ -103,17 +102,14 @@ def start():
     if result is not None:
         return result
     else:
+        recognition.signal_handler(run=True)
         threading.Thread(target=recognition.start).start()
 
     return render_template('start.html')
 
 @app.route('/stop', methods=['GET'])
 def stop():
-    p_name = 'flask'
-    for proc in psutil.process_iter():
-        if proc.name() == p_name:
-            proc.kill()
-
+    recognition.signal_handler()
     return render_template('stop.html')
 
 if __name__ == '__main__':

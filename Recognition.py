@@ -11,14 +11,6 @@ import numpy as np
 import cv2
 import config
 
-# global variable to run (loop) or not
-run = True
-
-# ends process when Ctrl+C is hit
-def signal_handler(signal, frame):
-    global run
-    run = False
-
 class Recognition:
     # constructor using configuration file
     def __init__(self):
@@ -29,6 +21,7 @@ class Recognition:
         self.known_face_encodings = []
         self.known_face_encodings_list = []
         self.get_known_encodings()
+        self.run = True
 
     # updates attributes
     def update(self, video_source=None, display_image=None, tolerance=None):
@@ -99,7 +92,7 @@ class Recognition:
         print('connected to capture device')
 
         # captures indefinitely
-        while run:
+        while self.run:
             frame = self.capture(video_capture)
             if frame is not None:
                 threading.Thread(target=self.recognize, args=(frame,)).start()
@@ -112,6 +105,8 @@ class Recognition:
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     print('quitting display')
                     break
+
+        print('run stopped')
 
         # releases everything
         video_capture.release()
@@ -186,11 +181,15 @@ class Recognition:
 
         return results
 
+    # handles start / stop capturing
+    def signal_handler(self, run=False):
+        self.run = run
+
 # stand alone execution
 if __name__ == '__main__':
-    # initiates signal handler
-    signal.signal(signal.SIGINT, signal_handler)
-
     # starts face recognition
     recognition = Recognition()
+
+    # initiates signal handler
+    signal.signal(signal.SIGINT, recognition.signal_handler)
     recognition.start()
