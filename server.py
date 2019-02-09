@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, url_for, render_template
 import io
 import cv2
 import psutil
+import datetime
 import threading
 import numpy as np
 
@@ -26,7 +27,7 @@ def image_validation(request, filename='file'):
 
     if filename not in request.files:
         return { 'error': True, 'message': 'no image received' }
-    
+
     file = request.files['file']
 
     if file.filename == '':
@@ -43,7 +44,7 @@ def get_image(image):
     data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
     color_image_flag = 1
     img = cv2.imdecode(data, color_image_flag)
-    
+
     return img
 
 @app.route('/', methods=['GET', 'POST'])
@@ -53,7 +54,7 @@ def index():
 
         if result['error']:
             return render_template('error.html', error=result['message'])
-        
+
         image = get_image(request.files['file'])
         found = recognition.recognize(image)
 
@@ -68,11 +69,25 @@ def register():
 
         if result['error']:
             return render_template('error.html', error=result['message'])
-        
-        images = request.files
-        name = request.form['nome']
 
-        return render_template('registered.html', name=name)
+        member = {key:request.form[key] for key in request.form if request.form[key]}
+        member['data_foto'] = datetime.datetime.now().isoformat()
+        member['fotos'] = {}
+
+        images = request.files
+        for image_label in images:
+            image = get_image(images[image_label])
+            face_locations, face_encodings = recognition.get_faces_from_picture(image)
+            encoding = {
+                'nome': member['nome'],
+                'foto': face_encodings[0].tolist(),
+                'obs': None
+            }
+            encoding_id = recognition.db.insert('encodings', encoding)
+            member['fotos'][image_label] = encoding_id
+
+        member_id = recognition.db.insert('members', member)
+        return render_template('registered.html', name=member['nome'])
 
     return render_template('register.html', labels=photo_labels)
 
@@ -96,7 +111,7 @@ def stop():
     for proc in psutil.process_iter():
         if proc.name() == p_name:
             proc.kill()
-    
+
     return render_template('stop.html')
 
 if __name__ == '__main__':
