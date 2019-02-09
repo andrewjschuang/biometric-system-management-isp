@@ -15,26 +15,40 @@
 
 <body>
     <div class="p-3 mb-2 bg-light text-dark">
-        <h2>Select an image to register a person</h2>
+        <h2>Fill in information to register to facial recognition</h2>
 
         <form method=post enctype="multipart/form-data">
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">Name</span>
+                    <span class="input-group-text" id="basic-addon1">Nome</span>
                 </div>
-                <input type="text" name="name" class="form-control" placeholder="" aria-label=""
+                    <input type="text" name="nome" class="form-control" placeholder="" aria-label=""
                     aria-describedby="basic-addon1" required>
             </div>
 
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Upload</span>
+            {% for s in ['Data de nascimento', 'Sexo', 'Telefone', 'Email', 'Zona', 'Ministerio', 'Membro ISP', 'Ano de membresia', 'SIGI'] %}
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">{{ s }}</span>
+                    </div>
+                    <input type="text" name="{{ s.lower() }}" class="form-control" placeholder="" aria-label=""
+                        aria-describedby="basic-addon1">
                 </div>
-                <div class="custom-file">
-                    <input type="file" name="file" class="custom-file-input" id="file" required>
-                    <label class="custom-file-label" for="inputGroupFile01">Click here to choose image</label>
+            {% endfor %}
+
+            <h2>Photo upload</h2>
+
+            {% for label in labels %}
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">{{ label }}</span>
+                    </div>
+                    <div class="custom-file">
+                        <input type="file" name="{{ label }}" class="custom-file-input" id="file">
+                        <label class="custom-file-label" for="inputGroupFile01">Click here to choose image</label>
+                    </div>
                 </div>
-            </div>
+            {% endfor %}
 
             <button type="submit" class="btn btn-outline-primary">Submit</button>
         </form>

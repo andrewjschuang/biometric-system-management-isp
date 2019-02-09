@@ -13,11 +13,18 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 app = Flask(__name__)
 recognition = Recognition.Recognition()
 
+photo_labels = ['central', 'direita', 'esquerda']
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def image_validation(request):
-    if 'file' not in request.files:
+def image_validation(request, filename='file'):
+    if type(filename) == list:
+        if len(request.files) == 0:
+            return { 'error': True, 'message': 'no image received' }
+        return { 'error': False }
+
+    if filename not in request.files:
         return { 'error': True, 'message': 'no image received' }
     
     file = request.files['file']
@@ -57,17 +64,17 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        result = image_validation(request)
+        result = image_validation(request, photo_labels)
 
         if result['error']:
             return render_template('error.html', error=result['message'])
         
-        image = get_image(request.files['file'])
-        name = request.form['name']
+        images = request.files
+        name = request.form['nome']
 
         return render_template('registered.html', name=name)
 
-    return render_template('register.html')
+    return render_template('register.html', labels=photo_labels)
 
 @app.route('/start', methods=['GET'])
 def start():
