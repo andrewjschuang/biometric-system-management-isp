@@ -93,7 +93,7 @@ def stop():
     return render_template('stop.html')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', debug=True)
 
 # curl -X GET http://localhost:5000
 # curl -F "file=@/home/andrewjschuang/dev/biometric-system-management/photos_for_encoding/random/andrew.jpg" -X POST http://localhost:5000
