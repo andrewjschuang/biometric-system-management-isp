@@ -6,7 +6,6 @@ face-recognition==1.2.3
 face-recognition-models==0.3.0
 Flask==1.0.2
 idna==2.7
-imutils==0.5.1
 itsdangerous==1.1.0
 Jinja2==2.10
 MarkupSafe==1.1.0

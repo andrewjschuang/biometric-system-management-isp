@@ -16,7 +16,7 @@ class Mongodb:
         return self.db[collection]
 
     def insert(self, collection, documents):
-        # document keys validation
+        # TODO: document keys validation
         ids = self.db[collection].insert(documents)
         return ids
 
@@ -43,4 +43,4 @@ class Mongodb:
         if type(document) == str or type(document) == ObjectId:
             return self.db[collection].update(self.getObjectIdDocument(document), { '$inc': { 'n': 1 } } )
         else:
-            return self.db[collection].update_many(document, { '$inc' : { 'n': 1 } } )
+            return self.db[collection].update_many(document, { '$inc': { 'n': 1 } } )

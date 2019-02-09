@@ -1,11 +1,11 @@
+import os
+
 video_source = 0
-display_image = False
-output = './found/temp'
-encodings = './encodings'
 tolerance = 0.4
+display_image = False
 
 mongodb = {
-    'host': 'localhost',
-    'port': 27017,
-    'db': 'bmsisp'
+    'host': os.environ.get('MONGO_HOST') or 'localhost',
+    'port': int(os.environ.get('MONGO_PORT')) if os.environ.get('MONGO_PORT') else 27017,
+    'db': os.environ.get('MONGO_DB') or 'bmsisp'
 }

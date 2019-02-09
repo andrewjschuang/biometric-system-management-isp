@@ -1,12 +1,11 @@
 from flask import Flask, request, redirect, url_for, render_template
 import io
 import cv2
-import numpy as np
 import psutil
 import threading
+import numpy as np
 
 import Recognition
-import fr_encodings
 import config
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
@@ -57,11 +56,6 @@ def register():
             color_image_flag = 1
             img = cv2.imdecode(data, color_image_flag)
             name = request.form['name']
-
-            if fr_encodings.persist(img, name):
-                return 'Cadastro para %s salvo' % name
-            else:
-                return 'Erro no cadastro de %s' % name
         
         return render_template('registered.html')
 
@@ -71,12 +65,10 @@ def register():
 def capture():
     video_source = request.args.get('source', default=config.video_source)
     display_image = request.args.get('display', default=config.display_image)
-    output = request.args.get('output', default=config.output)
-    encodings = request.args.get('encodings', default=config.encodings)
     tolerance = request.args.get('tolerance', default=config.tolerance)
 
-    result = recognition.update(video_source, display_image, output, encodings, tolerance)
-    if result:
+    result = recognition.update(video_source, display_image, tolerance)
+    if result is not None:
         return result
     else:
         threading.Thread(target=recognition.start).start()
