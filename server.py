@@ -87,6 +87,8 @@ def register():
             member['fotos'][image_label] = encoding_id
 
         member_id = recognition.db.insert('members', member)
+        recognition.get_known_encodings()
+
         return render_template('registered.html', name=member['nome'])
 
     return render_template('register.html', labels=photo_labels)

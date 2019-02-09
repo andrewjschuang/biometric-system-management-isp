@@ -58,9 +58,9 @@ class Recognition:
 
         if len(self.known_face_encodings) == 0:
             print('no face encodings found in database %s' % self.db.db)
-            exit(1)
-
-        print('got %s encodings from database' % len(self.known_face_encodings))
+            return
+        else:
+            print('got %s encodings from database' % len(self.known_face_encodings))
 
     # saves frame to database with detected info
     def save_event(self, collection, document, coordinates):
@@ -94,7 +94,7 @@ class Recognition:
 
         if not video_capture.isOpened():
             print('error opening capture device %s' % self.video_source)
-            exit(1)
+            return
 
         print('connected to capture device')
 
@@ -128,6 +128,10 @@ class Recognition:
 
     # identifies faces in frame and persists it
     def recognize(self, frame, model='hog'):
+        if len(self.known_face_encodings) == 0:
+            print('no face encodings found in database %s' % self.db.db)
+            return
+
         face_locations, face_encodings = self.get_faces_from_picture(frame, model=model)
         results = self.identify(frame, face_locations, face_encodings)
 
