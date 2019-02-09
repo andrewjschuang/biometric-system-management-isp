@@ -4,8 +4,8 @@ import signal
 import argparse
 import datetime
 import threading
+from PIL import Image, ImageDraw
 # from pathlib import Path
-# from PIL import Image, ImageDraw
 
 from Mongodb import Mongodb
 import numpy as np
@@ -94,20 +94,30 @@ class Recognition:
                 #     print('%s already in cache. skipping..' % name)
                 #     continue
 
-                self.db.increment('encodings', self.known_face_encodings[min_face_distance_index]['_id'], id=True)
+                self.db.increment('encodings', self.known_face_encodings[min_face_distance_index]['_id'])
                 # found.append(name)
                 # face_path = self.known_face_paths[min_face_distance_index]
-                timestamp = datetime.datetime.now().strftime("%c")
+                timestamp = datetime.datetime.now().isoformat()
                 # filename = timestamp + '- ' + name + '.png'
                 # out = { 'name': name, 'ts': timestamp, 'image': filename, 'encoding': face_path, \
                 # out = { 'name': name, 'ts': timestamp, 'image': filename, \
                 #         'encoding': self.known_face_encodings[min_face_distance_index]['_id'], \
                 #         'face distance': min_face_distance, 'coordinates': (top, right, bottom, left)}
                 # results.append(out)
+
                 results.append(name)
 
                 # create event document and save in mongodb
-                # save face distance
+                event = {
+                    'nome': name,
+                    'membro': None,
+                    'data': timestamp,
+                    'foto': frame,
+                    'encoding': self.known_face_encodings[min_face_distance_index]['_id'],
+                    'face_distance': min_face_distance
+                }
+
+                self.save_event('events', event, coordinates=(top, right, bottom, left))
 
         return results
 
@@ -160,14 +170,13 @@ class Recognition:
         # print('saved new person %s to cache' % result.name)
 
         # names = [x['name'] for x in results]
-        names = results
 
         # if len(names) > 0:
         #     threading.Thread(target=self.save_picture, args=(frame, results)).start()
         #     print('saving frame in a new thread: %s' % names)
 
-        print("found in frame: %s" % names)
-        return names
+        print("found in frame: %s" % results)
+        return results
 
     # DEPRECATED
     # gets database of resgistered faces from system path
@@ -211,31 +220,42 @@ class Recognition:
         return face_locations, face_encodings
 
     # saves frame to database with detected info
-    # def save_picture(self, frame, results):
-    #     # switches back to original color
-    #     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    def save_event(self, collection, document, coordinates):
+        # switches back to original color
+        frame = document['foto']
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-    #     for result in results:
-    #         top, right, bottom, left = result['coordinates']
-    #         pil_image = Image.fromarray(frame)
+        # for result in results:
+        # draws rectangle around face
+        top, right, bottom, left = coordinates
+        pil_image = Image.fromarray(frame)
+        ImageDraw.Draw(pil_image).rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+        # del draw
 
-    #         # draws rectangle around face
-    #         draw = ImageDraw.Draw(pil_image)
-    #         draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
-    #         del draw
-            
-    #         # creates directory if nonexistent
-    #         try:
-    #             os.makedirs(self.output, exist_ok=True)
-    #         except:
-    #             return False
+        # pil_image.show()
+        document['foto'] = {
+            'mode': pil_image.mode,
+            'size': pil_image.size,
+            'data': pil_image.tobytes()
+        }
 
-    #         # saves image to database
-    #         pil_image.save(os.path.join(self.output, result['image']))
+        ids = self.db.insert(collection, document)
+        print('saved event to database')
+        # to retrieve the saved photo
+        # Image.frombytes(document['foto']['mode'], pil_image['foto']['size'], pil_image['foto']['data']).show()
 
-    #         # writes log to disk
-    #         with open(os.path.join(self.output, 'out.txt'), 'a') as f:
-    #             f.write(str(result))
+        # # creates directory if nonexistent
+        # try:
+        #     os.makedirs(self.output, exist_ok=True)
+        # except:
+        #     return False
+
+        # # saves image to database
+        # pil_image.save(os.path.join(self.output, result['image']))
+
+        # # writes log to disk
+        # with open(os.path.join(self.output, 'out.txt'), 'a') as f:
+        #     f.write(str(result))
 
 if __name__ == '__main__':
     # initiates signal handler
