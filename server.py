@@ -119,23 +119,24 @@ def register():
 
 @app.route('/start', methods=['GET'])
 def start():
-    video_source = request.args.get('source', default=config.video_source)
-    display_image = request.args.get('display', default=config.display_image)
-    tolerance = request.args.get('tolerance', default=config.tolerance)
-
-    result = recognition.update(video_source, display_image, tolerance)
-    if result is not None:
-        return result
-    else:
+    if not recognition.run:
         recognition.signal_handler(run=True)
         threading.Thread(target=recognition.start).start()
-
     return render_template('start.html')
 
 @app.route('/stop', methods=['GET'])
 def stop():
     recognition.signal_handler()
     return render_template('stop.html')
+
+@app.route('/configure', methods=['GET'])
+def configure():
+    video_source = request.args.get('source')
+    display_image = request.args.get('display')
+    tolerance = request.args.get('tolerance')
+
+    error = recognition.update(video_source, display_image, tolerance)
+    return render_template('updated.html', error=error)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

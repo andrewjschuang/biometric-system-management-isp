@@ -18,27 +18,51 @@ class Recognition:
         self.video_source = config.video_source
         self.display_image = config.display_image
         self.tolerance = config.tolerance
+        self.video_capture = cv2.VideoCapture(self.video_source)
         self.known_face_encodings = []
         self.known_face_encodings_list = []
         self.get_known_encodings()
-        self.run = True
+        self.run = False
 
     # updates attributes
     def update(self, video_source=None, display_image=None, tolerance=None):
         if video_source:
             try:
-                self.video_source = int(video_source)
+                video_source = int(video_source)
             except:
-                self.video_source = video_source
+                video_source = video_source
+        else:
+            video_source = self.video_source
+
         if display_image and display_image.lower() == 'true':
-            self.display_image = True
+            display_image = True
+        elif display_image is None:
+            display_image = self.display_image
+        else:
+            display_image = False
+
         if tolerance:
             try:
-                self.tolerance = float(tolerance)
-            except:
+                tolerance = float(tolerance)
+            except Exception as e:
                 error = 'ERROR: input tolerance not a floating number'
                 print(error)
                 return error
+
+            if tolerance < 0 or tolerance > 1:
+                error = 'ERROR: tolerance not between 0 and 1'
+                print(error)
+                return error
+        else:
+            tolerance = self.tolerance
+
+        self.video_source = video_source
+        self.display_image = display_image
+        self.tolerance = tolerance
+
+        if self.video_source:
+            self.video_capture.release()
+            self.video_capture = cv2.VideoCapture(self.video_source)
 
         return None
 
@@ -79,13 +103,7 @@ class Recognition:
 
     # starts face recognition
     def start(self, capture_interval=0.5):
-        self.connect(capture_interval)
-
-    # connects to capture device
-    def connect(self, capture_interval):
-        video_capture = cv2.VideoCapture(self.video_source)
-
-        if not video_capture.isOpened():
+        if not self.video_capture.isOpened():
             print('error opening capture device %s' % self.video_source)
             return
 
@@ -93,7 +111,7 @@ class Recognition:
 
         # captures indefinitely
         while self.run:
-            frame = self.capture(video_capture)
+            frame = self.capture()
             if frame is not None:
                 threading.Thread(target=self.recognize, args=(frame,)).start()
                 print('started recognition thread')
@@ -103,18 +121,19 @@ class Recognition:
             if self.display_image and frame is not None:
                 cv2.imshow('Biometric System Management', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
+                    self.signal_handler()
                     print('quitting display')
                     break
 
         print('run stopped')
 
         # releases everything
-        video_capture.release()
+        self.signal_handler()
         cv2.destroyAllWindows()
 
     # captures frames and starts face recognition in new thread
-    def capture(self, video_capture):
-        ret, frame = video_capture.read()
+    def capture(self):
+        ret, frame = self.video_capture.read()
         if ret:
             print('got new frame')
             return frame
@@ -192,4 +211,5 @@ if __name__ == '__main__':
 
     # initiates signal handler
     signal.signal(signal.SIGINT, recognition.signal_handler)
+    recognition.signal_handler(run=True)
     recognition.start()
