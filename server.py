@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, url_for, render_template
 import io
 import cv2
+import json
 import datetime
 import threading
 import numpy as np
@@ -60,6 +61,24 @@ def index():
         return render_template('found.html', found=found)
 
     return render_template('index.html')
+
+@app.route('/api', methods=['POST'])
+def api():
+    result = image_validation(request)
+
+    if result['error']:
+        response = {
+            'error': result['message']
+        }
+        return json.dumps(response)
+
+    image = get_image(request.files['file'])
+    found = recognition.recognize(image)
+    response = {
+        'results': found
+    }
+
+    return json.dumps(response)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
