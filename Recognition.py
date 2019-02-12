@@ -25,16 +25,16 @@ class Recognition:
         self.run = False
 
     # updates attributes
-    def update(self, video_source=None, display_image=None, tolerance=None):
+    def configure(self, video_source=None, display_image=None, tolerance=None):
         if tolerance:
             try:
                 tolerance = float(tolerance)
             except Exception as e:
-                error = 'ERROR: input tolerance not a floating number'
+                error = 'Error: tolerance not a floating number'
                 print(error)
                 return error
             if tolerance < 0 or tolerance > 1:
-                error = 'ERROR: tolerance not between 0 and 1'
+                error = 'Error: tolerance not between 0 and 1'
                 print(error)
                 return error
             self.tolerance = tolerance

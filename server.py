@@ -135,7 +135,7 @@ def configure():
     display_image = request.args.get('display')
     tolerance = request.args.get('tolerance')
 
-    error = recognition.update(video_source, display_image, tolerance)
+    error = recognition.configure(video_source, display_image, tolerance)
     return render_template('updated.html', error=error)
 
 if __name__ == '__main__':
