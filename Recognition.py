@@ -26,21 +26,6 @@ class Recognition:
 
     # updates attributes
     def update(self, video_source=None, display_image=None, tolerance=None):
-        if video_source:
-            try:
-                video_source = int(video_source)
-            except:
-                video_source = video_source
-        else:
-            video_source = self.video_source
-
-        if display_image and display_image.lower() == 'true':
-            display_image = True
-        elif display_image is None:
-            display_image = self.display_image
-        else:
-            display_image = False
-
         if tolerance:
             try:
                 tolerance = float(tolerance)
@@ -48,21 +33,25 @@ class Recognition:
                 error = 'ERROR: input tolerance not a floating number'
                 print(error)
                 return error
-
             if tolerance < 0 or tolerance > 1:
                 error = 'ERROR: tolerance not between 0 and 1'
                 print(error)
                 return error
-        else:
-            tolerance = self.tolerance
+            self.tolerance = tolerance
 
-        self.video_source = video_source
-        self.display_image = display_image
-        self.tolerance = tolerance
-
-        if self.video_source:
+        if video_source:
+            try:
+                video_source = int(video_source)
+            except:
+                pass
+            self.video_source = video_source
             self.video_capture.release()
             self.video_capture = cv2.VideoCapture(self.video_source)
+
+        if display_image and (display_image.lower() == 'true' or display_image == '1'):
+            self.display_image = True
+        elif display_image and (display_image.lower() == 'false' or display_image == '0'):
+            self.display_image = False
 
         return None
 
