@@ -98,9 +98,9 @@ def register():
             face_locations, face_encodings = recognition.get_faces_from_picture(image)
 
             if len(face_encodings) == 0:
-                return render_template('error.html', error='no face encoding found')
-            if len(face_encodings) > 0:
-                return render_template('error.html', error='more than one face encoding found')
+                return render_template('error.html', error='no face found')
+            if len(face_encodings) > 1:
+                return render_template('error.html', error='more than one face found')
 
             encoding = {
                 'nome': member['nome'],
