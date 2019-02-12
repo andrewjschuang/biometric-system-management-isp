@@ -176,7 +176,6 @@ class Recognition:
             # detected and found face in database
             if min_face_distance <= self.tolerance:
                 name = self.known_face_encodings[min_face_distance_index]['nome']
-                print('%s found' % name)
 
                 # don't repeat for already found faces
                 # if name in found:
