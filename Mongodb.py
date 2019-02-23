@@ -12,35 +12,40 @@ class Mongodb:
     def getObjectIdDocument(self, _id):
         return { '_id': ObjectId(_id) }
 
-    def get_collection(self, collection):
-        return self.db[collection]
+    def get_collection(self, collection, db=None):
+        coll = self.client[db][collection] if db else self.db[collection]
+        return coll
 
-    def insert(self, collection, documents):
+    def insert(self, collection, documents, db=None):
         # TODO: document keys validation
-        ids = self.db[collection].insert(documents)
+        coll = self.client[db][collection] if db else self.db[collection]
+        ids = coll.insert(documents)
         return ids
 
-    def delete(self, collection, document):
+    def delete(self, collection, document, db=None):
+        coll = self.client[db][collection] if db else self.db[collection]
         if type(document) == str or type(document) == ObjectId:
-            return self.db[collection].delete_many(self.getObjectIdDocument(document))
+            return coll.delete_many(self.getObjectIdDocument(document))
         else:
-            return self.db[collection].delete_many(document)
+            return coll.delete_many(document)
 
-    def delete_all(self, collection, confirmation=False):
+    def delete_all(self, collection, confirmation=False, db=None):
         if confirmation:
-            return self.delete(collection, {})
+            return self.delete(collection, {}, db)
         else:
             print('ERROR: confirmation is set to false')
             return None
 
-    def find(self, collection, document):
+    def find(self, collection, document, db=None):
+        coll = self.client[db][collection] if db else self.db[collection]
         if type(document) == str or type(document) == ObjectId:
-            return self.db[collection].find(self.getObjectIdDocument(document))
+            return coll.find(self.getObjectIdDocument(document))
         else:
-            return self.db[collection].find(document)
+            return coll.find(document)
 
-    def increment(self, collection, document):
+    def increment(self, collection, document, db=None):
+        coll = self.client[db][collection] if db else self.db[collection]
         if type(document) == str or type(document) == ObjectId:
-            return self.db[collection].update(self.getObjectIdDocument(document), { '$inc': { 'n': 1 } } )
+            return coll.update(self.getObjectIdDocument(document), { '$inc': { 'n': 1 } } )
         else:
-            return self.db[collection].update_many(document, { '$inc': { 'n': 1 } } )
+            return coll.update_many(document, { '$inc': { 'n': 1 } } )
