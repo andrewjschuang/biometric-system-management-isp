@@ -36,7 +36,7 @@ class Mongodb:
             print('ERROR: confirmation is set to false')
             return None
 
-    def find(self, collection, document, db=None):
+    def find(self, collection, document={}, db=None):
         coll = self.client[db][collection] if db else self.db[collection]
         if type(document) == str or type(document) == ObjectId:
             return coll.find(self.getObjectIdDocument(document))
