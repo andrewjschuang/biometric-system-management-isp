@@ -26,7 +26,8 @@ services:
         source: ../mongodb/dump.bak
         target: /dump.bak
       - ../mongodb/encodings_dump:/dump
-    entrypoint: bash -c "mongodump --host mongodb -d bmsisp -o dump.bak && mongorestore --host mongodb --drop /dump"
+    entrypoint: bash /bin/true
+    # entrypoint: bash -c "mongodump --host mongodb -d bmsisp -o dump.bak && mongorestore --host mongodb --drop /dump"
 
 volumes:
   mongodb-volume:
