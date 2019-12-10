@@ -22,12 +22,13 @@
     </nav>
 
     <div class="p-3 mb-2 bg-light text-dark">
-        {% for person in persons %}
-            <ul class="list-group">
-                <img src="..." class="img-fluid" alt="Image">
-                <a href="/management/{{ person['_id'] }}" class="list-group-item list-group-item-action">{{ person['nome'] }}</a>
-            </ul>
-        {% endfor %}
+        <ul class="list-group">
+            <img src="..." class="img-fluid" alt="Image">
+            <li class="list-group-item">Nome: {{ person['nome'] }}</li>
+            <li class="list-group-item">Ministerio: {{ person['ministerio'] }}</li>
+            <li class="list-group-item">Sexo: {{ person['sexo'] }}</li>
+            <li class="list-group-item">Data de nascimento: {{ person['data_nascimento'] }}</li>
+        </ul>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

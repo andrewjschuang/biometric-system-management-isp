@@ -16,6 +16,13 @@ class Mongodb:
         coll = self.client[db][collection] if db else self.db[collection]
         return coll
 
+    def get_all(self, collection, db=None):
+        cursor = self.get_collection(collection).find()
+        return list(cursor)
+
+    def get_member(self, id):
+        return list(self.find('members', id))[0]
+
     def insert(self, collection, documents, db=None):
         # TODO: document keys validation
         coll = self.client[db][collection] if db else self.db[collection]

@@ -55,6 +55,12 @@ class Recognition:
 
         return None
 
+    def get_all_members(self):
+        return self.db.get_all('members')
+
+    def get_member(self, id):
+        return self.db.get_member(id)
+
     # gets database of registered faces from mongo
     def get_known_encodings(self):
         cursor = self.db.find('encodings', {})

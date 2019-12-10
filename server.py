@@ -135,7 +135,13 @@ def stop():
 
 @app.route('/management', methods=['GET'])
 def management():
-    return render_template('management.html')
+    persons = recognition.get_all_members()
+    return render_template('management.html', persons=persons)
+
+@app.route('/management/<id>', methods=['GET'])
+def get(id):
+    person = recognition.get_member(id)
+    return render_template('person.html', person=person)
 
 @app.route('/configure', methods=['GET'])
 def configure():
