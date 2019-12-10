@@ -133,6 +133,10 @@ def stop():
     recognition.signal_handler()
     return render_template('stop.html')
 
+@app.route('/management', methods=['GET'])
+def management():
+    return render_template('management.html')
+
 @app.route('/configure', methods=['GET'])
 def configure():
     video_source = request.args.get('source')
