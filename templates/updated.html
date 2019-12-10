@@ -14,6 +14,13 @@
 </head>
 
 <body>
+    <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Configuration</li>
+    </ol>
+    </nav>
+
     <div class="p-3 mb-2 bg-light text-dark">
         {% if error %}
             <h2>{{ error }}</h2>
