@@ -1,10 +1,12 @@
 from flask import Flask, request, redirect, url_for, render_template
+from base64 import b64encode
 import io
 import cv2
 import json
 import datetime
 import threading
 import numpy as np
+from PIL import Image
 
 import Recognition
 import config
@@ -44,7 +46,6 @@ def get_image(image):
     data = np.fromstring(in_memory_file.getvalue(), dtype=np.uint8)
     color_image_flag = 1
     img = cv2.imdecode(data, color_image_flag)
-
     return img
 
 @app.route('/', methods=['GET'])
@@ -141,7 +142,15 @@ def management():
 @app.route('/management/<id>', methods=['GET'])
 def get(id):
     person = recognition.get_member(id)
-    return render_template('person.html', person=person)
+    b = recognition.get_image(person['images']['central'])
+    image = Image.open(io.BytesIO(b))
+    imgByteArr = io.BytesIO()
+    width, height = image.size
+    resize = 0.15
+    new_size = (int(image.size[0]*resize), int(image.size[0]*resize))
+    image.thumbnail(new_size, Image.ANTIALIAS)
+    image.save(imgByteArr, format='JPEG')
+    return render_template('person.html', person=person, image=b64encode(imgByteArr.getvalue()).decode('utf-8'))
 
 @app.route('/configure', methods=['GET'])
 def configure():

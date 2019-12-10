@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from config import mongodb
+import gridfs
 
 class Mongodb:
     def __init__(self, host=mongodb['host'], port=mongodb['port'], db=mongodb['db']):
@@ -8,6 +9,7 @@ class Mongodb:
         self.port = port
         self.client = MongoClient(host, port)
         self.db = self.client[db]
+        self.fs = gridfs.GridFS(self.db)
 
     def getObjectIdDocument(self, _id):
         return { '_id': ObjectId(_id) }
@@ -22,6 +24,9 @@ class Mongodb:
 
     def get_member(self, id):
         return list(self.find('members', id))[0]
+
+    def get_image(self, id):
+        return self.fs.get(id).read()
 
     def insert(self, collection, documents, db=None):
         # TODO: document keys validation
