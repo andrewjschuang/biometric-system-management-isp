@@ -47,8 +47,12 @@ def get_image(image):
 
     return img
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
+    return render_template('index.html')
+
+@app.route('/recognize', methods=['GET', 'POST'])
+def recognize():
     if request.method == 'POST':
         result = image_validation(request)
 
@@ -60,7 +64,7 @@ def index():
 
         return render_template('found.html', found=found)
 
-    return render_template('index.html')
+    return render_template('recognize.html')
 
 @app.route('/api', methods=['POST'])
 def api():
