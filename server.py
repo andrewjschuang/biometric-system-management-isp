@@ -137,20 +137,18 @@ def stop():
 @app.route('/management', methods=['GET'])
 def management():
     persons = recognition.get_all_members()
+    for person in persons:
+        bytes = recognition.get_image(person['images']['central'])
+        image = get_person_image_from_bytes(bytes, 0.05)
+        person['images']['central'] = image
     return render_template('management.html', persons=persons)
 
 @app.route('/management/<id>', methods=['GET'])
 def get(id):
     person = recognition.get_member(id)
-    b = recognition.get_image(person['images']['central'])
-    image = Image.open(io.BytesIO(b))
-    imgByteArr = io.BytesIO()
-    width, height = image.size
-    resize = 0.15
-    new_size = (int(image.size[0]*resize), int(image.size[0]*resize))
-    image.thumbnail(new_size, Image.ANTIALIAS)
-    image.save(imgByteArr, format='JPEG')
-    return render_template('person.html', person=person, image=b64encode(imgByteArr.getvalue()).decode('utf-8'))
+    bytes = recognition.get_image(person['images']['central'])
+    image = get_person_image_from_bytes(bytes, 0.15)
+    return render_template('person.html', person=person, image=image)
 
 @app.route('/configure', methods=['GET'])
 def configure():
@@ -160,6 +158,14 @@ def configure():
 
     error = recognition.configure(video_source, display_image, tolerance)
     return render_template('updated.html', error=error)
+
+def get_person_image_from_bytes(bytes, resize):
+    image = Image.open(io.BytesIO(bytes))
+    imgByteArr = io.BytesIO()
+    new_size = (int(image.size[0]*resize), int(image.size[0]*resize))
+    image.thumbnail(new_size, Image.ANTIALIAS)
+    image.save(imgByteArr, format='JPEG')
+    return b64encode(imgByteArr.getvalue()).decode('utf-8')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
