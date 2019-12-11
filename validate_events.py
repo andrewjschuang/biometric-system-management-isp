@@ -6,9 +6,11 @@ from Mongodb import Mongodb
 
 db = Mongodb(db='bmsisp')
 
+
 def show_picture(document):
     image = document['foto']
     Image.frombytes(image['mode'], image['size'], image['data']).show()
+
 
 def print_info(document, log=False):
     info = {
@@ -22,6 +24,7 @@ def print_info(document, log=False):
         print('{ %s' % info['nome'], end=', ')
         print('%s }' % info['face_distance'])
     return info
+
 
 if __name__ == '__main__':
     cursor = db.find('events')

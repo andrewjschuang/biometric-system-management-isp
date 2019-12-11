@@ -11,8 +11,9 @@ import io
 from Mongodb import Mongodb
 import gridfs
 
+
 class Workbook:
-    rows = range(2,200)
+    rows = range(2, 200)
     columns = 'BEFGIKLQS'
 
     def __init__(self, fp, sheet):
@@ -57,6 +58,7 @@ class Workbook:
             })
         return d
 
+
 class Rotate:
     @staticmethod
     def rotate(image):
@@ -69,18 +71,22 @@ class Rotate:
         if image_orientation == 4:
             image = image.transpose(Image.FLIP_TOP_BOTTOM)
         if image_orientation == 5:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_90)
+            image = image.transpose(
+                Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_90)
         if image_orientation == 6:
             image = image.transpose(Image.ROTATE_270)
         if image_orientation == 7:
-            image = image.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_90)
+            image = image.transpose(
+                Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_90)
         if image_orientation == 8:
             image = image.transpose(Image.ROTATE_90)
         return image
 
+
 def rename_lower(path):
     for f in os.listdir(path):
         os.rename(os.path.join(path, f), os.path.join(path, f.lower()))
+
 
 def populate(d, db, args):
     fs = gridfs.GridFS(db.db)
@@ -94,11 +100,13 @@ def populate(d, db, args):
                 continue
             else:
                 try:
-                    fpath = os.path.join(args.path, person['fotos'][key].lower())
+                    fpath = os.path.join(
+                        args.path, person['fotos'][key].lower())
 
                     foto = Image.open(fpath)
                     foto = Rotate.rotate(foto)
-                    encodings = face_recognition.face_encodings(np.array(foto))[0]
+                    encodings = face_recognition.face_encodings(np.array(foto))[
+                        0]
 
                     print('saving %s: %s...' % (key, fpath), end=' ')
                     encoding = {
@@ -128,13 +136,17 @@ def populate(d, db, args):
         else:
             print('no encodings saved. skipping...\n')
 
+
 def createArgsParser():
     parser = argparse.ArgumentParser()
     parser.add_argument('file', help="xlsx file")
     parser.add_argument('-s', '--sheet', required=True, help='xlsx sheet')
-    parser.add_argument('-p', '--path', required=True, help='folder with pictures')
-    parser.add_argument('-d', '--database', required=True, help='database name')
+    parser.add_argument('-p', '--path', required=True,
+                        help='folder with pictures')
+    parser.add_argument('-d', '--database', required=True,
+                        help='database name')
     return parser.parse_args()
+
 
 if __name__ == '__main__':
     args = createArgsParser()

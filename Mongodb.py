@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from config import mongodb
 import gridfs
 
+
 class Mongodb:
     def __init__(self, host=mongodb['host'], port=mongodb['port'], db=mongodb['db']):
         self.host = host
@@ -12,7 +13,7 @@ class Mongodb:
         self.fs = gridfs.GridFS(self.db)
 
     def getObjectIdDocument(self, _id):
-        return { '_id': ObjectId(_id) }
+        return {'_id': ObjectId(_id)}
 
     def get_collection(self, collection, db=None):
         coll = self.client[db][collection] if db else self.db[collection]
@@ -58,6 +59,6 @@ class Mongodb:
     def increment(self, collection, document, db=None):
         coll = self.client[db][collection] if db else self.db[collection]
         if type(document) == str or type(document) == ObjectId:
-            return coll.update(self.getObjectIdDocument(document), { '$inc': { 'n': 1 } } )
+            return coll.update(self.getObjectIdDocument(document), {'$inc': {'n': 1}})
         else:
-            return coll.update_many(document, { '$inc': { 'n': 1 } } )
+            return coll.update_many(document, {'$inc': {'n': 1}})

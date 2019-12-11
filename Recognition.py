@@ -11,10 +11,12 @@ import numpy as np
 import cv2
 import config
 
+
 class Recognition:
     # constructor using configuration file
     def __init__(self):
-        self.db = Mongodb(config.mongodb['host'], config.mongodb['port'], config.mongodb['db'])
+        self.db = Mongodb(
+            config.mongodb['host'], config.mongodb['port'], config.mongodb['db'])
         self.video_source = config.video_source
         self.display_image = config.display_image
         self.tolerance = config.tolerance
@@ -69,13 +71,15 @@ class Recognition:
         cursor = self.db.find('encodings', {})
         self.known_face_encodings = list(cursor)
         for encoding in self.known_face_encodings:
-            self.known_face_encodings_list.append(np.array(encoding.pop('foto')))
+            self.known_face_encodings_list.append(
+                np.array(encoding.pop('foto')))
 
         if len(self.known_face_encodings) == 0:
             print('no face encodings found in database %s' % self.db.db)
             return
         else:
-            print('got %s encodings from database' % len(self.known_face_encodings))
+            print('got %s encodings from database' %
+                  len(self.known_face_encodings))
 
     # saves frame to database with detected info
     def save_event(self, collection, document, coordinates):
@@ -86,7 +90,8 @@ class Recognition:
         # draws rectangle around face
         top, right, bottom, left = coordinates
         pil_image = Image.fromarray(frame)
-        ImageDraw.Draw(pil_image).rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
+        ImageDraw.Draw(pil_image).rectangle(
+            ((left, top), (right, bottom)), outline=(0, 0, 255))
 
         document['foto'] = {
             'mode': pil_image.mode,
@@ -144,7 +149,8 @@ class Recognition:
             print('no face encodings found in database %s' % self.db.db)
             return
 
-        face_locations, face_encodings = self.get_faces_from_picture(frame, model=model)
+        face_locations, face_encodings = self.get_faces_from_picture(
+            frame, model=model)
         results = self.identify(frame, face_locations, face_encodings)
 
         print("found in frame: %s" % results)
@@ -164,9 +170,11 @@ class Recognition:
         # iterates through each face
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # Draw a box around the face
-            cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
+            cv2.rectangle(frame, (left*4, top*4),
+                          (right*4, bottom*4), (0, 0, 255), 2)
 
-            face_distances = face_recognition.face_distance(self.known_face_encodings_list, face_encoding)
+            face_distances = face_recognition.face_distance(
+                self.known_face_encodings_list, face_encoding)
 
             min_face_distance = np.min(face_distances)
             min_face_distance_index = np.argmin(face_distances)
@@ -190,8 +198,10 @@ class Recognition:
                     'face_distance': min_face_distance
                 }
 
-                self.db.increment('encodings', self.known_face_encodings[min_face_distance_index]['_id'])
-                self.save_event('events', event, coordinates=(top, right, bottom, left))
+                self.db.increment(
+                    'encodings', self.known_face_encodings[min_face_distance_index]['_id'])
+                self.save_event('events', event, coordinates=(
+                    top, right, bottom, left))
 
                 results.append(name)
 
@@ -200,6 +210,7 @@ class Recognition:
     # handles start / stop capturing
     def signal_handler(self, run=False):
         self.run = run
+
 
 # stand alone execution
 if __name__ == '__main__':

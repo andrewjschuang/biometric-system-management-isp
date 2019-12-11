@@ -18,27 +18,30 @@ recognition = Recognition.Recognition()
 
 photo_labels = ['central', 'direita', 'esquerda']
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def image_validation(request, filename='file'):
     if type(filename) == list:
         if len(request.files) == 0:
-            return { 'error': True, 'message': 'no image received' }
-        return { 'error': False }
+            return {'error': True, 'message': 'no image received'}
+        return {'error': False}
 
     if filename not in request.files:
-        return { 'error': True, 'message': 'no image received' }
+        return {'error': True, 'message': 'no image received'}
 
     file = request.files['file']
 
     if file.filename == '':
-            return { 'error': True, 'message': 'no selected image' }
+        return {'error': True, 'message': 'no selected image'}
 
     if not (file and allowed_file(file.filename)):
-        return { 'error': True, 'message': 'file is not an image' }
+        return {'error': True, 'message': 'file is not an image'}
 
-    return { 'error': False }
+    return {'error': False}
+
 
 def get_image(image):
     in_memory_file = io.BytesIO()
@@ -48,9 +51,11 @@ def get_image(image):
     img = cv2.imdecode(data, color_image_flag)
     return img
 
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
+
 
 @app.route('/recognize', methods=['GET', 'POST'])
 def recognize():
@@ -66,6 +71,7 @@ def recognize():
         return render_template('found.html', found=found)
 
     return render_template('recognize.html')
+
 
 @app.route('/api', methods=['POST'])
 def api():
@@ -85,6 +91,7 @@ def api():
 
     return json.dumps(response)
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -93,14 +100,16 @@ def register():
         if result['error']:
             return render_template('error.html', error=result['message'])
 
-        member = {key:request.form[key] for key in request.form if request.form[key]}
+        member = {key: request.form[key]
+                  for key in request.form if request.form[key]}
         member['data_foto'] = datetime.datetime.now().isoformat()
         member['fotos'] = {}
 
         images = request.files
         for image_label in images:
             image = get_image(images[image_label])
-            face_locations, face_encodings = recognition.get_faces_from_picture(image)
+            face_locations, face_encodings = recognition.get_faces_from_picture(
+                image)
 
             if len(face_encodings) == 0:
                 return render_template('error.html', error='no face found')
@@ -122,6 +131,7 @@ def register():
 
     return render_template('register.html', labels=photo_labels)
 
+
 @app.route('/start', methods=['GET'])
 def start():
     if not recognition.run:
@@ -129,10 +139,12 @@ def start():
         threading.Thread(target=recognition.start).start()
     return render_template('start.html')
 
+
 @app.route('/stop', methods=['GET'])
 def stop():
     recognition.signal_handler()
     return render_template('stop.html')
+
 
 @app.route('/management', methods=['GET'])
 def management():
@@ -146,12 +158,14 @@ def management():
             person['images']['central'] = b''
     return render_template('management.html', persons=persons)
 
+
 @app.route('/management/<id>', methods=['GET'])
 def get(id):
     person = recognition.get_member(id)
     bytes = recognition.get_image(person['images']['central'])
     image = get_person_image_from_bytes(bytes, 0.15)
     return render_template('person.html', person=person, image=image)
+
 
 @app.route('/configure', methods=['GET'])
 def configure():
@@ -162,6 +176,7 @@ def configure():
     error = recognition.configure(video_source, display_image, tolerance)
     return render_template('updated.html', error=error)
 
+
 def get_person_image_from_bytes(bytes, resize):
     image = Image.open(io.BytesIO(bytes))
     imgByteArr = io.BytesIO()
@@ -169,6 +184,7 @@ def get_person_image_from_bytes(bytes, resize):
     image.thumbnail(new_size, Image.ANTIALIAS)
     image.save(imgByteArr, format='JPEG')
     return b64encode(imgByteArr.getvalue()).decode('utf-8')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
