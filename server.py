@@ -104,25 +104,35 @@ def register():
                   for key in request.form if request.form[key]}
         member['data_foto'] = datetime.datetime.now().isoformat()
         member['fotos'] = {}
+        member['images'] = {}
 
         images = request.files
         for image_label in images:
-            image = get_image(images[image_label])
-            face_locations, face_encodings = recognition.get_faces_from_picture(
-                image)
+            try:
+                image = get_image(images[image_label])
+                face_locations, face_encodings = recognition.get_faces_from_picture(
+                    image)
 
-            if len(face_encodings) == 0:
-                return render_template('error.html', error='no face found')
-            if len(face_encodings) > 1:
-                return render_template('error.html', error='more than one face found')
+                if len(face_encodings) == 0:
+                    return render_template('error.html', error='no face found')
+                if len(face_encodings) > 1:
+                    return render_template('error.html', error='more than one face found')
 
-            encoding = {
-                'nome': member['nome'],
-                'foto': face_encodings[0].tolist(),
-                'obs': None
-            }
-            encoding_id = recognition.db.insert('encodings', encoding)
-            member['fotos'][image_label] = encoding_id
+                encoding = {
+                    'nome': member['nome'],
+                    'foto': face_encodings[0].tolist(),
+                    'obs': None
+                }
+                encoding_id = recognition.db.insert('encodings', encoding)
+                member['fotos'][image_label] = encoding_id
+
+                image = Image.open(images[image_label])
+                imgByteArr = io.BytesIO()
+                image.save(imgByteArr, format='JPEG')
+                image_id = recognition.db.fs.put(imgByteArr.getvalue())
+                member['images'][image_label] = image_id
+            except Exception as e:
+                print('failed to retrieve image: %s' % image_label)
 
         member_id = recognition.db.insert('members', member)
         recognition.get_known_encodings()
