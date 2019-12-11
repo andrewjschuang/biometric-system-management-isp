@@ -17,12 +17,17 @@
     <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Stop</li>
+        <li class="breadcrumb-item active" aria-current="page">Management</li>
     </ol>
     </nav>
 
     <div class="p-3 mb-2 bg-light text-dark">
-        <h2>Facial recognition stopped<h2>
+        {% for person in persons %}
+            <img src="data:image/jpeg;base64,{{ person['images']['central'] }}">
+            <ul class="list-group">
+                <a href="/management/{{ person['_id'] }}" class="list-group-item list-group-item-action">{{ person['nome'] }}</a>
+            </ul>
+        {% endfor %}
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

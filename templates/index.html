@@ -14,22 +14,23 @@
 </head>
 
 <body>
+    <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active" aria-current="page">Home</li>
+    </ol>
+    </nav>
+
     <div class="p-3 mb-2 bg-light text-dark">
-        <h2>Select an image for facial recognition</h2>
+        <h2>Welcome to Biometric System Management ISP</h2>
 
-        <form method=post enctype="multipart/form-data">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Upload</span>
-                </div>
-                <div class="custom-file">
-                    <input type="file" name="file" class="custom-file-input" id="file" required>
-                    <label class="custom-file-label" for="inputGroupFile01">Click here to choose image</label>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-outline-primary">Submit</button>
-        </form>
+        <div class="list-group">
+            <a href="/recognize" class="list-group-item list-group-item-action">Recognize faces in image</a>
+            <a href="/register" class="list-group-item list-group-item-action">Regsiter a new member</a>
+            <a href="/start" class="list-group-item list-group-item-action">Start recognition service</a>
+            <a href="/stop" class="list-group-item list-group-item-action">Stop recognition service</a>
+            <a href="/management" class="list-group-item list-group-item-action">Management</a>
+            <a href="/configure" class="list-group-item list-group-item-action">Configure</a>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

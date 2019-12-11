@@ -1,7 +1,10 @@
 certifi==2018.11.29
 chardet==3.0.4
 Click==7.0
+dlib==19.18.0
 et-xmlfile==1.0.1
+face-recognition==1.2.3
+face-recognition-models==0.3.0
 Flask==1.0.2
 idna==2.8
 itsdangerous==1.1.0
@@ -9,7 +12,9 @@ jdcal==1.4
 Jinja2==2.10.1
 MarkupSafe==1.1.1
 numpy==1.16.1
+opencv-python==4.1.2.30
 openpyxl==2.5.14
+Pillow==6.2.1
 pkg-resources==0.0.0
 pymongo==3.7.2
 requests==2.21.0

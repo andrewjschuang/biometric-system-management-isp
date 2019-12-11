@@ -1,6 +1,7 @@
 ve/
 __pycache__/
 .vscode/
+.history/
 **/*.png
 **/*.PNG
 **/*.jpg

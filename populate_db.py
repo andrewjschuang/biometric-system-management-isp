@@ -6,8 +6,10 @@ import numpy as np
 import openpyxl
 import argparse
 import os
+import io
 
 from Mongodb import Mongodb
+import gridfs
 
 class Workbook:
     rows = range(2,200)
@@ -46,6 +48,11 @@ class Workbook:
                     'direita': element[8].lower() + '-ld.jpg',
                     'esquerda': element[8].lower() + '-le.jpg',
                     'obs': element[9] if len(element) == 10 else None
+                },
+                'images': {
+                    'central': element[8].lower() + '-fr.jpg',
+                    'direita': element[8].lower() + '-ld.jpg',
+                    'esquerda': element[8].lower() + '-le.jpg',
                 }
             })
         return d
@@ -76,6 +83,7 @@ def rename_lower(path):
         os.rename(os.path.join(path, f), os.path.join(path, f.lower()))
 
 def populate(d, db, args):
+    fs = gridfs.GridFS(db.db)
     for person in d:
         encoding_saved = False
         print(person['nome'])
@@ -87,11 +95,11 @@ def populate(d, db, args):
             else:
                 try:
                     fpath = os.path.join(args.path, person['fotos'][key].lower())
-                    
+
                     foto = Image.open(fpath)
                     foto = Rotate.rotate(foto)
                     encodings = face_recognition.face_encodings(np.array(foto))[0]
-                
+
                     print('saving %s: %s...' % (key, fpath), end=' ')
                     encoding = {
                         'nome': person['nome'],
@@ -101,6 +109,12 @@ def populate(d, db, args):
 
                     encoding_id = db.insert('encodings', encoding)
                     person['fotos'][key] = encoding_id
+
+                    imgByteArr = io.BytesIO()
+                    foto.save(imgByteArr, format='JPEG')
+                    image_id = fs.put(imgByteArr.getvalue())
+                    person['images'][key] = image_id
+
                     encoding_saved = True
                     print('done')
                 except Exception as e:
@@ -125,13 +139,12 @@ def createArgsParser():
 if __name__ == '__main__':
     args = createArgsParser()
     rename_lower(args.path)
-    
+
     wb = Workbook(args.file, args.sheet)
     d = wb.dict_of_people(wb.list_of_people())
 
     db = Mongodb(db=args.database)
     db.delete_all('encodings', True)
     db.delete_all('members', True)
-    
+
     populate(d, db, args)
-    
