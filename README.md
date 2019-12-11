@@ -1,8 +1,15 @@
 # Biometric System Management using Face Recognition
 
-## Current branch in development
+## Dependencies - Debian (Ubuntu)
 
-`git checkout 2.0.0`
+Compile and install dlib from source
+https://github.com/davisking/dlib.git
+
+Install and run MongoDB
+https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
+
+python3, python3-pip and virtual environment
+https://docs.python.org/3/library/venv.html
 
 ## How to use
 
