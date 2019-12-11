@@ -138,9 +138,12 @@ def stop():
 def management():
     persons = recognition.get_all_members()
     for person in persons:
-        bytes = recognition.get_image(person['images']['central'])
-        image = get_person_image_from_bytes(bytes, 0.05)
-        person['images']['central'] = image
+        try:
+            bytes = recognition.get_image(person['images']['central'])
+            image = get_person_image_from_bytes(bytes, 0.05)
+            person['images']['central'] = image
+        except Exception as e:
+            person['images']['central'] = b''
     return render_template('management.html', persons=persons)
 
 @app.route('/management/<id>', methods=['GET'])
