@@ -120,7 +120,7 @@ class Mongodb:
         collection = self.get_collection('members')
         dt = datetime.datetime.fromtimestamp(timestamp).replace(microsecond=0)
         if dt.weekday() == 6: # sunday
-            key = dt.isoformat()
+            key = '%s-%s' % (dt.month, dt.day)
             year = str(dt.year)
             member = self.get_member(member_id)
             if 'calendar' not in member:
