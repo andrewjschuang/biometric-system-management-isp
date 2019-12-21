@@ -153,7 +153,7 @@ class Recognition:
             frame, model=model)
         results = self.identify(frame, face_locations, face_encodings)
 
-        print("found in frame: %s" % results)
+        print("found in frame: %s" % [x['name'] for x in results])
         return results
 
     # detects faces in frame
@@ -182,6 +182,7 @@ class Recognition:
             # detected and found face in database
             if min_face_distance <= self.tolerance:
                 name = self.known_face_encodings[min_face_distance_index]['nome']
+                member_id = self.known_face_encodings[min_face_distance_index]['member_id']
 
                 # don't repeat for already found faces
                 # if name in found:
@@ -191,19 +192,17 @@ class Recognition:
                 # create event document and save it to mongodb
                 event = {
                     'nome': name,
-                    'membro': None,
+                    'membro': member_id,
                     'data': datetime.datetime.now().isoformat(),
                     'foto': frame,
                     'encoding': self.known_face_encodings[min_face_distance_index]['_id'],
                     'face_distance': min_face_distance
                 }
 
-                self.db.increment(
-                    'encodings', self.known_face_encodings[min_face_distance_index]['_id'])
-                self.save_event('events', event, coordinates=(
-                    top, right, bottom, left))
+                self.db.increment('encodings', member_id)
+                self.save_event('events', event, coordinates=(top, right, bottom, left))
 
-                results.append(name)
+                results.append({'name': name, 'id': member_id})
 
         return results
 
