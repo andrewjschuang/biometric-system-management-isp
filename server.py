@@ -10,6 +10,7 @@ from PIL import Image
 
 import Recognition
 import config
+import time
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -68,7 +69,10 @@ def recognize():
         image = get_image(request.files['file'])
         found = recognition.recognize(image)
 
-        return render_template('found.html', found=found)
+        for x in found:
+            recognition.db.event_occured(time.time(), x['id'], x['name'])
+
+        return render_template('found.html', found=[x['name'] for x in found])
 
     return render_template('recognize.html')
 
@@ -173,18 +177,17 @@ def management():
 def get(id):
     person = recognition.get_member(id)
     if 'calendar' not in person:
-        person['calendar'] = recognition.db.init_calendar()
-    calendar = recognition.db.find_calendar_by_id(person['calendar'])
+        person['calendar'] = recognition.db.init_calendar(person)
     bytes = recognition.get_image(person['images']['central'])
     image = get_person_image_from_bytes(bytes, 0.15)
+    year = str(datetime.datetime.now().year)
 
     if request.method == 'POST':
-        calendar['days'] = { key : request.form[key] for key in request.form }
-        recognition.db.update_calendar(calendar)
+        person['calendar'][year] = { key : request.form[key] for key in request.form }
+        recognition.db.update_calendar(person, person['calendar'])
 
-    # recognition.db.event_occured(1575889200, '5df0605f6b923a4fc993aba5', 'Andrew Chuang')
-    is_active = recognition.db.is_active_by_document(calendar['days'])
-    return render_template('person.html', person=person, image=image, days=calendar['days'], is_active=is_active)
+    is_active = recognition.db.is_active_by_document(person['calendar'][year])
+    return render_template('person.html', person=person, image=image, days=person['calendar'][year], is_active=is_active)
 
 
 @app.route('/configure', methods=['GET'])

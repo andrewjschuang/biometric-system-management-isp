@@ -29,7 +29,8 @@ class Mongodb:
 
     # gets the member by id
     def get_member(self, id):
-        return list(self.find('members', id))[0]
+        members = self.find('members', id)
+        return list(members)[0]
 
     # gets the image in grid fs by id
     def get_image(self, id):
@@ -74,39 +75,25 @@ class Mongodb:
         else:
             return coll.update_many(document, {'$inc': {'n': 1}})
 
-    def init_calendar(self, id, name, year):
-        document = {
-            'member_id': id,
-            'member_name': name,
-            'year': year,
-            'days': {}
-        }
-        return self.init_calendar(document)
+    def update(self, collection, id, field, document, operator, upsert=True):
+        return collection.update({'_id': id},
+                                 {operator: {field: document}}, upsert)
 
-    def init_calendar(self):
-        collection = self.get_collection('calendar')
-        document = {
-            # "2019": {
-                "days": {
+    # calendar operations
 
-                }
-            # }
-        }
-        return collection.insert_one(document).inserted_id
+    def init_calendar(self, member, force=False):
+        collection = self.get_collection('members')
+        year = str(datetime.datetime.now().year)
+        if 'calendar' not in member:
+            member['calendar'] = {}
+        if force or (year not in member['calendar']):
+            member['calendar'][year] = {}
+        self.update(collection, member['_id'], 'calendar', member['calendar'], '$set')
+        return member['calendar']
 
-    def find_calendar_by_id(self, id):
-        collection = self.get_collection('calendar')
-        return collection.find_one(id)
-
-    def find_calendar_document_by_year(self, year):
-        collection = self.get_collection('calendar')
-        return collection.find_one({{ 'year': year}})
-
-    def get_total_from_document(self, document):
-        return self.get_total(document['year']['days'])
-
-    def get_count_from_document(self, document):
-        return self.get_count(document['year']['days'])
+    def update_calendar(self, member, document):
+        collection = self.get_collection('members')
+        return self.update(collection, member['_id'], 'calendar', document, '$set')
 
     def get_total(self, days):
         return len(days)
@@ -127,20 +114,16 @@ class Mongodb:
 
     # if event occurs
     def event_occured(self, timestamp, member_id, member_name):
-        coll = self.get_collection('calendar')
+        collection = self.get_collection('members')
         dt = datetime.datetime.fromtimestamp(timestamp).replace(microsecond=0)
         # if dt.weekday() == 6: # sunday
         key = dt.isoformat()
-        document = coll.find_one({
-            'member_id': self.getObjectIdDocument(member_id),
-            'member_name': member_name,
-        })
-
-        document['days'][key] = True
-        return coll.update({ '_id': document['_id'] },
-                { '$set': { 'days': document['days'] } }, upsert=True) # add day
-
-    def update_calendar(self, document):
-        coll = self.get_collection('calendar')
-        return coll.update({ '_id': document['_id'] },
-                { '$set': { 'days': document['days'] } }, upsert=True) # add day
+        year = str(dt.year)
+        member = self.get_member(member_id)
+        if 'calendar' not in member:
+            member['calendar'] = self.init_calendar(member)
+        if year not in member['calendar']:
+            member['calendar'][year] = { key: 'Presente' }
+        else:
+            member['calendar'][year][key] = 'Presente'
+        return self.update_calendar(member, member['calendar'])
