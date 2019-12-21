@@ -172,6 +172,8 @@ def management():
 @app.route('/management/<id>', methods=['GET', 'POST'])
 def get(id):
     person = recognition.get_member(id)
+    if 'calendar' not in person:
+        person['calendar'] = recognition.db.init_calendar()
     calendar = recognition.db.find_calendar_by_id(person['calendar'])
     bytes = recognition.get_image(person['images']['central'])
     image = get_person_image_from_bytes(bytes, 0.15)

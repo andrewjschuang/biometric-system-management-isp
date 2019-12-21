@@ -83,9 +83,16 @@ class Mongodb:
         }
         return self.init_calendar(document)
 
-    def init_calendar(self, document):
+    def init_calendar(self):
         collection = self.get_collection('calendar')
-        return collection.insert_one(document)
+        document = {
+            # "2019": {
+                "days": {
+
+                }
+            # }
+        }
+        return collection.insert_one(document).inserted_id
 
     def find_calendar_by_id(self, id):
         collection = self.get_collection('calendar')
@@ -113,6 +120,8 @@ class Mongodb:
 
     def is_active_by_document(self, document, rate=active_rate):
         total = self.get_total(document)
+        if total <= 0:
+            return False
         count = self.get_count(document)
         return True if count / total >= rate else False
 
