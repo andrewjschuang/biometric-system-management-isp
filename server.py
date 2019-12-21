@@ -174,7 +174,9 @@ def get(id):
     person = recognition.get_member(id)
     bytes = recognition.get_image(person['images']['central'])
     image = get_person_image_from_bytes(bytes, 0.15)
-    return render_template('person.html', person=person, image=image)
+    calendar = recognition.db.find_calendar_by_id(person['calendar'])
+    days = [x for x in calendar['days'] if calendar['days'][x] == True]
+    return render_template('person.html', person=person, image=image, days=days)
 
 
 @app.route('/configure', methods=['GET'])

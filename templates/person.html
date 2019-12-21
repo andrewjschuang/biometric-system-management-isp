@@ -28,6 +28,10 @@
             <li class="list-group-item">Ministerio: {{ person['ministerio'] }}</li>
             <li class="list-group-item">Sexo: {{ person['sexo'] }}</li>
             <li class="list-group-item">Data de nascimento: {{ person['data_nascimento'] }}</li>
+            <li class="list-group-item">Datas: {{ days }}</li>
+            {% for x in days %}
+                <p>{{ x }}</p>
+            {% endfor %}
         </ul>
     </div>
 

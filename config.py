@@ -9,3 +9,5 @@ mongodb = {
     'port': int(os.environ.get('MONGO_PORT')) if os.environ.get('MONGO_PORT') else 27017,
     'db': os.environ.get('MONGO_DB') or 'bmsisp'
 }
+
+active_rate = 0.5
