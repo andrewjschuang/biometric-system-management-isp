@@ -109,6 +109,7 @@ def register():
         member['data_foto'] = datetime.datetime.now().isoformat()
         member['fotos'] = {}
         member['images'] = {}
+        member_id = recognition.db.insert('members', member)
 
         images = request.files
         for image_label in images:
@@ -124,6 +125,7 @@ def register():
 
                 encoding = {
                     'nome': member['nome'],
+                    'member_id': member_id,
                     'foto': face_encodings[0].tolist(),
                     'obs': None
                 }
@@ -138,7 +140,7 @@ def register():
             except Exception as e:
                 print('failed to retrieve image: %s' % image_label)
 
-        member_id = recognition.db.insert('members', member)
+        recognition.db.get_collection('members').replace_one({'_id': member_id}, member)
         recognition.get_known_encodings()
 
         return render_template('registered.html', name=member['nome'])
