@@ -68,11 +68,14 @@ def recognize():
 
         image = get_image(request.files['file'])
         found = recognition.recognize(image)
+        names = []
 
-        for x in found:
-            recognition.db.event_occured(time.time(), x['id'], x['name'])
+        if found:
+            for x in found:
+                recognition.db.event_occured(time.time(), x['id'], x['name'])
+                names.append(x['name'])
 
-        return render_template('found.html', found=[x['name'] for x in found])
+        return render_template('found.html', found=names)
 
     return render_template('recognize.html')
 
