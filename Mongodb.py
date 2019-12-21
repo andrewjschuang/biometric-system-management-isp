@@ -107,7 +107,7 @@ class Mongodb:
     def get_count(self, days):
         count = 0
         for day in days:
-            if days[day] == True:
+            if days[day] == 'Presente':
                 count += 1
         return count
 
@@ -128,5 +128,10 @@ class Mongodb:
         })
 
         document['days'][key] = True
+        return coll.update({ '_id': document['_id'] },
+                { '$set': { 'days': document['days'] } }, upsert=True) # add day
+
+    def update_calendar(self, document):
+        coll = self.get_collection('calendar')
         return coll.update({ '_id': document['_id'] },
                 { '$set': { 'days': document['days'] } }, upsert=True) # add day

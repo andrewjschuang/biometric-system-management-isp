@@ -169,14 +169,20 @@ def management():
     return render_template('management.html', persons=persons)
 
 
-@app.route('/management/<id>', methods=['GET'])
+@app.route('/management/<id>', methods=['GET', 'POST'])
 def get(id):
     person = recognition.get_member(id)
+    calendar = recognition.db.find_calendar_by_id(person['calendar'])
     bytes = recognition.get_image(person['images']['central'])
     image = get_person_image_from_bytes(bytes, 0.15)
-    calendar = recognition.db.find_calendar_by_id(person['calendar'])
-    days = [x for x in calendar['days'] if calendar['days'][x] == True]
-    return render_template('person.html', person=person, image=image, days=days)
+
+    if request.method == 'POST':
+        calendar['days'] = { key : request.form[key] for key in request.form }
+        recognition.db.update_calendar(calendar)
+
+    # recognition.db.event_occured(1575889200, '5df0605f6b923a4fc993aba5', 'Andrew Chuang')
+    is_active = recognition.db.is_active_by_document(calendar['days'])
+    return render_template('person.html', person=person, image=image, days=calendar['days'], is_active=is_active)
 
 
 @app.route('/configure', methods=['GET'])
