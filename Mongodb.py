@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from config import mongodb, active_rate
 import gridfs
 import datetime
+import sundays
 
 
 class Mongodb:
@@ -88,6 +89,8 @@ class Mongodb:
             member['calendar'] = {}
         if force or (year not in member['calendar']):
             member['calendar'][year] = {}
+            for day in sundays.get_sundays_from_year(int(year)):
+                member['calendar'][year][day] = 'Ausente'
         self.update(collection, member['_id'], 'calendar', member['calendar'], '$set')
         return member['calendar']
 
@@ -116,14 +119,14 @@ class Mongodb:
     def event_occured(self, timestamp, member_id, member_name):
         collection = self.get_collection('members')
         dt = datetime.datetime.fromtimestamp(timestamp).replace(microsecond=0)
-        # if dt.weekday() == 6: # sunday
-        key = dt.isoformat()
-        year = str(dt.year)
-        member = self.get_member(member_id)
-        if 'calendar' not in member:
-            member['calendar'] = self.init_calendar(member)
-        if year not in member['calendar']:
-            member['calendar'][year] = { key: 'Presente' }
-        else:
-            member['calendar'][year][key] = 'Presente'
+        if dt.weekday() == 6: # sunday
+            key = dt.isoformat()
+            year = str(dt.year)
+            member = self.get_member(member_id)
+            if 'calendar' not in member:
+                member['calendar'] = self.init_calendar(member)
+            if year not in member['calendar']:
+                member['calendar'][year] = { key: 'Presente' }
+            else:
+                member['calendar'][year][key] = 'Presente'
         return self.update_calendar(member, member['calendar'])
