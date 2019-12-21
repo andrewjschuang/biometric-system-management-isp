@@ -119,7 +119,7 @@ class Mongodb:
     def event_occured(self, timestamp, member_id, member_name):
         collection = self.get_collection('members')
         dt = datetime.datetime.fromtimestamp(timestamp).replace(microsecond=0)
-        if dt.weekday() == 6: # sunday
+        if sundays.is_sunday(dt):
             key = '%s-%s' % (dt.month, dt.day)
             year = str(dt.year)
             member = self.get_member(member_id)

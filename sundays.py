@@ -1,6 +1,9 @@
 import calendar
 import datetime
 
+def is_sunday(dt):
+    return dt.weekday() == 6
+
 def get_sundays_from_month(month, month_index):
     days = []
 
