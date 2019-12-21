@@ -90,7 +90,11 @@ def rename_lower(path):
 
 def populate(d, db, args):
     fs = gridfs.GridFS(db.db)
+
     for person in d:
+        print('saving person...', end=' ')
+        member_id = db.insert('members', person)
+
         encoding_saved = False
         print(person['nome'])
         obs = person['fotos'].pop('obs')
@@ -104,13 +108,16 @@ def populate(d, db, args):
                         args.path, person['fotos'][key].lower())
 
                     foto = Image.open(fpath)
-                    foto = Rotate.rotate(foto)
-                    encodings = face_recognition.face_encodings(np.array(foto))[
-                        0]
+                    try:
+                        foto = Rotate.rotate(foto)
+                    except Exception as e:
+                        pass
+                    encodings = face_recognition.face_encodings(np.array(foto))[0]
 
                     print('saving %s: %s...' % (key, fpath), end=' ')
                     encoding = {
                         'nome': person['nome'],
+                        'member_id': member_id,
                         'foto': encodings.tolist(),
                         'obs': obs
                     }
@@ -129,13 +136,8 @@ def populate(d, db, args):
                     print(e)
                     continue
 
-        if encoding_saved:
-            print('saving person...', end=' ')
-            member_id = db.insert('members', person)
-            print('done\n')
-        else:
-            print('no encodings saved. skipping...\n')
-
+        print('updating person...')
+        db.get_collection('members').replace_one({'_id': member_id}, person)
 
 def createArgsParser():
     parser = argparse.ArgumentParser()
