@@ -23,11 +23,37 @@
 
     <div class="p-3 mb-2 bg-light text-dark">
         <img src="data:image/jpeg;base64,{{ image }}">
+        <p></p>
         <ul class="list-group">
             <li class="list-group-item">Nome: {{ person['nome'] }}</li>
             <li class="list-group-item">Ministerio: {{ person['ministerio'] }}</li>
             <li class="list-group-item">Sexo: {{ person['sexo'] }}</li>
             <li class="list-group-item">Data de nascimento: {{ person['data_nascimento'] }}</li>
+            <li class="list-group-item">Membro ativo: {{ is_active }}</li>
+            <p></p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% for day in days %}
+                <div class="form-group">
+                    <label for="day">{{ day }}</label>
+                    <select class="form-control" id="day" name="{{ day }}">
+                        <option value="Ausente" {% if days[day] == 'Ausente' %} selected {% endif %}>Ausente
+                        </option>
+                        <option value="Atrasado" {% if days[day] == 'Atrasado' %} selected {% endif %}>Atrasado
+                        </option>
+                        <option value="Presente" {% if days[day] == 'Presente' %} selected {% endif %}>Presente
+                        </option>
+                    </select>
+                </div>
+                {% endfor %}
+                <input type="submit" class="btn btn-outline-success" value="Gravar">
+                <a href="">
+                    <input type="button" class="btn btn-outline-danger" value="Cancelar">
+                </a>
+                <a href="/management">
+                    <input type="button" class="btn btn-outline-secondary float-right" value="Voltar">
+                </a>
+            </form>
         </ul>
     </div>
 
