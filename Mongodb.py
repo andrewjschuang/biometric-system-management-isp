@@ -129,4 +129,4 @@ class Mongodb:
                 member['calendar'][year] = { key: 'Presente' }
             else:
                 member['calendar'][year][key] = 'Presente'
-        return self.update_calendar(member, member['calendar'])
+            self.update_calendar(member, member['calendar'])
