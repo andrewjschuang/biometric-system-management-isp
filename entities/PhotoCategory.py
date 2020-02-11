@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PhotoCategory(Enum):
 
     FRONT = 1

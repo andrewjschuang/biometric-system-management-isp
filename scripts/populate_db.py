@@ -9,20 +9,20 @@ import os
 import io
 import re
 
-from Mongodb import Mongodb
-import gridfs
+from database.Mongodb import Mongodb
+from gridfs import GridFS
 
-from Person import Person
-from Gender import Gender
-from Calendar import Calendar
-from Day import Day
-from Collections import Collections
-from Photo import Photo
-from PhotoCategory import PhotoCategory
-from PhotoMode import PhotoMode
-from Name import Name
-from Ministry import Ministry
-from Encoding import Encoding
+from entities.Person import Person
+from entities.Gender import Gender
+from entities.Calendar import Calendar
+from entities.Day import Day
+from entities.Collections import Collections
+from entities.Photo import Photo
+from entities.PhotoCategory import PhotoCategory
+from entities.PhotoMode import PhotoMode
+from entities.Name import Name
+from entities.Ministry import Ministry
+from entities.Encoding import Encoding
 
 
 class Workbook:
@@ -131,7 +131,7 @@ def rename_lower(path):
 
 
 def populate(d, db, args):
-    fs = gridfs.GridFS(db.db)
+    fs = GridFS(db.db)
 
     for person in d:
         print('saving person...', end=' ')

@@ -1,9 +1,9 @@
+import datetime
 from pymongo import MongoClient
+from gridfs import GridFS
 from bson.objectid import ObjectId
 from config import mongodb, active_rate
-import gridfs
-import datetime
-import sundays
+import database.sundays as sundays
 
 
 class Mongodb:
@@ -12,7 +12,7 @@ class Mongodb:
         self.port = port
         self.client = MongoClient(host, port)
         self.db = self.client[db]
-        self.fs = gridfs.GridFS(self.db)
+        self.fs = GridFS(self.db)
 
     # gets the object referenced by _id
     def getObjectIdDocument(self, _id):

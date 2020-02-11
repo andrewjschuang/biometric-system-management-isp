@@ -1,8 +1,7 @@
-from pprint import pprint
 from PIL import Image
 from bson.objectid import ObjectId
+from database.Mongodb import Mongodb
 
-from Mongodb import Mongodb
 
 db = Mongodb(db='bmsisp')
 

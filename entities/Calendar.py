@@ -1,7 +1,7 @@
 from datetime import datetime
-from Presence import Presence
-from Sunday import Sunday
 from config import active_rate
+from entities.Presence import Presence
+from entities.Sunday import Sunday
 
 
 class Calendar:

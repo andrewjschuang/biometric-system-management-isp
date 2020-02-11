@@ -3,22 +3,21 @@ from base64 import b64encode
 import io
 import cv2
 import json
+import time
 import datetime
 import threading
 import numpy as np
 from PIL import Image
 
-import Recognition
+from recognition.Recognition import Recognition
 import config
-import time
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
-recognition = Recognition.Recognition()
+recognition = Recognition()
 
 photo_labels = ['central', 'direita', 'esquerda']
-
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

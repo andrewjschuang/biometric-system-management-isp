@@ -1,6 +1,6 @@
-from Day import Day
 from calendar import Calendar
-from Presence import Presence
+from entities.Day import Day
+from entities.Presence import Presence
 
 
 class Sunday(Day):

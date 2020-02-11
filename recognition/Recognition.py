@@ -5,7 +5,7 @@ import datetime
 import signal
 import time
 
-from Mongodb import Mongodb
+from database.Mongodb import Mongodb
 import face_recognition
 import numpy as np
 import cv2
