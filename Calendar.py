@@ -23,3 +23,9 @@ class Calendar:
             if day == Presence.Present:
                 count += 1
         return count
+
+    def to_dict(self):
+        return {
+            'sundays': [x.to_dict() for x in self.sundays],
+            'active': self.active
+        }

@@ -22,6 +22,7 @@ from PhotoCategory import PhotoCategory
 from PhotoMode import PhotoMode
 from Name import Name
 from Ministry import Ministry
+from Encoding import Encoding
 
 
 class Workbook:
@@ -85,7 +86,6 @@ class Workbook:
                 PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, 0, element[8].lower() + '-fr.jpg'),
                 PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, 0, element[8].lower() + '-le.jpg'),
                 PhotoCategory.RIGHT: Photo(PhotoCategory.RIGHT, PhotoMode.RAW, 0, element[8].lower() + '-ld.jpg'),
-                'obs': element[9] if len(element) == 10 else None
             }
 
             encodings = {
@@ -135,11 +135,10 @@ def populate(d, db, args):
 
     for person in d:
         print('saving person...', end=' ')
-        member_id = db.insert(Collections.MEMBERS.name, person.__dict__)
+        member_id = db.insert(Collections.MEMBERS.name, person.to_dict())
 
         encoding_saved = False
         print(person.name)
-        obs = person.photos.pop('obs')
 
         for key in person.photos.keys():
             if person.photos[key] is None:
@@ -147,7 +146,7 @@ def populate(d, db, args):
             else:
                 try:
                     fpath = os.path.join(
-                        args.path, person.photos[key].lower())
+                        args.path, person.photos[key].data.lower())
 
                     foto = Image.open(fpath)
                     try:
@@ -161,7 +160,7 @@ def populate(d, db, args):
                     encoding = Encoding(
                         member_id, person.name, encodings.tolist())
 
-                    encoding_id = db.insert(Collections.ENCODINGS.name, encoding)
+                    encoding_id = db.insert(Collections.ENCODINGS.name, encoding.to_dict())
                     person.photos[key] = encoding_id
 
                     imgByteArr = io.BytesIO()
@@ -177,7 +176,7 @@ def populate(d, db, args):
 
         print('updating person...')
         db.get_collection(Collections.MEMBERS.name).replace_one(
-            {'_id': member_id}, person)
+            {'_id': member_id}, person.to_dict())
 
 
 def createArgsParser():

@@ -10,3 +10,10 @@ class Day:
 
     def __eq__(self, day):
         return self.year == day.year and self.month == day.month and self.day == day.day
+
+    def to_dict(self):
+        return {
+            'year': self.year,
+            'month': self.month,
+            'day': self.day
+        }
