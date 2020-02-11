@@ -7,9 +7,22 @@ import openpyxl
 import argparse
 import os
 import io
+import re
 
 from Mongodb import Mongodb
 import gridfs
+
+from Person import Person
+from Gender import Gender
+from Calendar import Calendar
+from Day import Day
+from Collections import Collections
+from Photo import Photo
+from PhotoCategory import PhotoCategory
+from PhotoMode import PhotoMode
+from Name import Name
+from Ministry import Ministry
+from Encoding import Encoding
 
 
 class Workbook:
@@ -34,28 +47,57 @@ class Workbook:
 
     def dict_of_people(self, l):
         d = []
+
         for element in l:
-            d.append({
-                'nome': element[0],
-                'sexo': element[1],
-                'data_nascimento': element[2],
-                'telefone': element[3],
-                'email': element[4],
-                'ministerio': element[5],
-                'membro_isp': element[6],
-                'sigi': element[7],
-                'fotos': {
-                    'central': element[8].lower() + '-fr.jpg',
-                    'direita': element[8].lower() + '-ld.jpg',
-                    'esquerda': element[8].lower() + '-le.jpg',
-                    'obs': element[9] if len(element) == 10 else None
-                },
-                'images': {
-                    'central': element[8].lower() + '-fr.jpg',
-                    'direita': element[8].lower() + '-ld.jpg',
-                    'esquerda': element[8].lower() + '-le.jpg',
-                }
-            })
+            name = element[0].split()
+            last_name = name[-1]
+            first_name = name[0]
+            middle_name = ' '.join(name[1:-1])
+            name = Name(last_name, first_name, middle_name)
+
+            gender = Gender.FEMALE if element[1] == 'F' else Gender.MALE
+
+            day = element[2]
+            if day is None:
+                birth_date = None
+            else:
+                birth_date = Day(day.year, day.month, day.day)
+
+            if element[3] is None:
+                phone_number = None
+            elif type(element[3]) == float:
+                phone_number = str(element[3])[:-2]
+            elif type(element[3]) == int:
+                phone_number = str(element[3])
+            else:
+                phone_number = re.compile('[\W_]+').sub('', element[3])
+
+            email = element[4]
+
+            ministry = [Ministry[x.strip().upper()] for x in element[5].split(',')]
+
+            member = bool(element[6])
+
+            sigi = element[7]
+
+            calendar = Calendar()
+
+            photos = {
+                PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, 0, element[8].lower() + '-fr.jpg'),
+                PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, 0, element[8].lower() + '-le.jpg'),
+                PhotoCategory.RIGHT: Photo(PhotoCategory.RIGHT, PhotoMode.RAW, 0, element[8].lower() + '-ld.jpg'),
+            }
+
+            encodings = {
+                PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, 0, element[8].lower() + '-fr.jpg'),
+                PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, 0, element[8].lower() + '-le.jpg'),
+                PhotoCategory.RIGHT: Photo(
+                    PhotoCategory.RIGHT, PhotoMode.RAW, 0, element[8].lower() + '-ld.jpg')
+            }
+
+            d.append(Person(name, birth_date, email, gender, phone_number,
+                            member, ministry, sigi, calendar, photos, encodings))
+
         return d
 
 
@@ -93,42 +135,38 @@ def populate(d, db, args):
 
     for person in d:
         print('saving person...', end=' ')
-        member_id = db.insert('members', person)
+        member_id = db.insert(Collections.MEMBERS.name, person.to_dict())
 
         encoding_saved = False
-        print(person['nome'])
-        obs = person['fotos'].pop('obs')
+        print(person.name)
 
-        for key in person['fotos'].keys():
-            if person['fotos'][key] is None:
+        for key in person.photos.keys():
+            if person.photos[key] is None:
                 continue
             else:
                 try:
                     fpath = os.path.join(
-                        args.path, person['fotos'][key].lower())
+                        args.path, person.photos[key].data.lower())
 
                     foto = Image.open(fpath)
                     try:
                         foto = Rotate.rotate(foto)
                     except Exception as e:
                         pass
-                    encodings = face_recognition.face_encodings(np.array(foto))[0]
+                    encodings = face_recognition.face_encodings(np.array(foto))[
+                        0]
 
                     print('saving %s: %s...' % (key, fpath), end=' ')
-                    encoding = {
-                        'nome': person['nome'],
-                        'member_id': member_id,
-                        'foto': encodings.tolist(),
-                        'obs': obs
-                    }
+                    encoding = Encoding(
+                        member_id, person.name, encodings.tolist())
 
-                    encoding_id = db.insert('encodings', encoding)
-                    person['fotos'][key] = encoding_id
+                    encoding_id = db.insert(Collections.ENCODINGS.name, encoding.to_dict())
+                    person.photos[key] = encoding_id
 
                     imgByteArr = io.BytesIO()
                     foto.save(imgByteArr, format='JPEG')
                     image_id = fs.put(imgByteArr.getvalue())
-                    person['images'][key] = image_id
+                    person.encodings[key] = image_id
 
                     encoding_saved = True
                     print('done')
@@ -137,7 +175,9 @@ def populate(d, db, args):
                     continue
 
         print('updating person...')
-        db.get_collection('members').replace_one({'_id': member_id}, person)
+        db.get_collection(Collections.MEMBERS.name).replace_one(
+            {'_id': member_id}, person.to_dict())
+
 
 def createArgsParser():
     parser = argparse.ArgumentParser()
@@ -158,7 +198,7 @@ if __name__ == '__main__':
     d = wb.dict_of_people(wb.list_of_people())
 
     db = Mongodb(db=args.database)
-    db.delete_all('encodings', True)
-    db.delete_all('members', True)
+    db.delete_all(Collections.ENCODINGS.name, True)
+    db.delete_all(Collections.MEMBERS.name, True)
 
     populate(d, db, args)
