@@ -1,3 +1,11 @@
+from entities.Name import Name
+from entities.Day import Day
+from entities.Ministry import Ministry
+from entities.Calendar import Calendar
+from entities.Encoding import Encoding
+from entities.PhotoCategory import PhotoCategory
+
+
 class Person:
 
     def __init__(self, name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, photos, encodings):
@@ -12,6 +20,10 @@ class Person:
         self.calendar = calendar
         self.photos = photos
         self.encodings = encodings
+
+    def set_id(self, _id):
+        self._id = _id
+        return self
 
     def is_active(self):
         return self.calendar.is_active()
@@ -48,3 +60,8 @@ class Person:
             'photos': { x.name : photos[x] for x in photos },
             'encodings': { x.name : encodings[x] for x in encodings }
         }
+
+    @staticmethod
+    def from_dict(person):
+        return Person(Name.from_dict(person['name']), Day.from_dict(person['birth_date']), person['email'], person['gender'], person['phone_number'],
+                      person['member'], [Ministry[x] for x in person['ministry']], person['sigi'], Calendar.from_dict(person['calendar']), person['photos'], person['encodings'])

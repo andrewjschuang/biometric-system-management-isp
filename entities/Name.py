@@ -6,6 +6,11 @@ class Name:
         self.middle_name = middle_name
 
     def __str__(self):
+        if self.middle_name is None or self.middle_name == '':
+            return '%s %s' % (self.first_name, self.last_name)
+        return '%s %s %s' % (self.first_name, self.middle_name, self.last_name)
+
+    def __repr__(self):
         if self.middle_name == '':
             return 'Name(first_name=%s, last_name=%s)' % (self.first_name, self.last_name)
         return 'Name(first_name=%s, middle_name=%s, last_name=%s)' % (self.first_name, self.middle_name, self.last_name)
@@ -22,3 +27,7 @@ class Name:
                 'middle_name': self.middle_name,
                 'last_name': self.last_name
             }
+
+    @staticmethod
+    def from_dict(name):
+        return Name(name['last_name'], name['first_name'], name.get('middle_name'))

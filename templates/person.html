@@ -17,7 +17,8 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Management</li>
+            <li class="breadcrumb-item"><a href="/management">Management</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Manage</li>
         </ol>
     </nav>
 
@@ -25,23 +26,23 @@
         <img src="data:image/jpeg;base64,{{ image }}">
         <p></p>
         <ul class="list-group">
-            <li class="list-group-item">Nome: {{ person['nome'] }}</li>
-            <li class="list-group-item">Ministerio: {{ person['ministerio'] }}</li>
-            <li class="list-group-item">Sexo: {{ person['sexo'] }}</li>
-            <li class="list-group-item">Data de nascimento: {{ person['data_nascimento'] }}</li>
-            <li class="list-group-item">Membro ativo: {{ is_active }}</li>
+            <li class="list-group-item">Nome: {{ person.name }}</li>
+            <li class="list-group-item">Ministerio: {{ person.ministry }}</li>
+            <li class="list-group-item">Sexo: {{ person.gender }}</li>
+            <li class="list-group-item">Data de nascimento: {{ person.birth_date }}</li>
+            <li class="list-group-item">Membro ativo: {{ person.calendar.is_active() }}</li>
             <p></p>
 
             <form method="post" enctype="multipart/form-data">
-                {% for day in days %}
+                {% for day in person.calendar.sundays %}
                 <div class="form-group">
                     <label for="day">{{ day }}</label>
                     <select class="form-control" id="day" name="{{ day }}">
-                        <option value="Ausente" {% if days[day] == 'Ausente' %} selected {% endif %}>Ausente
+                        <option value="ABSENT" {% if day.presence.name == 'ABSENT' %} selected {% endif %}>Ausente
                         </option>
-                        <option value="Atrasado" {% if days[day] == 'Atrasado' %} selected {% endif %}>Atrasado
+                        <option value="LATE" {% if day.presence.name == 'LATE' %} selected {% endif %}>Atrasado
                         </option>
-                        <option value="Presente" {% if days[day] == 'Presente' %} selected {% endif %}>Presente
+                        <option value="PRESENT" {% if day.presence.name == 'PRESENT' %} selected {% endif %}>Presente
                         </option>
                     </select>
                 </div>

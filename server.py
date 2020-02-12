@@ -9,8 +9,12 @@ import threading
 import numpy as np
 from PIL import Image
 
-from recognition.Recognition import Recognition
 import config
+from recognition.Recognition import Recognition
+from entities.Person import Person
+from entities.PhotoCategory import PhotoCategory
+from entities.Calendar import Calendar
+from entities.Sunday import Sunday
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -21,7 +25,6 @@ photo_labels = ['central', 'direita', 'esquerda']
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 def image_validation(request, filename='file'):
     if type(filename) == list:
@@ -42,7 +45,6 @@ def image_validation(request, filename='file'):
 
     return {'error': False}
 
-
 def get_image(image):
     in_memory_file = io.BytesIO()
     image.save(in_memory_file)
@@ -51,11 +53,17 @@ def get_image(image):
     img = cv2.imdecode(data, color_image_flag)
     return img
 
+def get_person_image_from_bytes(bytes, resize):
+    image = Image.open(io.BytesIO(bytes))
+    imgByteArr = io.BytesIO()
+    new_size = (int(image.size[0]*resize), int(image.size[0]*resize))
+    image.thumbnail(new_size, Image.ANTIALIAS)
+    image.save(imgByteArr, format='JPEG')
+    return b64encode(imgByteArr.getvalue()).decode('utf-8')
 
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
-
 
 @app.route('/recognize', methods=['GET', 'POST'])
 def recognize():
@@ -78,7 +86,6 @@ def recognize():
 
     return render_template('recognize.html')
 
-
 @app.route('/api', methods=['POST'])
 def api():
     result = image_validation(request)
@@ -96,7 +103,6 @@ def api():
     }
 
     return json.dumps(response)
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -149,7 +155,6 @@ def register():
 
     return render_template('register.html', labels=photo_labels)
 
-
 @app.route('/start', methods=['GET'])
 def start():
     if not recognition.run:
@@ -157,42 +162,34 @@ def start():
         threading.Thread(target=recognition.start).start()
     return render_template('start.html')
 
-
 @app.route('/stop', methods=['GET'])
 def stop():
     recognition.signal_handler()
     return render_template('stop.html')
 
-
 @app.route('/management', methods=['GET'])
 def management():
-    persons = recognition.get_all_members()
+    persons = recognition.db.get_all_members()
     for person in persons:
         try:
-            bytes = recognition.get_image(person['images']['central'])
-            image = get_person_image_from_bytes(bytes, 0.05)
-            person['images']['central'] = image
+            image_bytes = recognition.db.get_image(person.encodings[PhotoCategory.FRONT.name])
+            person.encodings[PhotoCategory.FRONT.name] = get_person_image_from_bytes(image_bytes, 0.05)
         except Exception as e:
-            person['images']['central'] = b''
+            person.encodings[PhotoCategory.FRONT.name] = b''
     return render_template('management.html', persons=persons)
 
-
-@app.route('/management/<id>', methods=['GET', 'POST'])
-def get(id):
-    person = recognition.get_member(id)
-    if 'calendar' not in person:
-        person['calendar'] = recognition.db.init_calendar(person)
-    bytes = recognition.get_image(person['images']['central'])
-    image = get_person_image_from_bytes(bytes, 0.15)
+@app.route('/management/<_id>', methods=['GET', 'POST'])
+def get(_id):
+    person = recognition.db.get_member_by_id(_id)
+    image_bytes = recognition.db.get_image(person.encodings[PhotoCategory.FRONT.name])
+    image = get_person_image_from_bytes(image_bytes, 0.15)
     year = str(datetime.datetime.now().year)
 
     if request.method == 'POST':
-        person['calendar'][year] = { key : request.form[key] for key in request.form }
-        recognition.db.update_calendar(person, person['calendar'])
+        person.calendar.sundays = [Sunday.from_str(key, request.form[key]) for key in request.form]
+        recognition.db.update_member_calendar(person)
 
-    is_active = recognition.db.is_active_by_document(person['calendar'][year])
-    return render_template('person.html', person=person, image=image, days=person['calendar'][year], is_active=is_active)
-
+    return render_template('person.html', person=person, image=image)
 
 @app.route('/configure', methods=['GET'])
 def configure():
@@ -202,16 +199,6 @@ def configure():
 
     error = recognition.configure(video_source, display_image, tolerance)
     return render_template('updated.html', error=error)
-
-
-def get_person_image_from_bytes(bytes, resize):
-    image = Image.open(io.BytesIO(bytes))
-    imgByteArr = io.BytesIO()
-    new_size = (int(image.size[0]*resize), int(image.size[0]*resize))
-    image.thumbnail(new_size, Image.ANTIALIAS)
-    image.save(imgByteArr, format='JPEG')
-    return b64encode(imgByteArr.getvalue()).decode('utf-8')
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

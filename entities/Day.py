@@ -6,6 +6,9 @@ class Day:
         self.day = day
 
     def __str__(self):
+        return '%s/%s/%s' % (self.year, self.month, self.day)
+
+    def __repr__(self):
         return 'Day(year=%s, month=%s, day=%s)' % (self.year, self.month, self.day)
 
     def __eq__(self, day):
@@ -17,3 +20,7 @@ class Day:
             'month': self.month,
             'day': self.day
         }
+
+    @staticmethod
+    def from_dict(day):
+        return Day(day['year'], day['month'], day['day'])
