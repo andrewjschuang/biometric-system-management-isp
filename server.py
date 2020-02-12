@@ -9,8 +9,10 @@ import threading
 import numpy as np
 from PIL import Image
 
-from recognition.Recognition import Recognition
 import config
+from recognition.Recognition import Recognition
+from entities.Person import Person
+from entities.PhotoCategory import PhotoCategory
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -166,14 +168,14 @@ def stop():
 
 @app.route('/management', methods=['GET'])
 def management():
-    persons = recognition.get_all_members()
-    for person in persons:
+    persons = recognition.db.get_all_members()
+    for p in persons:
         try:
-            bytes = recognition.get_image(person['images']['central'])
-            image = get_person_image_from_bytes(bytes, 0.05)
-            person['images']['central'] = image
+            person = Person.from_dict(p)
+            image_bytes = recognition.db.get_image(person.encodings[PhotoCategory.FRONT.name])
+            person.encodings[PhotoCategory.FRONT.name] = get_person_image_from_bytes(image_bytes, 0.05)
         except Exception as e:
-            person['images']['central'] = b''
+            person.encodings[PhotoCategory.FRONT.name] = b''
     return render_template('management.html', persons=persons)
 
 
