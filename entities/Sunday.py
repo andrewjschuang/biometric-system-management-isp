@@ -21,6 +21,10 @@ class Sunday(Day):
         }
 
     @staticmethod
+    def from_dict(day):
+        return Sunday(day['year'], day['month'], day['day'], Presence[day['presence']])
+
+    @staticmethod
     def is_sunday(dt):
         return dt.weekday() == 6
 

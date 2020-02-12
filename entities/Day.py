@@ -17,3 +17,7 @@ class Day:
             'month': self.month,
             'day': self.day
         }
+
+    @staticmethod
+    def from_dict(day):
+        return Day(day['year'], day['month'], day['day'])

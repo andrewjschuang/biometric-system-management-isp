@@ -9,7 +9,7 @@ class Calendar:
     def __init__(self, sundays=None, year=datetime.now().year):
         self.sundays = sundays if sundays is not None else Sunday.get_sundays_from_year(
             year)
-        self.active = False if sundays is None else is_active()
+        self.active = False if sundays is None else self.is_active()
 
     def is_active(self):
         size = len(self.sundays)
@@ -20,7 +20,7 @@ class Calendar:
     def presence_count(self):
         count = 0
         for day in self.sundays:
-            if day == Presence.Present:
+            if day.presence == Presence.PRESENT:
                 count += 1
         return count
 
@@ -29,3 +29,7 @@ class Calendar:
             'sundays': [x.to_dict() for x in self.sundays],
             'active': self.active
         }
+
+    @staticmethod
+    def from_dict(calendar):
+        return Calendar([Sunday.from_dict(x) for x in calendar['sundays']])

@@ -22,3 +22,7 @@ class Name:
                 'middle_name': self.middle_name,
                 'last_name': self.last_name
             }
+
+    @staticmethod
+    def from_dict(name):
+        return Name(name['last_name'], name['first_name'], name.get('middle_name'))
