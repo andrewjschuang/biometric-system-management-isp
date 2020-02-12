@@ -9,7 +9,7 @@ class Sunday(Day):
         super(Sunday, self).__init__(year, month, day)
         self.presence = presence
 
-    def __str__(self):
+    def __repr__(self):
         return 'Sunday(year=%s, month=%s, day=%s, presence=%s)' % (self.year, self.month, self.day, self.presence)
 
     def to_dict(self):
@@ -43,3 +43,8 @@ class Sunday(Day):
                 month_index += 1
 
         return days
+
+    @staticmethod
+    def from_str(sunday, presence):
+        sunday = sunday.split('/')
+        return Sunday(int(sunday[0]), int(sunday[1]), int(sunday[2]), Presence[presence])

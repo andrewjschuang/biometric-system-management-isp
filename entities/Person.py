@@ -21,6 +21,10 @@ class Person:
         self.photos = photos
         self.encodings = encodings
 
+    def set_id(self, _id):
+        self._id = _id
+        return self
+
     def is_active(self):
         return self.calendar.is_active()
 

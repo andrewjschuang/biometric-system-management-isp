@@ -3,8 +3,11 @@ from pymongo import MongoClient
 from gridfs import GridFS
 from bson.objectid import ObjectId
 from config import mongodb, active_rate
+
 import database.sundays as sundays
+
 from entities.Collections import Collections
+from entities.Person import Person
 
 
 class Mongodb:
@@ -27,12 +30,13 @@ class Mongodb:
     def get_all_documents_in_collection(self, collection_name, db=None):
         return list(self.__get_collection(collection_name, db).find())
 
+    # gets all members and initializes to a list of Persons
     def get_all_members(self):
-        return self.get_all_documents_in_collection(Collections.MEMBERS.name)
+        return [initialize_person(x) for x in self.get_all_documents_in_collection(Collections.MEMBERS.name)]
 
     # gets the member by id
     def get_member_by_id(self, _id):
-        return list(self.find(Collections.MEMBERS.name, _id))[0]
+        return initialize_person(self.find(Collections.MEMBERS.name, _id).next())
 
     # gets the image in grid fs by id
     def get_image(self, _id):
@@ -69,8 +73,8 @@ class Mongodb:
         else:
             return collection.find(document)
 
-    def update(self, collection_name, _id, field, document, operator, upsert=True):
-        collection = self.__get_collection(collection_name, db)
+    def __update(self, collection_name, _id, field, document, operator, upsert=True):
+        collection = self.__get_collection(collection_name)
         return collection.update({'_id': _id}, {operator: {field: document}}, upsert)
 
     # calendar operations
@@ -87,9 +91,8 @@ class Mongodb:
         self.update(collection, member['_id'], 'calendar', member['calendar'], '$set')
         return member['calendar']
 
-    def update_calendar(self, member, document):
-        collection = self.get_collection('members')
-        return self.update(collection, member['_id'], 'calendar', document, '$set')
+    def update_member_calendar(self, member):
+        return self.__update(Collections.MEMBERS.name, member._id, 'calendar', member.calendar.to_dict(), '$set')
 
     def get_total(self, days):
         return len(days)
@@ -123,3 +126,6 @@ class Mongodb:
             else:
                 member['calendar'][year][key] = 'Presente'
             self.update_calendar(member, member['calendar'])
+
+def initialize_person(person):
+    return Person.from_dict(person).set_id(person['_id'])

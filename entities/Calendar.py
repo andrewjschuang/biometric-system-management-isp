@@ -10,6 +10,7 @@ class Calendar:
         self.sundays = sundays if sundays is not None else Sunday.get_sundays_from_year(
             year)
         self.active = False if sundays is None else self.is_active()
+        self.year = year
 
     def is_active(self):
         size = len(self.sundays)
