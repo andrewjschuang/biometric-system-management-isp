@@ -4,8 +4,8 @@ from gridfs import GridFS
 from bson.objectid import ObjectId
 from config import mongodb, active_rate
 
-import database.sundays as sundays
 
+from entities.Sunday import Sunday
 from entities.Collections import Collections
 from entities.Person import Person
 
@@ -79,18 +79,6 @@ class Mongodb:
 
     # calendar operations
 
-    def init_calendar(self, member, force=False):
-        collection = self.get_collection('members')
-        year = str(datetime.datetime.now().year)
-        if 'calendar' not in member:
-            member['calendar'] = {}
-        if force or (year not in member['calendar']):
-            member['calendar'][year] = {}
-            for day in sundays.get_sundays_from_year(int(year)):
-                member['calendar'][year][day] = 'Ausente'
-        self.update(collection, member['_id'], 'calendar', member['calendar'], '$set')
-        return member['calendar']
-
     def update_member_calendar(self, member):
         return self.__update(Collections.MEMBERS.name, member._id, 'calendar', member.calendar.to_dict(), '$set')
 
@@ -115,7 +103,7 @@ class Mongodb:
     def event_occured(self, timestamp, member_id, member_name):
         collection = self.get_collection('members')
         dt = datetime.datetime.fromtimestamp(timestamp).replace(microsecond=0)
-        if sundays.is_sunday(dt):
+        if Sunday.is_sunday(dt):
             key = '%s-%s' % (dt.month, dt.day)
             year = str(dt.year)
             member = self.get_member(member_id)
