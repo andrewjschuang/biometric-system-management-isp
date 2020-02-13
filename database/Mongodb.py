@@ -8,7 +8,7 @@ from config import mongodb, active_rate
 from entities.Sunday import Sunday
 from entities.Collections import Collections
 from entities.Person import Person
-
+from entities.Encoding import Encoding
 
 class Mongodb:
     def __init__(self, host=mongodb['host'], port=mongodb['port'], db=mongodb['db']):
@@ -37,6 +37,10 @@ class Mongodb:
     # gets the member by id
     def get_member_by_id(self, _id):
         return initialize_person(self.find(Collections.MEMBERS.name, _id).next())
+
+    def get_all_encodings(self):
+        encodings = self.find(Collections.ENCODINGS.name, {})
+        return [Encoding.from_dict(encoding) for encoding in encodings]
 
     # gets the image in grid fs by id
     def get_image(self, _id):
