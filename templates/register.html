@@ -24,24 +24,75 @@
     <div class="p-3 mb-2 bg-light text-dark">
         <h2>Fill in information to register to facial recognition</h2>
 
-        <form method=post enctype="multipart/form-data">
+        <form method=post enctype="multipart/form-data" id=registerform>
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1">Nome</span>
                 </div>
-                <input type="text" name="nome" class="form-control" placeholder="" aria-label=""
+                <input type="text" name="name" class="form-control" placeholder="" aria-label=""
                     aria-describedby="basic-addon1" required>
             </div>
 
-            {% for s in ['Data de nascimento', 'Sexo', 'Telefone', 'Email', 'Zona', 'Ministerio', 'Membro ISP', 'Ano de membresia', 'SIGI'] %}
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">{{ s }}</span>
-                    </div>
-                    <input type="text" name="{{ s.lower() }}" class="form-control" placeholder="" aria-label=""
-                        aria-describedby="basic-addon1">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Data de nascimento</span>
                 </div>
-            {% endfor %}
+                <input type="date" name="birth_date" class="form-control" placeholder="" aria-label=""
+                    aria-describedby="basic-addon1" required>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Email</span>
+                </div>
+                <input type="email" name="email" class="form-control" placeholder="" aria-label=""
+                    aria-describedby="basic-addon1" required>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Sexo</span>
+                </div>
+                <select id="gender" name="gender" form="registerform">
+                    <option value="MALE">Masculino</option>
+                    <option value="FEMALE">Feminino</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Telefone</span>
+                </div>
+                <input type="text" name="phone_number" class="form-control" placeholder="" aria-label=""
+                    aria-describedby="basic-addon1" required>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Membro da ISP</span>
+                </div>
+                <input type="checkbox" name="member" value="true" class="form-control" placeholder="" aria-label=""
+                    aria-describedby="basic-addon1">
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Ministério</span>
+                </div>
+                <select id="ministry" name="ministry" form="registerform">
+                    <option value="PT">Português</option>
+                    <option value="MD">Mandarim</option>
+                    <option value="TW">Taiwanês</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Sigi</span>
+                </div>
+                <input type="number" name="sigi" class="form-control" placeholder="" aria-label=""
+                    aria-describedby="basic-addon1" required>
+            </div>
 
             <h2>Photo upload</h2>
 

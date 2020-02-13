@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, url_for, render_template
 from base64 import b64encode
 import io
+import re
 import cv2
 import json
 import time
@@ -14,14 +15,24 @@ from recognition.Recognition import Recognition
 from entities.Person import Person
 from entities.PhotoCategory import PhotoCategory
 from entities.Calendar import Calendar
+from entities.Day import Day
 from entities.Sunday import Sunday
+from entities.Gender import Gender
+from entities.Ministry import Ministry
+from entities.Encoding import Encoding
+from entities.Collections import Collections
+from entities.Name import Name
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
 recognition = Recognition()
 
-photo_labels = ['central', 'direita', 'esquerda']
+photo_labels = [
+    PhotoCategory.FRONT.name,
+    PhotoCategory.LEFT.name,
+    PhotoCategory.RIGHT.name
+]
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -112,46 +123,48 @@ def register():
         if result['error']:
             return render_template('error.html', error=result['message'])
 
-        member = {key: request.form[key]
-                  for key in request.form if request.form[key]}
-        member['data_foto'] = datetime.datetime.now().isoformat()
-        member['fotos'] = {}
-        member['images'] = {}
-        member_id = recognition.db.insert('members', member)
+        name = Name.from_str(request.form.get('name'))
+        birth_date = Day.from_str(request.form.get('birth_date'))
+        gender = Gender[request.form.get('gender')]
+        email = request.form.get('email')
+        phone_number = phone_number = re.compile('[\W_]+').sub('', request.form.get('phone_number'))
+        member = bool(request.form.get('member'))
+        ministry = [Ministry[request.form.get('ministry')]]
+        sigi = int(request.form.get('sigi'))
+        calendar = Calendar()
+
+        person = Person(name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, {}, {})
+
+        member_id = recognition.db.insert(Collections.MEMBERS.name, person.to_dict())
 
         images = request.files
         for image_label in images:
             try:
                 image = get_image(images[image_label])
-                face_locations, face_encodings = recognition.get_faces_from_picture(
-                    image)
+                face_locations, face_encodings = recognition.get_faces_from_picture(image)
 
                 if len(face_encodings) == 0:
                     return render_template('error.html', error='no face found')
                 if len(face_encodings) > 1:
                     return render_template('error.html', error='more than one face found')
 
-                encoding = {
-                    'nome': member['nome'],
-                    'member_id': member_id,
-                    'foto': face_encodings[0].tolist(),
-                    'obs': None
-                }
-                encoding_id = recognition.db.insert('encodings', encoding)
-                member['fotos'][image_label] = encoding_id
+                encoding = Encoding(member_id, person.name, face_encodings[0].tolist())
+                encoding_id = recognition.db.insert(Collections.ENCODINGS.name, encoding.to_dict())
 
-                image = Image.open(images[image_label])
                 imgByteArr = io.BytesIO()
-                image.save(imgByteArr, format='JPEG')
+                Image.open(images[image_label]).save(imgByteArr, format='JPEG')
                 image_id = recognition.db.fs.put(imgByteArr.getvalue())
-                member['images'][image_label] = image_id
+
+                # may be switched
+                person.encodings[PhotoCategory[image_label]] = image_id
+                person.photos[PhotoCategory[image_label]] = encoding_id
             except Exception as e:
                 print('failed to retrieve image: %s' % image_label)
 
-        recognition.db.get_collection('members').replace_one({'_id': member_id}, member)
+        recognition.db.replace_member(Collections.MEMBERS.name, member_id, person.to_dict())
         recognition.get_known_encodings()
 
-        return render_template('registered.html', name=member['nome'])
+        return render_template('registered.html', name=person.name)
 
     return render_template('register.html', labels=photo_labels)
 
