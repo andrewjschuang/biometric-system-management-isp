@@ -1,7 +1,7 @@
+from datetime import date
 from calendar import Calendar
 from entities.Day import Day
 from entities.Presence import Presence
-
 
 class Sunday(Day):
 
@@ -26,6 +26,8 @@ class Sunday(Day):
 
     @staticmethod
     def is_sunday(dt):
+        if type(dt) == Day:
+            return date(year=dt.year, month=dt.month, day=dt.day).weekday() == 6
         return dt.weekday() == 6
 
     @staticmethod

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 class Day:
 
     def __init__(self, year, month, day):
@@ -20,6 +22,11 @@ class Day:
             'month': self.month,
             'day': self.day
         }
+
+    @staticmethod
+    def today():
+        today = datetime.today()
+        return Day(today.year, today.month, today.day)
 
     @staticmethod
     def from_dict(day):
