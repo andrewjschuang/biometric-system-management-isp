@@ -205,6 +205,11 @@ def get(_id):
 
     return render_template('person.html', person=person, image=image)
 
+@app.route('/management/delete/<_id>')
+def delete(_id):
+    recognition.db.delete_member(_id)
+    return render_template('deleted.html')
+
 @app.route('/configure', methods=['GET'])
 def configure():
     video_source = request.args.get('source')
