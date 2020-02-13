@@ -10,3 +10,13 @@ class Event:
 
     def __str__(self):
         return 'Event(member_id=%s, name=%s, day=%s, face_distance=%s, encoding=%s)' % (self.member_id, self.name, self.day, self.face_distance, self.encoding)
+
+    def to_dict(self):
+        return {
+            'member_id': self.member_id,
+            'name': self.name.to_dict(),
+            'day': self.day.to_dict(),
+            'face_distance': self.face_distance,
+            'encoding': self.encoding,
+            'photo': self.photo
+        }

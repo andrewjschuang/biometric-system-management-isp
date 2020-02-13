@@ -5,12 +5,16 @@ import datetime
 import signal
 import time
 
-from database.Mongodb import Mongodb
 import face_recognition
 import numpy as np
 import cv2
-import config
 
+import config
+from database.Mongodb import Mongodb
+from entities.Collections import Collections
+from entities.Event import Event
+from entities.Day import Day
+from entities.Name import Name
 
 class Recognition:
     # constructor using configuration file
@@ -82,9 +86,9 @@ class Recognition:
                   len(self.known_face_encodings))
 
     # saves frame to database with detected info
-    def save_event(self, collection, document, coordinates):
+    def save_event(self, event, coordinates):
         # switches back to original color
-        frame = document['foto']
+        frame = event.photo
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
         # draws rectangle around face
@@ -93,16 +97,16 @@ class Recognition:
         ImageDraw.Draw(pil_image).rectangle(
             ((left, top), (right, bottom)), outline=(0, 0, 255))
 
-        document['foto'] = {
+        event.photo = {
             'mode': pil_image.mode,
             'size': pil_image.size,
             'data': pil_image.tobytes()
         }
 
-        ids = self.db.insert(collection, document)
+        ids = self.db.insert(Collections.EVENTS.name, event.to_dict())
         print('saved event to database')
         # to retrieve the saved photo
-        # Image.frombytes(document['foto']['mode'], pil_image['foto']['size'], pil_image['foto']['data']).show()
+        # Image.frombytes(event['foto']['mode'], pil_image['foto']['size'], pil_image['foto']['data']).show()
 
     # starts face recognition
     def start(self, capture_interval=0.5):
@@ -153,7 +157,7 @@ class Recognition:
             frame, model=model)
         results = self.identify(frame, face_locations, face_encodings)
 
-        print("found in frame: %s" % [x['name'] for x in results])
+        print("found in frame: %s" % [x.name for x in results])
         return results
 
     # detects faces in frame
@@ -181,7 +185,7 @@ class Recognition:
 
             # detected and found face in database
             if min_face_distance <= self.tolerance:
-                name = self.known_face_encodings[min_face_distance_index]['nome']
+                name = Name.from_str(self.known_face_encodings[min_face_distance_index]['nome'])
                 member_id = self.known_face_encodings[min_face_distance_index]['member_id']
 
                 # don't repeat for already found faces
@@ -190,19 +194,12 @@ class Recognition:
                 #     continue
 
                 # create event document and save it to mongodb
-                event = {
-                    'nome': name,
-                    'membro': member_id,
-                    'data': datetime.datetime.now().isoformat(),
-                    'foto': frame,
-                    'encoding': self.known_face_encodings[min_face_distance_index]['_id'],
-                    'face_distance': min_face_distance
-                }
+                event = Event(member_id, name, Day.today(), min_face_distance, self.known_face_encodings[min_face_distance_index]['_id'], frame)
 
-                self.db.increment('encodings', member_id)
-                self.save_event('events', event, coordinates=(top, right, bottom, left))
+                # self.db.increment('encodings', member_id)
+                self.save_event(event, coordinates=(top, right, bottom, left))
 
-                results.append({'name': name, 'id': member_id})
+                results.append(event)
 
         return results
 
