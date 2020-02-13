@@ -15,6 +15,9 @@ from entities.Collections import Collections
 from entities.Event import Event
 from entities.Day import Day
 from entities.Name import Name
+from entities.Photo import Photo
+from entities.PhotoCategory import PhotoCategory
+from entities.PhotoMode import PhotoMode
 
 class Recognition:
     # constructor using configuration file
@@ -89,12 +92,7 @@ class Recognition:
         ImageDraw.Draw(pil_image).rectangle(
             ((left, top), (right, bottom)), outline=(0, 0, 255))
 
-        event.photo = {
-            'mode': pil_image.mode,
-            'size': pil_image.size,
-            'data': pil_image.tobytes()
-        }
-
+        event.photo = Photo(PhotoCategory.EVENT, PhotoMode.RGB, pil_image.size, pil_image.tobytes())
         ids = self.db.insert(Collections.EVENTS.name, event.to_dict())
         print('saved event to database')
         # to retrieve the saved photo
@@ -149,6 +147,12 @@ class Recognition:
             frame, model=model)
         results = self.identify(frame, face_locations, face_encodings)
 
+        # conf that defines if should update person's presence or not
+        # for event in events:
+        #     recognition.db.event_occured(event.day, event.member_id, event.name)
+        #     found.append(event.name)
+
+
         print("found in frame: %s" % [x.name for x in results])
         return results
 
@@ -187,10 +191,7 @@ class Recognition:
 
                 # create event document and save it to mongodb
                 event = Event(member_id, name, Day.today(), min_face_distance, self.known_face_encodings[min_face_distance_index], frame)
-
-                # self.db.increment('encodings', member_id)
-                # self.save_event(event, coordinates=(top, right, bottom, left))
-                print('TODO: should save event')
+                self.save_event(event, coordinates=(top, right, bottom, left))
 
                 results.append(event)
 

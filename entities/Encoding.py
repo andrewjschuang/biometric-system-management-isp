@@ -15,7 +15,7 @@ class Encoding:
         return {
             'member_id': self.member_id,
             'name': self.name.to_dict(),
-            'data': self.data
+            'data': self.data.tolist()
         }
 
     @staticmethod
