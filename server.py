@@ -22,6 +22,7 @@ from entities.Ministry import Ministry
 from entities.Encoding import Encoding
 from entities.Collections import Collections
 from entities.Name import Name
+from entities.Event import Event
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -85,15 +86,15 @@ def recognize():
             return render_template('error.html', error=result['message'])
 
         image = get_image(request.files['file'])
-        found = recognition.recognize(image)
-        names = []
+        events = recognition.recognize(image)
+        found = [event.name for event in events]
 
-        if found:
-            for x in found:
-                recognition.db.event_occured(time.time(), x['id'], x['name'])
-                names.append(x['name'])
+        # conf that defines if should save event or not
+        # for event in events:
+        #     recognition.db.event_occured(event.day, event.member_id, event.name)
+        #     found.append(event.name)
 
-        return render_template('found.html', found=names)
+        return render_template('found.html', found=found)
 
     return render_template('recognize.html')
 

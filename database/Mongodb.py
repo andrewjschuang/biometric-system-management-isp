@@ -104,20 +104,19 @@ class Mongodb:
         return True if count / total >= rate else False
 
     # if event occurs
-    def event_occured(self, timestamp, member_id, member_name):
-        collection = self.get_collection('members')
-        dt = datetime.datetime.fromtimestamp(timestamp).replace(microsecond=0)
-        if Sunday.is_sunday(dt):
-            key = '%s-%s' % (dt.month, dt.day)
-            year = str(dt.year)
-            member = self.get_member(member_id)
-            if 'calendar' not in member:
-                member['calendar'] = self.init_calendar(member)
-            if year not in member['calendar']:
-                member['calendar'][year] = { key: 'Presente' }
-            else:
-                member['calendar'][year][key] = 'Presente'
-            self.update_calendar(member, member['calendar'])
+    def event_occured(self, day, member_id, member_name):
+        collection = self.__get_collection(Collections.MEMBERS.name)
+        if Sunday.is_sunday(day):
+            # key = '%s-%s' % (day.month, day.day)
+            # year = str(day.year)
+            # member = self.get_member_by_id(member_id)
+            # member.calendar.sundays
+            # if year not in member['calendar']:
+            #     member['calendar'][year] = { key: 'Presente' }
+            # else:
+            #     member['calendar'][year][key] = 'Presente'
+            # self.update_calendar(member, member['calendar'])
+            pass
 
 def initialize_person(person):
     return Person.from_dict(person).set_id(person['_id'])
