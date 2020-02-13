@@ -72,18 +72,13 @@ class Recognition:
 
     # gets database of registered faces from mongo
     def get_known_encodings(self):
-        cursor = self.db.find('encodings', {})
-        self.known_face_encodings = list(cursor)
-        for encoding in self.known_face_encodings:
-            self.known_face_encodings_list.append(
-                np.array(encoding.pop('foto')))
+        self.known_face_encodings = self.db.get_all_encodings()
+        self.known_face_encodings_list = [encoding.data for encoding in self.known_face_encodings]
 
         if len(self.known_face_encodings) == 0:
             print('no face encodings found in database %s' % self.db.db)
             return
-        else:
-            print('got %s encodings from database' %
-                  len(self.known_face_encodings))
+        print('got %s encodings from database' % len(self.known_face_encodings))
 
     # saves frame to database with detected info
     def save_event(self, event, coordinates):
@@ -185,8 +180,8 @@ class Recognition:
 
             # detected and found face in database
             if min_face_distance <= self.tolerance:
-                name = Name.from_str(self.known_face_encodings[min_face_distance_index]['nome'])
-                member_id = self.known_face_encodings[min_face_distance_index]['member_id']
+                name = self.known_face_encodings[min_face_distance_index].name
+                member_id = self.known_face_encodings[min_face_distance_index].member_id
 
                 # don't repeat for already found faces
                 # if name in found:
@@ -194,10 +189,11 @@ class Recognition:
                 #     continue
 
                 # create event document and save it to mongodb
-                event = Event(member_id, name, Day.today(), min_face_distance, self.known_face_encodings[min_face_distance_index]['_id'], frame)
+                event = Event(member_id, name, Day.today(), min_face_distance, self.known_face_encodings[min_face_distance_index], frame)
 
                 # self.db.increment('encodings', member_id)
-                self.save_event(event, coordinates=(top, right, bottom, left))
+                # self.save_event(event, coordinates=(top, right, bottom, left))
+                print('TODO: should save event')
 
                 results.append(event)
 

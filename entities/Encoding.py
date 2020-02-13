@@ -1,3 +1,6 @@
+import numpy as np
+from entities.Name import Name
+
 class Encoding:
 
     def __init__(self, member_id, name, data):
@@ -14,3 +17,7 @@ class Encoding:
             'name': self.name.to_dict(),
             'data': self.data
         }
+
+    @staticmethod
+    def from_dict(encoding):
+        return Encoding(encoding['member_id'], Name.from_dict(encoding['name']), np.array(encoding['data']))
