@@ -34,18 +34,20 @@ class Person:
 
     def to_dict(self):
         photos = {}
-        for x in self.photos:
-            if hasattr(self.photos[x], 'to_dict'):
-                photos[x] = self.photos[x].to_dict()
-            else:
-                photos[x] = self.photos[x]
+        if self.photos is not None:
+            for x in self.photos:
+                if hasattr(self.photos[x], 'to_dict'):
+                    photos[x] = self.photos[x].to_dict()
+                else:
+                    photos[x] = self.photos[x]
 
         encodings = {}
-        for x in self.encodings:
-            if hasattr(self.encodings[x], 'to_dict'):
-                encodings[x] = self.encodings[x].to_dict()
-            else:
-                encodings[x] = self.encodings[x]
+        if self.encodings is not None:
+            for x in self.encodings:
+                if hasattr(self.encodings[x], 'to_dict'):
+                    encodings[x] = self.encodings[x].to_dict()
+                else:
+                    encodings[x] = self.encodings[x]
 
         return {
             'name': self.name.to_dict(),

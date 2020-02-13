@@ -77,6 +77,10 @@ class Mongodb:
         collection = self.__get_collection(collection_name)
         return collection.update({'_id': _id}, {operator: {field: document}}, upsert)
 
+    def replace_member(self, collection_name, member_id, person):
+        collection = self.__get_collection(collection_name)
+        return collection.replace_one({'_id': member_id}, person)
+
     # calendar operations
 
     def update_member_calendar(self, member):
