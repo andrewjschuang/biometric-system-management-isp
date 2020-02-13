@@ -24,3 +24,11 @@ class Day:
     @staticmethod
     def from_dict(day):
         return Day(day['year'], day['month'], day['day'])
+
+    @staticmethod
+    def from_str(day):
+        if '-' in day:
+            day = day.split('-')
+        elif '/' in day:
+            day = day.split('/')
+        return Day(int(day[0]), int(day[1]), int(day[2]))

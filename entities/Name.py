@@ -31,3 +31,11 @@ class Name:
     @staticmethod
     def from_dict(name):
         return Name(name['last_name'], name['first_name'], name.get('middle_name'))
+
+    @staticmethod
+    def from_str(name):
+        name = name.split()
+        last_name = name[-1]
+        first_name = name[0]
+        middle_name = ' '.join(name[1:-1])
+        return Name(last_name, first_name, middle_name)

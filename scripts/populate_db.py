@@ -49,11 +49,7 @@ class Workbook:
         d = []
 
         for element in l:
-            name = element[0].split()
-            last_name = name[-1]
-            first_name = name[0]
-            middle_name = ' '.join(name[1:-1])
-            name = Name(last_name, first_name, middle_name)
+            name = Name.from_str(element[0])
 
             gender = Gender.FEMALE if element[1] == 'F' else Gender.MALE
 
