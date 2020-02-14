@@ -35,9 +35,18 @@
                 </div>
             </div>
 
-            <div>
-                <input type="checkbox" name="update" value="true">
-                <label>Update presence</label>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Select date if should update presence</span>
+                </div>
+                <input type="date" name="day" class="form-control" placeholder="" aria-label=""
+                    aria-describedby="basic-addon1">
+
+                <select class="form-control" name="presence">
+                    <option value="ABSENT">Ausente</option>
+                    <option value="LATE">Atrasado</option>
+                    <option value="PRESENT">Presente</option>
+                </select>
             </div>
 
             <button type="submit" class="btn btn-outline-primary">Submit</button>

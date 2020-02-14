@@ -13,12 +13,12 @@ class Calendar:
         self.year = year
 
     # TODO: change how sunday is found
-    def mark_present(self, day):
+    def mark_presence(self, day, presence):
         if not Sunday.is_sunday(day):
             return False
         for sunday in self.sundays:
             if sunday == day:
-                sunday.presence = Presence.PRESENT
+                sunday.presence = presence
                 return True
         return False
 
