@@ -86,7 +86,7 @@ def recognize():
             return render_template('error.html', error=result['message'])
 
         image = get_image(request.files['file'])
-        events = recognition.recognize(image, update_presence=request.form.get('update'))
+        events = recognition.recognize(image, day=request.form.get('day'), presence=request.form.get('presence'))
         found = [event.name for event in events]
 
         return render_template('found.html', found=found)

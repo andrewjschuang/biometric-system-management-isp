@@ -18,6 +18,7 @@ from entities.Name import Name
 from entities.Photo import Photo
 from entities.PhotoCategory import PhotoCategory
 from entities.PhotoMode import PhotoMode
+from entities.Presence import Presence
 
 class Recognition:
     # constructor using configuration file
@@ -138,7 +139,7 @@ class Recognition:
         return None
 
     # identifies faces in frame and persists it
-    def recognize(self, frame, model='hog', update_presence=False):
+    def recognize(self, frame, model='hog', day=None, presence=None):
         if len(self.known_face_encodings) == 0:
             print('no face encodings found in database %s' % self.db.db)
             return
@@ -149,10 +150,10 @@ class Recognition:
         names = []
 
         # conf that defines if should update person's presence or not
-        if update_presence:
+        if day is not None and day != '':
             for result in results:
                 member = self.db.get_member_by_id(result.member_id)
-                if member.calendar.mark_present(result.day):
+                if member.calendar.mark_presence(Day.from_str(day), Presence[presence]):
                     self.db.update_member_calendar(member)
                 names.append(result.name)
         else:
