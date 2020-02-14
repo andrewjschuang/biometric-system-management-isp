@@ -205,14 +205,21 @@ def delete(_id):
         pass
     return render_template('deleted.html')
 
-@app.route('/configure', methods=['GET'])
+@app.route('/configure', methods=['GET', 'POST'])
 def configure():
-    video_source = request.args.get('source')
-    display_image = request.args.get('display')
-    tolerance = request.args.get('tolerance')
+    if request.method == 'POST':
+        video_source = request.form.get('video_source')
+        tolerance = request.form.get('tolerance')
+        active_rate = request.form.get('active_rate')
 
-    error = recognition.configure(video_source, display_image, tolerance)
-    return render_template('updated.html', error=error)
+        error = recognition.configure(video_source=video_source, tolerance=tolerance)
+        if error is None:
+            config.video_source = video_source
+            config.tolerance = tolerance
+            config.active_rate = active_rate
+        return render_template('updated.html', error=error)
+
+    return render_template('configure.html', config=config)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
