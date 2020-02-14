@@ -138,7 +138,7 @@ class Recognition:
         return None
 
     # identifies faces in frame and persists it
-    def recognize(self, frame, model='hog'):
+    def recognize(self, frame, model='hog', update_presence=False):
         if len(self.known_face_encodings) == 0:
             print('no face encodings found in database %s' % self.db.db)
             return
@@ -146,14 +146,18 @@ class Recognition:
         face_locations, face_encodings = self.get_faces_from_picture(
             frame, model=model)
         results = self.identify(frame, face_locations, face_encodings)
+        names = []
 
         # conf that defines if should update person's presence or not
-        # for event in events:
-        #     recognition.db.event_occured(event.day, event.member_id, event.name)
-        #     found.append(event.name)
+        if update_presence:
+            for result in results:
+                member = self.db.get_member_by_id(result.member_id)
+                member.calendar.mark_present(result.day)
+                names.append(result.name)
+        else:
+            names = [x.name for x in results]
 
-
-        print("found in frame: %s" % [x.name for x in results])
+        print("found in frame: %s" % names)
         return results
 
     # detects faces in frame
