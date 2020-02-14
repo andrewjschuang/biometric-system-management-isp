@@ -100,30 +100,3 @@ class Mongodb:
             return collection.find(self.getObjectIdDocument(document))
         else:
             return collection.find(document)
-
-    # calendar operations
-
-    def get_total(self, days):
-        return len(days)
-
-    def get_count(self, days):
-        count = 0
-        for day in days:
-            if days[day] == 'Presente':
-                count += 1
-        return count
-
-    # if event occurs
-    def event_occured(self, day, member_id, member_name):
-        collection = self.__get_collection(Collections.MEMBERS.name)
-        if Sunday.is_sunday(day):
-            # key = '%s-%s' % (day.month, day.day)
-            # year = str(day.year)
-            # member = self.get_member_by_id(member_id)
-            # member.calendar.sundays
-            # if year not in member['calendar']:
-            #     member['calendar'][year] = { key: 'Presente' }
-            # else:
-            #     member['calendar'][year][key] = 'Presente'
-            # self.update_calendar(member, member['calendar'])
-            pass
