@@ -21,7 +21,7 @@ class Mongodb:
         self.fs = GridFS(self.db)
 
     # gets the object referenced by _id
-    def getObjectIdDocument(self, _id):
+    def __get_object_id_document(self, _id):
         return {'_id': ObjectId(_id)}
 
     # gets pointer to a collection
@@ -86,7 +86,7 @@ class Mongodb:
     def delete(self, collection_name, document, db=None):
         collection = self.__get_collection(collection_name, db)
         if type(document) == str or type(document) == ObjectId:
-            return collection.delete_many(self.getObjectIdDocument(document))
+            return collection.delete_many(self.__get_object_id_document(document))
         else:
             return collection.delete_many(document)
 
@@ -103,6 +103,6 @@ class Mongodb:
     def find(self, collection_name, document={}, db=None):
         collection = self.__get_collection(collection_name, db)
         if type(document) == str or type(document) == ObjectId:
-            return collection.find(self.getObjectIdDocument(document))
+            return collection.find(self.__get_object_id_document(document))
         else:
             return collection.find(document)
