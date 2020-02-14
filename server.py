@@ -86,13 +86,8 @@ def recognize():
             return render_template('error.html', error=result['message'])
 
         image = get_image(request.files['file'])
-        events = recognition.recognize(image)
+        events = recognition.recognize(image, update_presence=request.form.get('update'))
         found = [event.name for event in events]
-
-        # conf that defines if should save event or not
-        # for event in events:
-        #     recognition.db.event_occured(event.day, event.member_id, event.name)
-        #     found.append(event.name)
 
         return render_template('found.html', found=found)
 
@@ -103,18 +98,12 @@ def api():
     result = image_validation(request)
 
     if result['error']:
-        response = {
-            'error': result['message']
-        }
-        return json.dumps(response)
+        return json.dumps({ 'error': result['message'] })
 
     image = get_image(request.files['file'])
-    found = recognition.recognize(image)
-    response = {
-        'results': found
-    }
+    events = recognition.recognize(image, update_presence=request.form.get('update'))
 
-    return json.dumps(response)
+    return json.dumps({ 'results': events })
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

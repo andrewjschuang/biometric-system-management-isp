@@ -12,6 +12,16 @@ class Calendar:
         self.active = False if sundays is None else self.is_active()
         self.year = year
 
+    # TODO: change how sunday is found
+    def mark_present(self, day):
+        if not Sunday.is_sunday(day):
+            return False
+        for sunday in self.sundays:
+            if sunday == day:
+                sunday.presence = Presence.PRESENT
+                return True
+        return False
+
     def is_active(self):
         size = len(self.sundays)
         if size == 0:

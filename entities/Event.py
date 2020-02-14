@@ -17,6 +17,6 @@ class Event:
             'name': self.name.to_dict(),
             'day': self.day.to_dict(),
             'face_distance': self.face_distance,
-            'encoding': self.encoding,
-            'photo': self.photo
+            'encoding': self.encoding.to_dict(),
+            'photo': self.photo.to_dict()
         }
