@@ -106,12 +106,12 @@ class Mongodb:
                 count += 1
         return count
 
-    def is_active_by_document(self, document, rate=active_rate):
-        total = self.get_total(document)
-        if total <= 0:
-            return False
-        count = self.get_count(document)
-        return True if count / total >= rate else False
+    # def is_active_by_document(self, document, rate=active_rate):
+    #     total = self.get_total(document)
+    #     if total <= 0:
+    #         return False
+    #     count = self.get_count(document)
+    #     return True if count / total >= rate else False
 
     # if event occurs
     def event_occured(self, day, member_id, member_name):

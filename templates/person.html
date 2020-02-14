@@ -30,7 +30,7 @@
             <li class="list-group-item">Ministerio: {{ person.ministry }}</li>
             <li class="list-group-item">Sexo: {{ person.gender }}</li>
             <li class="list-group-item">Data de nascimento: {{ person.birth_date }}</li>
-            <li class="list-group-item">Membro ativo: {{ person.calendar.is_active() }}</li>
+            <li class="list-group-item">Membro ativo: {{ is_active }}</li>
             <p></p>
 
             <form method="post" enctype="multipart/form-data">

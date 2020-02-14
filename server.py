@@ -192,7 +192,7 @@ def get(_id):
         person.calendar.sundays = [Sunday.from_str(key, request.form[key]) for key in request.form]
         recognition.db.update_member_calendar(person)
 
-    return render_template('person.html', person=person, image=image)
+    return render_template('person.html', person=person, image=image, is_active=person.is_active())
 
 @app.route('/management/delete/<_id>')
 def delete(_id):
