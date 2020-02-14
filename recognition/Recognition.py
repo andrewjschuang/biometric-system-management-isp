@@ -152,7 +152,8 @@ class Recognition:
         if update_presence:
             for result in results:
                 member = self.db.get_member_by_id(result.member_id)
-                member.calendar.mark_present(result.day)
+                if member.calendar.mark_present(result.day):
+                    self.db.update_member_calendar(member)
                 names.append(result.name)
         else:
             names = [x.name for x in results]
