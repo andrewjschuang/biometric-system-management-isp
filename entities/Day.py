@@ -13,6 +13,9 @@ class Day:
     def __repr__(self):
         return 'Day(year=%s, month=%s, day=%s)' % (self.year, self.month, self.day)
 
+    def __lt__(self, day):
+        return self.year <= day.year and self.month <= day.month and self.day < day.day
+
     def __eq__(self, day):
         return self.year == day.year and self.month == day.month and self.day == day.day
 

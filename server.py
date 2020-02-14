@@ -125,7 +125,7 @@ def register():
 
         person = Person(name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, {}, {})
 
-        member_id = recognition.db.insert(Collections.MEMBERS.name, person.to_dict())
+        member_id = recognition.db.insert_member(person)
 
         images = request.files
         for image_label in images:

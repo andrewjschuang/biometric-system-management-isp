@@ -4,11 +4,13 @@ from gridfs import GridFS
 from bson.objectid import ObjectId
 from config import mongodb, active_rate
 
-
 from entities.Sunday import Sunday
 from entities.Collections import Collections
 from entities.Person import Person
 from entities.Encoding import Encoding
+
+def initialize_person(person):
+    return Person.from_dict(person).set_id(person['_id'])
 
 class Mongodb:
     def __init__(self, host=mongodb['host'], port=mongodb['port'], db=mongodb['db']):
@@ -25,6 +27,10 @@ class Mongodb:
     # gets pointer to a collection
     def __get_collection(self, collection, db=None):
         return self.client[db][collection] if db else self.db[collection]
+
+    def __update(self, collection_name, _id, field, document, operator, upsert=True):
+        collection = self.__get_collection(collection_name)
+        return collection.update({'_id': _id}, {operator: {field: document}}, upsert)
 
     # gets all documents saved in a collection
     def get_all_documents_in_collection(self, collection_name, db=None):
@@ -58,6 +64,18 @@ class Mongodb:
         collection = self.__get_collection(collection_name, db)
         return collection.insert(documents)
 
+    def insert_member(self, member):
+        member.update_active()
+        self.insert(Collections.MEMBERS.name, member.to_dict())
+
+    def update_member_calendar(self, member):
+        member.update_active()
+        return self.__update(Collections.MEMBERS.name, member._id, 'calendar', member.calendar.to_dict(), '$set')
+
+    def replace_member(self, collection_name, member_id, person):
+        collection = self.__get_collection(collection_name)
+        return collection.replace_one({'_id': member_id}, person)
+
     # deletes documents in a collection
     def delete(self, collection_name, document, db=None):
         collection = self.__get_collection(collection_name, db)
@@ -83,18 +101,7 @@ class Mongodb:
         else:
             return collection.find(document)
 
-    def __update(self, collection_name, _id, field, document, operator, upsert=True):
-        collection = self.__get_collection(collection_name)
-        return collection.update({'_id': _id}, {operator: {field: document}}, upsert)
-
-    def replace_member(self, collection_name, member_id, person):
-        collection = self.__get_collection(collection_name)
-        return collection.replace_one({'_id': member_id}, person)
-
     # calendar operations
-
-    def update_member_calendar(self, member):
-        return self.__update(Collections.MEMBERS.name, member._id, 'calendar', member.calendar.to_dict(), '$set')
 
     def get_total(self, days):
         return len(days)
@@ -105,13 +112,6 @@ class Mongodb:
             if days[day] == 'Presente':
                 count += 1
         return count
-
-    def is_active_by_document(self, document, rate=active_rate):
-        total = self.get_total(document)
-        if total <= 0:
-            return False
-        count = self.get_count(document)
-        return True if count / total >= rate else False
 
     # if event occurs
     def event_occured(self, day, member_id, member_name):
@@ -127,6 +127,3 @@ class Mongodb:
             #     member['calendar'][year][key] = 'Presente'
             # self.update_calendar(member, member['calendar'])
             pass
-
-def initialize_person(person):
-    return Person.from_dict(person).set_id(person['_id'])
