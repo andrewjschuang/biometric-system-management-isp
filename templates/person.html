@@ -38,12 +38,9 @@
                 <div class="form-group">
                     <label for="day">{{ day }}</label>
                     <select class="form-control" id="day" name="{{ day }}">
-                        <option value="ABSENT" {% if day.presence.name == 'ABSENT' %} selected {% endif %}>Ausente
-                        </option>
-                        <option value="LATE" {% if day.presence.name == 'LATE' %} selected {% endif %}>Atrasado
-                        </option>
-                        <option value="PRESENT" {% if day.presence.name == 'PRESENT' %} selected {% endif %}>Presente
-                        </option>
+                        <option value="ABSENT" {% if day.presence.name == 'ABSENT' %} selected {% endif %}>Ausente</option>
+                        <option value="LATE" {% if day.presence.name == 'LATE' %} selected {% endif %}>Atrasado</option>
+                        <option value="PRESENT" {% if day.presence.name == 'PRESENT' %} selected {% endif %}>Presente</option>
                     </select>
                 </div>
                 {% endfor %}

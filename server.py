@@ -98,18 +98,12 @@ def api():
     result = image_validation(request)
 
     if result['error']:
-        response = {
-            'error': result['message']
-        }
-        return json.dumps(response)
+        return json.dumps({ 'error': result['message'] })
 
     image = get_image(request.files['file'])
-    found = recognition.recognize(image)
-    response = {
-        'results': found
-    }
+    events = recognition.recognize(image, update_presence=request.form.get('update'))
 
-    return json.dumps(response)
+    return json.dumps({ 'results': events })
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
