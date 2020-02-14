@@ -151,7 +151,7 @@ def register():
             except Exception as e:
                 print('failed to retrieve image: %s' % image_label)
 
-        recognition.db.replace_member(Collections.MEMBERS.name, member_id, person.to_dict())
+        recognition.db.replace_member(member_id, person)
         recognition.get_known_encodings()
 
         return render_template('registered.html', name=person.name)

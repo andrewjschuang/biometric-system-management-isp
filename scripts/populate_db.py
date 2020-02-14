@@ -171,8 +171,7 @@ def populate(d, db, args):
                     continue
 
         print('updating person...')
-        db.get_collection(Collections.MEMBERS.name).replace_one(
-            {'_id': member_id}, person.to_dict())
+        db.replace_member(member_id, person)
 
 
 def createArgsParser():
@@ -194,7 +193,7 @@ if __name__ == '__main__':
     d = wb.dict_of_people(wb.list_of_people())
 
     db = Mongodb(db=args.database)
-    db.delete_all(Collections.ENCODINGS.name, True)
-    db.delete_all(Collections.MEMBERS.name, True)
+    db.delete_all_encodings(True)
+    db.delete_all_members(True)
 
     populate(d, db, args)
