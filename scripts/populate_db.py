@@ -10,7 +10,6 @@ import io
 import re
 
 from database.Mongodb import Mongodb
-from gridfs import GridFS
 
 from entities.Person import Person
 from entities.Gender import Gender
@@ -127,8 +126,6 @@ def rename_lower(path):
 
 
 def populate(d, db, args):
-    fs = GridFS(db.db)
-
     for person in d:
         print('saving person...', end=' ')
         member_id = db.insert_member(person)
@@ -161,7 +158,7 @@ def populate(d, db, args):
 
                     imgByteArr = io.BytesIO()
                     foto.save(imgByteArr, format='JPEG')
-                    image_id = fs.put(imgByteArr.getvalue())
+                    image_id = db.insert_image(imgByteArr.getvalue())
                     person.encodings[key] = image_id
 
                     encoding_saved = True

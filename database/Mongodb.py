@@ -52,16 +52,14 @@ class Mongodb:
         collection = self.__get_collection(collection_name)
         if type(document) == str or type(document) == ObjectId:
             return collection.delete_many(self.__get_object_id_document(document))
-        else:
-            return collection.delete_many(document)
+        return collection.delete_many(document)
 
     # finds a document in a collection by id or by the whole document
     def __find(self, collection_name, document={}):
         collection = self.__get_collection(collection_name)
         if type(document) == str or type(document) == ObjectId:
             return collection.find(self.__get_object_id_document(document))
-        else:
-            return collection.find(document)
+        return collection.find(document)
 
     ''' ---------- MEMBERS METHODS ---------- '''
 
@@ -75,7 +73,7 @@ class Mongodb:
 
     def insert_member(self, member):
         member.update_active()
-        self.__insert(Collections.MEMBERS.name, member.to_dict())
+        return self.__insert(Collections.MEMBERS.name, member.to_dict())
 
     def update_member_calendar(self, member):
         member.update_active()
@@ -92,9 +90,8 @@ class Mongodb:
     def delete_all_members(self, confirmation=False):
         if confirmation:
             return self.__delete_all(Collections.MEMBERS.name)
-        else:
-            print('ERROR: confirmation is set to false')
-            return None
+        print('ERROR: confirmation is set to false')
+        return None
 
     ''' ---------- ENCODINGS METHODS ---------- '''
 
@@ -103,7 +100,7 @@ class Mongodb:
         return [Encoding.from_dict(encoding) for encoding in encodings]
 
     def insert_encoding(self, encoding):
-        self.__insert(Collections.ENCODINGS.name, encoding.to_dict())
+        return self.__insert(Collections.ENCODINGS.name, encoding.to_dict())
 
     def delete_encoding(self, _id):
         return self.delete(Collections.ENCODINGS.name, ObjectId(_id))
@@ -112,17 +109,19 @@ class Mongodb:
     def delete_all_encodings(self, confirmation=False):
         if confirmation:
             return self.__delete_all(Collections.ENCODINGS.name)
-        else:
-            print('ERROR: confirmation is set to false')
-            return None
+        print('ERROR: confirmation is set to false')
+        return None
 
     ''' ---------- EVENTS METHODS ---------- '''
 
     def insert_event(self, event):
-        self.__insert(Collections.EVENTS.name, event.to_dict())
+        return self.__insert(Collections.EVENTS.name, event.to_dict())
 
     ''' ---------- IMAGES METHODS ---------- '''
 
     # gets the image in grid fs by id
     def get_image(self, _id):
         return self.fs.get(_id).read()
+
+    def insert_image(self, image):
+        return self.fs.put(image)

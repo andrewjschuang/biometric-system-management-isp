@@ -143,7 +143,7 @@ def register():
 
                 imgByteArr = io.BytesIO()
                 Image.open(images[image_label]).save(imgByteArr, format='JPEG')
-                image_id = recognition.db.fs.put(imgByteArr.getvalue())
+                image_id = recognition.db.insert_image(imgByteArr.getvalue())
 
                 # may be switched
                 person.encodings[PhotoCategory[image_label]] = image_id
