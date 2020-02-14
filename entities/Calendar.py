@@ -22,29 +22,16 @@ class Calendar:
         return False
 
     def is_active(self):
-        size = self.sundays_length_until_today()
-        if size == 0:
-            return False
-        return True if self.presence_count() / size >= active_rate else False
-
-    def presence_count(self):
         count = 0
+        total = 0
         today = Day.today()
         for sunday in self.sundays:
             if sunday > today:
                 break
             if sunday.presence == Presence.PRESENT:
                 count += 1
-        return count
-
-    def sundays_length_until_today(self):
-        length = 0
-        today = Day.today()
-        for sunday in self.sundays:
-            if sunday > today:
-                break
-            length += 1
-        return length
+            total += 1
+        return True if count / total >= active_rate else False
 
     def to_dict(self):
         return {
