@@ -156,7 +156,7 @@ def populate(d, db, args):
                     encoding = Encoding(
                         member_id, person.name, encodings.tolist())
 
-                    encoding_id = db.insert(Collections.ENCODINGS.name, encoding.to_dict())
+                    encoding_id = db.insert_encoding(encoding)
                     person.photos[key] = encoding_id
 
                     imgByteArr = io.BytesIO()

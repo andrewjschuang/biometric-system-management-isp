@@ -139,7 +139,7 @@ def register():
                     return render_template('error.html', error='more than one face found')
 
                 encoding = Encoding(member_id, person.name, face_encodings[0].tolist())
-                encoding_id = recognition.db.insert(Collections.ENCODINGS.name, encoding.to_dict())
+                encoding_id = recognition.db.insert_encoding(encoding)
 
                 imgByteArr = io.BytesIO()
                 Image.open(images[image_label]).save(imgByteArr, format='JPEG')

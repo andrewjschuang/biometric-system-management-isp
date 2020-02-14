@@ -28,6 +28,12 @@ class Mongodb:
     def __get_collection(self, collection, db=None):
         return self.client[db][collection] if db else self.db[collection]
 
+    # inserts documents into a collection
+    def __insert(self, collection_name, documents, db=None):
+        # TODO: document keys validation
+        collection = self.__get_collection(collection_name, db)
+        return collection.insert(documents)
+
     def __update(self, collection_name, _id, field, document, operator, upsert=True):
         collection = self.__get_collection(collection_name)
         return collection.update({'_id': _id}, {operator: {field: document}}, upsert)
@@ -58,15 +64,15 @@ class Mongodb:
     def get_image(self, _id):
         return self.fs.get(_id).read()
 
-    # inserts documents into a collection
-    def insert(self, collection_name, documents, db=None):
-        # TODO: document keys validation
-        collection = self.__get_collection(collection_name, db)
-        return collection.insert(documents)
+    def insert_encoding(self, encoding):
+        self.__insert(Collections.ENCODINGS.name, encoding.to_dict())
+
+    def insert_event(self, event):
+        self.__insert(Collections.EVENTS.name, event.to_dict())
 
     def insert_member(self, member):
         member.update_active()
-        self.insert(Collections.MEMBERS.name, member.to_dict())
+        self.__insert(Collections.MEMBERS.name, member.to_dict())
 
     def update_member_calendar(self, member):
         member.update_active()

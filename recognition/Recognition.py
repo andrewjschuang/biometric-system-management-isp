@@ -88,7 +88,7 @@ class Recognition:
             ((left, top), (right, bottom)), outline=(0, 0, 255))
 
         event.photo = Photo(PhotoCategory.EVENT, PhotoMode.RGB, pil_image.size, pil_image.tobytes())
-        ids = self.db.insert(Collections.EVENTS.name, event.to_dict())
+        ids = self.db.insert_event(event)
         print('saved event to database')
         # to retrieve the saved photo
         # Image.frombytes(event['foto']['mode'], pil_image['foto']['size'], pil_image['foto']['data']).show()
