@@ -38,6 +38,12 @@ class Mongodb:
     def get_member_by_id(self, _id):
         return initialize_person(self.find(Collections.MEMBERS.name, _id).next())
 
+    def delete_member(self, _id):
+        return self.delete(Collections.MEMBERS.name, ObjectId(_id))
+
+    def delete_encoding(self, _id):
+        return self.delete(Collections.ENCODINGS.name, ObjectId(_id))
+
     def get_all_encodings(self):
         encodings = self.find(Collections.ENCODINGS.name, {})
         return [Encoding.from_dict(encoding) for encoding in encodings]

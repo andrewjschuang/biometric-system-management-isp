@@ -64,9 +64,6 @@ class Recognition:
     def get_all_members(self):
         return self.db.get_all('members')
 
-    def get_member(self, id):
-        return self.db.get_member(id)
-
     def get_image(self, id):
         return self.db.get_image(id)
 
