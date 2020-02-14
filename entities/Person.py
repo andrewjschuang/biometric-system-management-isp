@@ -25,8 +25,9 @@ class Person:
         self._id = _id
         return self
 
-    def is_active(self):
-        return self.calendar.is_active()
+    def update_active(self):
+        self.is_active = self.calendar.is_active()
+        return self.is_active
 
     def __str__(self):
         return 'Person(name=%s, birth_date=%s, email=%s, gender=%s, phone_number=%s, member=%s, ministry=%s, sigi=%s, calendar=%s, photos=%s, encodings=%s)' % (

@@ -125,7 +125,7 @@ def register():
 
         person = Person(name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, {}, {})
 
-        member_id = recognition.db.insert(Collections.MEMBERS.name, person.to_dict())
+        member_id = recognition.db.insert_member(person)
 
         images = request.files
         for image_label in images:
@@ -192,7 +192,7 @@ def get(_id):
         person.calendar.sundays = [Sunday.from_str(key, request.form[key]) for key in request.form]
         recognition.db.update_member_calendar(person)
 
-    return render_template('person.html', person=person, image=image, is_active=person.is_active())
+    return render_template('person.html', person=person, image=image)
 
 @app.route('/management/delete/<_id>')
 def delete(_id):

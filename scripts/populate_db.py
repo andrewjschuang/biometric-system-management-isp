@@ -131,7 +131,7 @@ def populate(d, db, args):
 
     for person in d:
         print('saving person...', end=' ')
-        member_id = db.insert(Collections.MEMBERS.name, person.to_dict())
+        member_id = db.insert_member(person)
 
         encoding_saved = False
         print(person.name)
