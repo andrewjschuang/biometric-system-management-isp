@@ -20,14 +20,11 @@ class Person:
         self.calendar = calendar
         self.photos = photos
         self.encodings = encodings
+        self.is_active = self.calendar.is_active()
 
     def set_id(self, _id):
         self._id = _id
         return self
-
-    def update_active(self):
-        self.is_active = self.calendar.is_active()
-        return self.is_active
 
     def __str__(self):
         return 'Person(name=%s, birth_date=%s, email=%s, gender=%s, phone_number=%s, member=%s, ministry=%s, sigi=%s, calendar=%s, photos=%s, encodings=%s)' % (
@@ -66,5 +63,6 @@ class Person:
 
     @staticmethod
     def from_dict(person):
-        return Person(Name.from_dict(person['name']), Day.from_dict(person['birth_date']), person['email'], person['gender'], person['phone_number'],
-                      person['member'], [Ministry[x] for x in person['ministry']], person['sigi'], Calendar.from_dict(person['calendar']), person['photos'], person['encodings'])
+        return Person(Name.from_dict(person['name']), Day.from_dict(person['birth_date']), person['email'], person['gender'],
+                        person['phone_number'], person['member'], [Ministry[x] for x in person['ministry']], person['sigi'],
+                        Calendar.from_dict(person['calendar']), person['photos'], person['encodings'])

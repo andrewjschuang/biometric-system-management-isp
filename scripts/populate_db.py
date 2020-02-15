@@ -23,7 +23,6 @@ from entities.Name import Name
 from entities.Ministry import Ministry
 from entities.Encoding import Encoding
 
-
 class Workbook:
     rows = range(2, 200)
     columns = 'BEFGIKLQS'
@@ -95,7 +94,6 @@ class Workbook:
 
         return d
 
-
 class Rotate:
     @staticmethod
     def rotate(image):
@@ -119,11 +117,9 @@ class Rotate:
             image = image.transpose(Image.ROTATE_90)
         return image
 
-
 def rename_lower(path):
     for f in os.listdir(path):
         os.rename(os.path.join(path, f), os.path.join(path, f.lower()))
-
 
 def populate(d, db, args):
     for person in d:
@@ -170,7 +166,6 @@ def populate(d, db, args):
         print('updating person...')
         db.replace_member(member_id, person)
 
-
 def createArgsParser():
     parser = argparse.ArgumentParser()
     parser.add_argument('file', help="xlsx file")
@@ -180,7 +175,6 @@ def createArgsParser():
     parser.add_argument('-d', '--database', required=True,
                         help='database name')
     return parser.parse_args()
-
 
 if __name__ == '__main__':
     args = createArgsParser()

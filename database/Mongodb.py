@@ -9,33 +9,34 @@ from entities.Collections import Collections
 from entities.Person import Person
 from entities.Encoding import Encoding
 
-def initialize_person(person):
-    return Person.from_dict(person).set_id(person['_id'])
+def initialize_member(member):
+    return Person.from_dict(member).set_id(member['_id'])
 
 class Mongodb:
     def __init__(self, host=mongodb['host'], port=mongodb['port'], db=mongodb['db']):
-        self.host = host
-        self.port = port
-        self.client = MongoClient(host, port)
-        self.db = self.client[db]
-        self.fs = GridFS(self.db)
+        client = MongoClient(host, port)
+        db = client[db]
+        fs = GridFS(db)
+        self.client = client
+        self.db = db
+        self.fs = fs
 
     # gets the object referenced by _id
     def __get_object_id_document(self, _id):
         return {'_id': ObjectId(_id)}
 
     # gets pointer to a collection
-    def __get_collection(self, collection, db=None):
-        return self.client[db][collection] if db else self.db[collection]
+    def __get_collection(self, collection):
+        return self.db[collection]
 
     # gets all documents saved in a collection
     def __get_all_documents_in_collection(self, collection_name):
         return list(self.__get_collection(collection_name).find())
 
     # inserts documents into a collection
-    def __insert(self, collection_name, documents, db=None):
+    def __insert(self, collection_name, documents):
         # TODO: document keys validation
-        collection = self.__get_collection(collection_name, db)
+        collection = self.__get_collection(collection_name)
         return collection.insert(documents)
 
     def __update(self, collection_name, _id, field, document, operator, upsert=True):
@@ -65,26 +66,24 @@ class Mongodb:
 
     # gets all members and initializes to a list of Persons
     def get_all_members(self):
-        return [initialize_person(x) for x in self.__get_all_documents_in_collection(Collections.MEMBERS.name)]
+        return [initialize_member(x) for x in self.__get_all_documents_in_collection(Collections.MEMBERS.name)]
 
     # gets the member by id
     def get_member_by_id(self, _id):
-        return initialize_person(self.__find(Collections.MEMBERS.name, _id).next())
+        return initialize_member(self.__find(Collections.MEMBERS.name, _id).next())
 
     def insert_member(self, member):
-        member.update_active()
         return self.__insert(Collections.MEMBERS.name, member.to_dict())
 
     def update_member_calendar(self, member):
-        member.update_active()
         return self.__update(Collections.MEMBERS.name, member._id, 'calendar', member.calendar.to_dict(), '$set')
 
-    def replace_member(self, member_id, person):
+    def replace_member(self, member_id, member):
         collection = self.__get_collection(Collections.MEMBERS.name)
-        return collection.replace_one(__get_object_id_document(member_id), person.to_dict())
+        return collection.replace_one(self.__get_object_id_document(member_id), member.to_dict())
 
     def delete_member(self, _id):
-        return self.delete(Collections.MEMBERS.name, ObjectId(_id))
+        return self.__delete(Collections.MEMBERS.name, ObjectId(_id))
 
     # deletes all documents in a collection
     def delete_all_members(self, confirmation=False):
@@ -103,7 +102,7 @@ class Mongodb:
         return self.__insert(Collections.ENCODINGS.name, encoding.to_dict())
 
     def delete_encoding(self, _id):
-        return self.delete(Collections.ENCODINGS.name, ObjectId(_id))
+        return self.__delete(Collections.ENCODINGS.name, ObjectId(_id))
 
     # deletes all documents in a collection
     def delete_all_encodings(self, confirmation=False):
