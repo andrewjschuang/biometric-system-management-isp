@@ -5,9 +5,7 @@ from entities.Calendar import Calendar
 from entities.Encoding import Encoding
 from entities.PhotoCategory import PhotoCategory
 
-
 class Person:
-
     def __init__(self, name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, photos, encodings):
         self.name = name
         self.birth_date = birth_date

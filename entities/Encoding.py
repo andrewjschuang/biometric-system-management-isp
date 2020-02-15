@@ -1,8 +1,6 @@
 import numpy as np
 from entities.Name import Name
-
 class Encoding:
-
     def __init__(self, member_id, name, data):
         self.member_id = member_id
         self.name = name

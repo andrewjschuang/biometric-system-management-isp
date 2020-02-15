@@ -4,12 +4,9 @@ from entities.Presence import Presence
 from entities.Sunday import Sunday
 from entities.Day import Day
 
-
 class Calendar:
-
     def __init__(self, sundays=None, year=datetime.now().year):
         self.sundays = sundays if sundays is not None else Sunday.get_sundays_from_year(year)
-        self.year = year
 
     # TODO: change how sunday is found
     def mark_presence(self, day, presence):

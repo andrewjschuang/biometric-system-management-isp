@@ -23,8 +23,7 @@ from entities.Presence import Presence
 class Recognition:
     # constructor using configuration file
     def __init__(self):
-        self.db = Mongodb(
-            config.mongodb['host'], config.mongodb['port'], config.mongodb['db'])
+        self.db = Mongodb(config.mongodb['host'], config.mongodb['port'], config.mongodb['db'])
         self.video_source = config.video_source
         self.display_image = config.display_image
         self.tolerance = config.tolerance
@@ -170,11 +169,9 @@ class Recognition:
         # iterates through each face
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # Draw a box around the face
-            cv2.rectangle(frame, (left*4, top*4),
-                          (right*4, bottom*4), (0, 0, 255), 2)
+            cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
 
-            face_distances = face_recognition.face_distance(
-                self.known_face_encodings_list, face_encoding)
+            face_distances = face_recognition.face_distance(self.known_face_encodings_list, face_encoding)
 
             min_face_distance = np.min(face_distances)
             min_face_distance_index = np.argmin(face_distances)

@@ -134,20 +134,17 @@ def populate(d, db, args):
                 continue
             else:
                 try:
-                    fpath = os.path.join(
-                        args.path, person.photos[key].data.lower())
+                    fpath = os.path.join(args.path, person.photos[key].data.lower())
 
                     foto = Image.open(fpath)
                     try:
                         foto = Rotate.rotate(foto)
                     except Exception as e:
                         pass
-                    encodings = face_recognition.face_encodings(np.array(foto))[
-                        0]
+                    encodings = face_recognition.face_encodings(np.array(foto))[0]
 
                     print('saving %s: %s...' % (key, fpath), end=' ')
-                    encoding = Encoding(
-                        member_id, person.name, encodings.tolist())
+                    encoding = Encoding(member_id, person.name, encodings)
 
                     encoding_id = db.insert_encoding(encoding)
                     person.photos[key] = encoding_id

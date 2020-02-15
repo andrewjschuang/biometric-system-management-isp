@@ -1,5 +1,4 @@
 class Photo:
-
     def __init__(self, photo_category, photo_mode, size, data):
         self.photo_category = photo_category
         self.photo_mode = photo_mode

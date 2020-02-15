@@ -4,7 +4,6 @@ from entities.Day import Day
 from entities.Presence import Presence
 
 class Sunday(Day):
-
     def __init__(self, year, month, day, presence=Presence.ABSENT):
         super(Sunday, self).__init__(year, month, day)
         self.presence = presence

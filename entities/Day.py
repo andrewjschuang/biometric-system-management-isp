@@ -1,7 +1,6 @@
 from datetime import datetime
 
 class Day:
-
     def __init__(self, year, month, day):
         self.year = year
         self.month = month

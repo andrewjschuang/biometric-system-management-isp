@@ -1,5 +1,4 @@
 class Event:
-
     def __init__(self, member_id, name, day, face_distance, encoding, photo):
         self.member_id = member_id
         self.name = name
