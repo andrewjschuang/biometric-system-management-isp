@@ -225,7 +225,7 @@ def configure():
     return render_template('configure.html', config=config)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0')
 
 # curl -X GET http://localhost:5000
 # curl -F "file=@/home/andrewjschuang/dev/biometric-system-management/photos_for_encoding/random/andrew.jpg" -X POST http://localhost:5000

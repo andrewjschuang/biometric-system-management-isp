@@ -30,8 +30,7 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-ENV FLASK_APP=server.py
 ENV PYTHONUNBUFFERED=0
 ENV OPENCV_FFMPEG_CAPTURE_OPTIONS=null
 
-CMD ["flask", "run", "--host", "0.0.0.0"]
+CMD ["python", "-m", "server"]
