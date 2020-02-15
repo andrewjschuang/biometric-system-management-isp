@@ -26,8 +26,8 @@ class Mongodb:
         return {'_id': ObjectId(_id)}
 
     # gets pointer to a collection
-    def __get_collection(self, collection):
-        return self.db[collection]
+    def __get_collection(self, collection_name):
+        return self.db[collection_name]
 
     # gets all documents saved in a collection
     def __get_all_documents_in_collection(self, collection_name):
@@ -45,8 +45,7 @@ class Mongodb:
 
     # deletes all documents in a collection
     def __delete_all(self, collection_name):
-        collection = self.__get_collection(collection_name)
-        return self.__delete(collection, {})
+        return self.__delete(collection_name, {})
 
     # deletes documents in a collection
     def __delete(self, collection_name, document):
