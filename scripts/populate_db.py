@@ -10,7 +10,6 @@ import io
 import re
 
 from database.Mongodb import Mongodb
-from gridfs import GridFS
 
 from entities.Person import Person
 from entities.Gender import Gender
@@ -23,7 +22,6 @@ from entities.PhotoMode import PhotoMode
 from entities.Name import Name
 from entities.Ministry import Ministry
 from entities.Encoding import Encoding
-
 
 class Workbook:
     rows = range(2, 200)
@@ -96,7 +94,6 @@ class Workbook:
 
         return d
 
-
 class Rotate:
     @staticmethod
     def rotate(image):
@@ -120,15 +117,11 @@ class Rotate:
             image = image.transpose(Image.ROTATE_90)
         return image
 
-
 def rename_lower(path):
     for f in os.listdir(path):
         os.rename(os.path.join(path, f), os.path.join(path, f.lower()))
 
-
 def populate(d, db, args):
-    fs = GridFS(db.db)
-
     for person in d:
         print('saving person...', end=' ')
         member_id = db.insert_member(person)
@@ -156,12 +149,12 @@ def populate(d, db, args):
                     encoding = Encoding(
                         member_id, person.name, encodings.tolist())
 
-                    encoding_id = db.insert(Collections.ENCODINGS.name, encoding.to_dict())
+                    encoding_id = db.insert_encoding(encoding)
                     person.photos[key] = encoding_id
 
                     imgByteArr = io.BytesIO()
                     foto.save(imgByteArr, format='JPEG')
-                    image_id = fs.put(imgByteArr.getvalue())
+                    image_id = db.insert_image(imgByteArr.getvalue())
                     person.encodings[key] = image_id
 
                     encoding_saved = True
@@ -171,9 +164,7 @@ def populate(d, db, args):
                     continue
 
         print('updating person...')
-        db.get_collection(Collections.MEMBERS.name).replace_one(
-            {'_id': member_id}, person.to_dict())
-
+        db.replace_member(member_id, person)
 
 def createArgsParser():
     parser = argparse.ArgumentParser()
@@ -185,7 +176,6 @@ def createArgsParser():
                         help='database name')
     return parser.parse_args()
 
-
 if __name__ == '__main__':
     args = createArgsParser()
     rename_lower(args.path)
@@ -194,7 +184,7 @@ if __name__ == '__main__':
     d = wb.dict_of_people(wb.list_of_people())
 
     db = Mongodb(db=args.database)
-    db.delete_all(Collections.ENCODINGS.name, True)
-    db.delete_all(Collections.MEMBERS.name, True)
+    db.delete_all_encodings(True)
+    db.delete_all_members(True)
 
     populate(d, db, args)

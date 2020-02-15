@@ -65,12 +65,6 @@ class Recognition:
 
         return None
 
-    def get_all_members(self):
-        return self.db.get_all('members')
-
-    def get_image(self, id):
-        return self.db.get_image(id)
-
     # gets database of registered faces from mongo
     def get_known_encodings(self):
         self.known_face_encodings = self.db.get_all_encodings()
@@ -94,7 +88,7 @@ class Recognition:
             ((left, top), (right, bottom)), outline=(0, 0, 255))
 
         event.photo = Photo(PhotoCategory.EVENT, PhotoMode.RGB, pil_image.size, pil_image.tobytes())
-        ids = self.db.insert(Collections.EVENTS.name, event.to_dict())
+        ids = self.db.insert_event(event)
         print('saved event to database')
         # to retrieve the saved photo
         # Image.frombytes(event['foto']['mode'], pil_image['foto']['size'], pil_image['foto']['data']).show()
