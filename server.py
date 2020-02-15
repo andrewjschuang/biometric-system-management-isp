@@ -192,7 +192,7 @@ def get(_id):
         image = None
 
     if request.method == 'POST':
-        person.calendar.sundays = [Sunday.from_str(key, request.form[key]) for key in request.form]
+        person.set_sundays([Sunday.from_str(key, request.form[key]) for key in request.form])
         recognition.db.update_member_calendar(person)
 
     return render_template('person.html', person=person, image=image)

@@ -4,6 +4,7 @@ from entities.Ministry import Ministry
 from entities.Calendar import Calendar
 from entities.Encoding import Encoding
 from entities.PhotoCategory import PhotoCategory
+from entities.Sunday import Sunday
 
 class Person:
     def __init__(self, name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, photos, encodings):
@@ -20,13 +21,17 @@ class Person:
         self.encodings = encodings
         self.is_active = self.calendar.is_active()
 
+    def __str__(self):
+        return 'Person(name=%s, birth_date=%s, email=%s, gender=%s, phone_number=%s, member=%s, ministry=%s, sigi=%s, calendar=%s, photos=%s, encodings=%s)' % (
+            self.name, self.birth_date, self.email, self.gender, self.phone_number, self.member, self.ministry, self.sigi, self.calendar, self.photos, self.encodings)
+
     def set_id(self, _id):
         self._id = _id
         return self
 
-    def __str__(self):
-        return 'Person(name=%s, birth_date=%s, email=%s, gender=%s, phone_number=%s, member=%s, ministry=%s, sigi=%s, calendar=%s, photos=%s, encodings=%s)' % (
-            self.name, self.birth_date, self.email, self.gender, self.phone_number, self.member, self.ministry, self.sigi, self.calendar, self.photos, self.encodings)
+    def set_sundays(self, sundays):
+        self.calendar.sundays = sundays
+        self.is_active = self.calendar.is_active()
 
     def to_dict(self):
         photos = {}
