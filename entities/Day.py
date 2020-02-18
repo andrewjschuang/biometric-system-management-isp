@@ -15,8 +15,20 @@ class Day:
     def __lt__(self, day):
         return self.year <= day.year and self.month <= day.month and self.day < day.day
 
+    def __le__(self, day):
+        return self.year <= day.year and self.month <= day.month and self.day <= day.day
+
+    def __gt__(self, day):
+        return self.year >= day.year and self.month >= day.month and self.day > day.day
+
+    def __ge__(self, day):
+        return self.year >= day.year and self.month >= day.month and self.day >= day.day
+
     def __eq__(self, day):
         return self.year == day.year and self.month == day.month and self.day == day.day
+
+    def __ne__(self, day):
+        return self.year != day.year or self.month != day.month or self.day != day.day
 
     def to_dict(self):
         return {
