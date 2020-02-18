@@ -1,3 +1,5 @@
+from itertools import zip_longest
+
 from entities.Name import Name
 from entities.Day import Day
 from entities.Ministry import Ministry
@@ -30,7 +32,10 @@ class Person:
         return self
 
     def set_sundays(self, sundays):
-        self.calendar.sundays = sundays
+        for index,t in enumerate(zip_longest(self.calendar.sundays, sundays)):
+            sunday = t[1]
+            if sunday is not None:
+                self.calendar.sundays[index] = sunday
         self.is_active = self.calendar.is_active()
 
     def to_dict(self):
