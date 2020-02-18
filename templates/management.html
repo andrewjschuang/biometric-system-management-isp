@@ -23,6 +23,14 @@
 
     <div class="p-3 mb-2 bg-light text-dark">
         <form method="post" enctype="multipart/form-data">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Date for marking presence</span>
+                </div>
+                <input type="date" name="presence_date" class="form-control" placeholder="" aria-label=""
+                    aria-describedby="basic-addon1" required>
+            </div>
+
             {% for person in persons %}
                 <img src="data:image/jpeg;base64,{{ person.encodings['FRONT'] }}">
                 <div class="form-row">
@@ -36,6 +44,7 @@
                     </div>
                 </div>
             {% endfor %}
+
             <p></p>
             <input type="submit" class="btn btn-outline-success" value="Mark">
         </form>
