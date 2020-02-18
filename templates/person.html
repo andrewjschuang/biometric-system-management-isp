@@ -23,41 +23,94 @@
     </nav>
 
     <div class="p-3 mb-2 bg-light text-dark">
+        {% for image in images %}
         <img src="data:image/jpeg;base64,{{ image }}">
+        {% endfor %}
         <p></p>
-        <ul class="list-group">
-            <li class="list-group-item">Nome: {{ person.name }}</li>
-            <li class="list-group-item">Ministerio: {{ person.ministry }}</li>
-            <li class="list-group-item">Sexo: {{ person.gender }}</li>
-            <li class="list-group-item">Data de nascimento: {{ person.birth_date }}</li>
-            <li class="list-group-item">Membro ativo: {{ person.is_active }}</li>
-            <p></p>
 
-            <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="{{ person.name }}">
+            </div>
+
+            <div class="form-group">
+                <label for="birth_date">Birth date</label>
+                <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ person.birth_date.__str__('-') }}">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="{{ person.email }}">
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select class="form-control" id="gender" name="gender" placeholder="{{ person.gender }}">
+                    <option value="MALE" {% if person.gender.name == 'MALE' %} selected {% endif %}>Male</option>
+                    <option value="FEMALE" {% if person.gender.name == 'FEMALE' %} selected {% endif %}>Female</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="phone_number">Phone number</label>
+                <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="{{ person.phone_number }}">
+            </div>
+
+            <div class="form-group">
+                <label for="member">Member</label>
+                <select class="form-control" id="member" name="member" placeholder="{{ person.member }}">
+                    <option value=true {% if person.member == True %} selected {% endif %}>Yes</option>
+                    <option value=false {% if person.member == False %} selected {% endif %}>No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ministry">Ministry</label>
+                <select class="form-control" id="ministry" name="ministry" placeholder="{{ person.ministry }}">
+                    <option value="PT" {% if person.ministry.name == 'PT' %} selected {% endif %}>Portuguese</option>
+                    <option value="MD" {% if person.ministry.name == 'MD' %} selected {% endif %}>Mandarin</option>
+                    <option value="TW" {% if person.ministry.name == 'TW' %} selected {% endif %}>Taiwanese</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="sigi">SIGI</label>
+                <input type="number" class="form-control" id="sigi" name="sigi" placeholder="{{ person.sigi }}">
+            </div>
+
+            <div class="form-group">
+                <label for="is_active">Is currently active</label>
+                <input type="text" class="form-control" id="is_active" readonly placeholder="{{ person.is_active }}">
+            </div>
+
+            <p>Calendar</p>
+            <div class="container-fluid">
                 {% for day in person.calendar.sundays %}
                     {% if day <= today %}
                     <div class="form-group">
                         <label for="day">{{ day }}</label>
-                        <select class="form-control" id="day" name="{{ day }}">
-                            <option value="ABSENT" {% if day.presence.name == 'ABSENT' %} selected {% endif %}>Ausente</option>
-                            <option value="LATE" {% if day.presence.name == 'LATE' %} selected {% endif %}>Atrasado</option>
-                            <option value="PRESENT" {% if day.presence.name == 'PRESENT' %} selected {% endif %}>Presente</option>
+                        <select class="form-control" id="day" name="calendar.{{ day }}">
+                            <option value="ABSENT" {% if day.presence.name == 'ABSENT' %} selected {% endif %}>Absent</option>
+                            <option value="LATE" {% if day.presence.name == 'LATE' %} selected {% endif %}>Late</option>
+                            <option value="PRESENT" {% if day.presence.name == 'PRESENT' %} selected {% endif %}>Present</option>
                         </select>
                     </div>
                     {% endif %}
                 {% endfor %}
-                <input type="submit" class="btn btn-outline-success" value="Gravar">
-                <a href="">
-                    <input type="button" class="btn btn-outline-secondary" value="Desfazer">
-                </a>
-                <a href="/management/delete/{{ person._id }}">
-                    <input type="button" class="btn btn-outline-danger" value="Apagar">
-                </a>
-                <a href="/management">
-                    <input type="button" class="btn btn-outline-primary" value="Voltar">
-                </a>
-            </form>
-        </ul>
+            </div>
+
+            <input type="submit" class="btn btn-outline-success" value="Gravar">
+            <a href="">
+                <input type="button" class="btn btn-outline-secondary" value="Desfazer">
+            </a>
+            <a href="/management/delete/{{ person._id }}">
+                <input type="button" class="btn btn-outline-danger" value="Apagar">
+            </a>
+            <a href="/management">
+                <input type="button" class="btn btn-outline-primary" value="Voltar">
+            </a>
+        </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

@@ -73,6 +73,28 @@ def get_person_image_from_bytes(bytes, resize):
     image.save(imgByteArr, format='JPEG')
     return b64encode(imgByteArr.getvalue()).decode('utf-8')
 
+def create_person(form):
+    name = Name.from_str(form.get('name'))
+    birth_date = Day.from_str(form.get('birth_date'))
+    email = form.get('email')
+    gender = Gender[form.get('gender')]
+    phone_number = phone_number = re.compile('[\W_]+').sub('', form.get('phone_number'))
+    person.member = form.get('member').lower() == 'true'
+    ministry = [Ministry[form.get('ministry')]]
+    sigi = int(form.get('sigi'))
+    return Person(name, birth_date, email, gender, phone_number, member, ministry, sigi, Calendar(), {}, {})
+
+def update_person_fields(form, person):
+    person.name = Name.from_str(form.get('name')) if form.get('name') else person.name
+    person.birth_date = Day.from_str(form.get('birth_date'))
+    person.email = form.get('email') or person.email
+    person.gender = Gender[form.get('gender')]
+    person.phone_number = phone_number = re.compile('[\W_]+').sub('', form.get('phone_number')) if form.get('phone_number') else person.phone_number
+    person.member = form.get('member').lower() == 'true'
+    person.ministry = [Ministry[form.get('ministry')]]
+    person.sigi = int(form.get('sigi')) if form.get('sigi') else person.sigi
+    return person
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
@@ -113,18 +135,7 @@ def register():
         if result['error']:
             return render_template('error.html', error=result['message'])
 
-        name = Name.from_str(request.form.get('name'))
-        birth_date = Day.from_str(request.form.get('birth_date'))
-        gender = Gender[request.form.get('gender')]
-        email = request.form.get('email')
-        phone_number = phone_number = re.compile('[\W_]+').sub('', request.form.get('phone_number'))
-        member = bool(request.form.get('member'))
-        ministry = [Ministry[request.form.get('ministry')]]
-        sigi = int(request.form.get('sigi'))
-        calendar = Calendar()
-
-        person = Person(name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, {}, {})
-
+        person = create_person(request.form)
         member_id = recognition.db.insert_member(person)
 
         images = request.files
@@ -184,18 +195,22 @@ def management():
 @app.route('/management/<_id>', methods=['GET', 'POST'])
 def get(_id):
     person = recognition.db.get_member_by_id(_id)
-    try:
-        image_bytes = recognition.db.get_image(person.encodings[PhotoCategory.FRONT.name])
-        image = get_person_image_from_bytes(image_bytes, 0.15)
-    except Exception as e:
-        print('failed to retrieve image: %s' % e)
-        image = None
+    images = []
+    for encoding_id in person.encodings.values():
+        try:
+            image_bytes = recognition.db.get_image(encoding_id)
+            image = get_person_image_from_bytes(image_bytes, 0.15)
+            images.append(image)
+        except Exception as e:
+            print('failed to retrieve image: %s' % e)
 
     if request.method == 'POST':
-        person.set_sundays([Sunday.from_str(key, request.form[key]) for key in request.form])
+        person = update_person_fields(request.form, person)
+        person.set_sundays([Sunday.from_str(key.split('calendar.')[1], request.form[key]) for key in request.form if 'calendar' in key])
         recognition.db.update_member_calendar(person)
+        recognition.db.replace_member(person._id, person)
 
-    return render_template('person.html', person=person, image=image, today=Day.today())
+    return render_template('person.html', person=person, images=images, today=Day.today())
 
 @app.route('/management/delete/<_id>')
 def delete(_id):

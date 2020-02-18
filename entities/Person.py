@@ -65,8 +65,8 @@ class Person:
             'ministry': [x.name for x in self.ministry],
             'sigi': self.sigi,
             'calendar': self.calendar.to_dict(),
-            'photos': { x.name : photos[x] for x in photos },
-            'encodings': { x.name : encodings[x] for x in encodings }
+            'photos': { (x.name if type(x) == PhotoCategory else x): photos[x] for x in photos },
+            'encodings': { (x.name if type(x) == PhotoCategory else x) : encodings[x] for x in encodings }
         }
 
     @staticmethod
