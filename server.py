@@ -23,6 +23,7 @@ from entities.Encoding import Encoding
 from entities.Collections import Collections
 from entities.Name import Name
 from entities.Event import Event
+from entities.Presence import Presence
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -181,9 +182,19 @@ def stop():
     recognition.signal_handler()
     return render_template('stop.html')
 
-@app.route('/management', methods=['GET'])
+@app.route('/management', methods=['GET', 'POST'])
 def management():
     persons = recognition.db.get_all_members()
+
+    if request.method == 'POST':
+        # TODO: change implementation because of high complexity
+        today = Day.today()
+        ids = request.form.keys() # O(len(ids))
+        filtered_persons = filter(lambda x: str(x._id) in ids, persons) # O(len(persons))
+        for person in filtered_persons: # O(len(ids))
+            if person.calendar.mark_presence(today, Presence.PRESENT):
+                recognition.db.update_person_calendar(person)
+
     for person in persons:
         try:
             image_bytes = recognition.db.get_image(person.encodings[PhotoCategory.FRONT.name])
