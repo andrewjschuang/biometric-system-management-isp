@@ -187,13 +187,8 @@ def management():
     persons = recognition.db.get_all_members()
 
     if request.method == 'POST':
-        # TODO: change implementation because of high complexity
         today = Day.today()
-        ids = request.form.keys() # O(len(ids))
-        filtered_persons = filter(lambda x: str(x._id) in ids, persons) # O(len(persons))
-        for person in filtered_persons: # O(len(ids))
-            if person.calendar.mark_presence(today, Presence.PRESENT):
-                recognition.db.update_person_calendar(person)
+        ids = request.form.keys() # gets ids to be marked
 
     for person in persons:
         try:
@@ -201,6 +196,13 @@ def management():
             person.encodings[PhotoCategory.FRONT.name] = get_person_image_from_bytes(image_bytes, 0.05)
         except Exception as e:
             person.encodings[PhotoCategory.FRONT.name] = b''
+
+        # if marking presence for person, update in database
+        if request.method == 'POST':
+            if str(person._id) in ids:
+                if person.calendar.mark_presence(today, Presence.PRESENT):
+                    recognition.db.update_person_calendar(person)
+
     return render_template('management.html', persons=persons)
 
 @app.route('/management/<_id>', methods=['GET', 'POST'])
