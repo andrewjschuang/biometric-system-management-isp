@@ -7,7 +7,7 @@ class Day:
         self.day = day
 
     def __str__(self, separator='/'):
-        return '%s%s%s%s%s' % (self.year, separator, self.month, separator, self.day)
+        return '%s%s%s%s%s' % (self.year, separator, str(self.month).rjust(2,'0'), separator, str(self.day).rjust(2,'0'))
 
     def __repr__(self):
         return 'Day(year=%s, month=%s, day=%s)' % (self.year, self.month, self.day)
