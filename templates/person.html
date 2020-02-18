@@ -23,7 +23,9 @@
     </nav>
 
     <div class="p-3 mb-2 bg-light text-dark">
+        {% for image in images %}
         <img src="data:image/jpeg;base64,{{ image }}">
+        {% endfor %}
         <p></p>
         <ul class="list-group">
             <form method="post" enctype="multipart/form-data">

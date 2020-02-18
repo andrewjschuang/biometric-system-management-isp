@@ -184,18 +184,20 @@ def management():
 @app.route('/management/<_id>', methods=['GET', 'POST'])
 def get(_id):
     person = recognition.db.get_member_by_id(_id)
-    try:
-        image_bytes = recognition.db.get_image(person.encodings[PhotoCategory.FRONT.name])
-        image = get_person_image_from_bytes(image_bytes, 0.15)
-    except Exception as e:
-        print('failed to retrieve image: %s' % e)
-        image = None
+    images = []
+    for key in person.encodings:
+        try:
+            image_bytes = recognition.db.get_image(person.encodings[key])
+            image = get_person_image_from_bytes(image_bytes, 0.15)
+            images.append(image)
+        except Exception as e:
+            print('failed to retrieve image: %s' % e)
 
     if request.method == 'POST':
         person.set_sundays([Sunday.from_str(key, request.form[key]) for key in request.form])
         recognition.db.update_member_calendar(person)
 
-    return render_template('person.html', person=person, image=image, today=Day.today())
+    return render_template('person.html', person=person, images=images, today=Day.today())
 
 @app.route('/management/delete/<_id>')
 def delete(_id):
