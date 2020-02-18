@@ -26,26 +26,45 @@
         <img src="data:image/jpeg;base64,{{ image }}">
         <p></p>
         <ul class="list-group">
-            <li class="list-group-item">Nome: {{ person.name }}</li>
-            <li class="list-group-item">Ministerio: {{ person.ministry }}</li>
-            <li class="list-group-item">Sexo: {{ person.gender }}</li>
-            <li class="list-group-item">Data de nascimento: {{ person.birth_date }}</li>
-            <li class="list-group-item">Membro ativo: {{ person.is_active }}</li>
-            <p></p>
-
             <form method="post" enctype="multipart/form-data">
-                {% for day in person.calendar.sundays %}
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="{{ person.name }}">
+                </div>
+                <div class="form-group">
+                    <label for="ministry">Ministry</label>
+                    <select class="form-control" id="ministry" placeholder="{{ person.ministry }}">
+                        <option value="PT" {% if person.ministry == 'PT' %} selected {% endif %}>Portuguese</option>
+                        <option value="MD" {% if person.ministry == 'MD' %} selected {% endif %}>Mandarin</option>
+                        <option value="TW" {% if person.ministry == 'TW' %} selected {% endif %}>Taiwanese</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select class="form-control" id="gender" placeholder="{{ person.gender }}">
+                        <option value="MALE" {% if person.gender == 'MALE' %} selected {% endif %}>Male</option>
+                        <option value="FEMALE" {% if person.gender == 'FEMALE' %} selected {% endif %}>Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="is_active">Is Active</label>
+                    <input type="text" class="form-control" id="is_active" readonly placeholder="{{ person.is_active }}">
+                </div>
+
+                <div>
+                    {% for day in person.calendar.sundays %}
                     {% if day <= today %}
                     <div class="form-group">
                         <label for="day">{{ day }}</label>
                         <select class="form-control" id="day" name="{{ day }}">
-                            <option value="ABSENT" {% if day.presence.name == 'ABSENT' %} selected {% endif %}>Ausente</option>
-                            <option value="LATE" {% if day.presence.name == 'LATE' %} selected {% endif %}>Atrasado</option>
-                            <option value="PRESENT" {% if day.presence.name == 'PRESENT' %} selected {% endif %}>Presente</option>
+                            <option value="ABSENT" {% if day.presence.name == 'ABSENT' %} selected {% endif %}>Absent</option>
+                            <option value="LATE" {% if day.presence.name == 'LATE' %} selected {% endif %}>Late</option>
+                            <option value="PRESENT" {% if day.presence.name == 'PRESENT' %} selected {% endif %}>Present</option>
                         </select>
                     </div>
                     {% endif %}
-                {% endfor %}
+                    {% endfor %}
+                </div>
                 <input type="submit" class="btn btn-outline-success" value="Gravar">
                 <a href="">
                     <input type="button" class="btn btn-outline-secondary" value="Desfazer">
