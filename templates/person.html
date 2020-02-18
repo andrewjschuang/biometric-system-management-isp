@@ -31,6 +31,38 @@
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" placeholder="{{ person.name }}">
                 </div>
+
+                <div class="form-group">
+                    <label for="birth_date">Birth date</label>
+                    <input type="date" class="form-control" id="birth_date" value="{{ person.birth_date.__str__('-') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="{{ person.email }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select class="form-control" id="gender" placeholder="{{ person.gender }}">
+                        <option value="MALE" {% if person.gender == 'MALE' %} selected {% endif %}>Male</option>
+                        <option value="FEMALE" {% if person.gender == 'FEMALE' %} selected {% endif %}>Female</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone_number">Phone number</label>
+                    <input type="text" class="form-control" id="phone_number" placeholder="{{ person.phone_number }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="member">Member</label>
+                    <select class="form-control" id="member" placeholder="{{ person.member }}">
+                        <option value="True" {% if person.member == True %} selected {% endif %}>Yes</option>
+                        <option value="False" {% if person.member == False %} selected {% endif %}>No</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="ministry">Ministry</label>
                     <select class="form-control" id="ministry" placeholder="{{ person.ministry }}">
@@ -39,15 +71,14 @@
                         <option value="TW" {% if person.ministry == 'TW' %} selected {% endif %}>Taiwanese</option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="gender">Gender</label>
-                    <select class="form-control" id="gender" placeholder="{{ person.gender }}">
-                        <option value="MALE" {% if person.gender == 'MALE' %} selected {% endif %}>Male</option>
-                        <option value="FEMALE" {% if person.gender == 'FEMALE' %} selected {% endif %}>Female</option>
-                    </select>
+                    <label for="sigi">SIGI</label>
+                    <input type="number" class="form-control" id="sigi" placeholder="{{ person.sigi }}">
                 </div>
+
                 <div class="form-group">
-                    <label for="is_active">Is Active</label>
+                    <label for="is_active">Is currently active</label>
                     <input type="text" class="form-control" id="is_active" readonly placeholder="{{ person.is_active }}">
                 </div>
 
