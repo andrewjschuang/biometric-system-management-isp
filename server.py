@@ -79,7 +79,7 @@ def create_person(form):
     email = form.get('email')
     gender = Gender[form.get('gender')]
     phone_number = phone_number = re.compile('[\W_]+').sub('', form.get('phone_number'))
-    person.member = form.get('member').lower() == 'true'
+    member = form.get('member').lower() == 'true'
     ministry = [Ministry[form.get('ministry')]]
     sigi = int(form.get('sigi'))
     return Person(name, birth_date, email, gender, phone_number, member, ministry, sigi, Calendar(), {}, {})
