@@ -27,65 +27,66 @@
         <img src="data:image/jpeg;base64,{{ image }}">
         {% endfor %}
         <p></p>
-        <ul class="list-group">
-            <form method="post" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" class="form-control" id="name" placeholder="{{ person.name }}">
-                </div>
 
-                <div class="form-group">
-                    <label for="birth_date">Birth date</label>
-                    <input type="date" class="form-control" id="birth_date" value="{{ person.birth_date.__str__('-') }}">
-                </div>
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" placeholder="{{ person.name }}">
+            </div>
 
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" placeholder="{{ person.email }}">
-                </div>
+            <div class="form-group">
+                <label for="birth_date">Birth date</label>
+                <input type="date" class="form-control" id="birth_date" value="{{ person.birth_date.__str__('-') }}">
+            </div>
 
-                <div class="form-group">
-                    <label for="gender">Gender</label>
-                    <select class="form-control" id="gender" placeholder="{{ person.gender }}">
-                        <option value="MALE" {% if person.gender == 'MALE' %} selected {% endif %}>Male</option>
-                        <option value="FEMALE" {% if person.gender == 'FEMALE' %} selected {% endif %}>Female</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" placeholder="{{ person.email }}">
+            </div>
 
-                <div class="form-group">
-                    <label for="phone_number">Phone number</label>
-                    <input type="text" class="form-control" id="phone_number" placeholder="{{ person.phone_number }}">
-                </div>
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select class="form-control" id="gender" placeholder="{{ person.gender }}">
+                    <option value="MALE" {% if person.gender == 'MALE' %} selected {% endif %}>Male</option>
+                    <option value="FEMALE" {% if person.gender == 'FEMALE' %} selected {% endif %}>Female</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label for="member">Member</label>
-                    <select class="form-control" id="member" placeholder="{{ person.member }}">
-                        <option value="True" {% if person.member == True %} selected {% endif %}>Yes</option>
-                        <option value="False" {% if person.member == False %} selected {% endif %}>No</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="phone_number">Phone number</label>
+                <input type="text" class="form-control" id="phone_number" placeholder="{{ person.phone_number }}">
+            </div>
 
-                <div class="form-group">
-                    <label for="ministry">Ministry</label>
-                    <select class="form-control" id="ministry" placeholder="{{ person.ministry }}">
-                        <option value="PT" {% if person.ministry == 'PT' %} selected {% endif %}>Portuguese</option>
-                        <option value="MD" {% if person.ministry == 'MD' %} selected {% endif %}>Mandarin</option>
-                        <option value="TW" {% if person.ministry == 'TW' %} selected {% endif %}>Taiwanese</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="member">Member</label>
+                <select class="form-control" id="member" placeholder="{{ person.member }}">
+                    <option value="True" {% if person.member == True %} selected {% endif %}>Yes</option>
+                    <option value="False" {% if person.member == False %} selected {% endif %}>No</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label for="sigi">SIGI</label>
-                    <input type="number" class="form-control" id="sigi" placeholder="{{ person.sigi }}">
-                </div>
+            <div class="form-group">
+                <label for="ministry">Ministry</label>
+                <select class="form-control" id="ministry" placeholder="{{ person.ministry }}">
+                    <option value="PT" {% if person.ministry == 'PT' %} selected {% endif %}>Portuguese</option>
+                    <option value="MD" {% if person.ministry == 'MD' %} selected {% endif %}>Mandarin</option>
+                    <option value="TW" {% if person.ministry == 'TW' %} selected {% endif %}>Taiwanese</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label for="is_active">Is currently active</label>
-                    <input type="text" class="form-control" id="is_active" readonly placeholder="{{ person.is_active }}">
-                </div>
+            <div class="form-group">
+                <label for="sigi">SIGI</label>
+                <input type="number" class="form-control" id="sigi" placeholder="{{ person.sigi }}">
+            </div>
 
-                <div>
-                    {% for day in person.calendar.sundays %}
+            <div class="form-group">
+                <label for="is_active">Is currently active</label>
+                <input type="text" class="form-control" id="is_active" readonly placeholder="{{ person.is_active }}">
+            </div>
+
+            <p>Calendar</p>
+            <div class="container-fluid">
+                {% for day in person.calendar.sundays %}
                     {% if day <= today %}
                     <div class="form-group">
                         <label for="day">{{ day }}</label>
@@ -96,20 +97,20 @@
                         </select>
                     </div>
                     {% endif %}
-                    {% endfor %}
-                </div>
-                <input type="submit" class="btn btn-outline-success" value="Gravar">
-                <a href="">
-                    <input type="button" class="btn btn-outline-secondary" value="Desfazer">
-                </a>
-                <a href="/management/delete/{{ person._id }}">
-                    <input type="button" class="btn btn-outline-danger" value="Apagar">
-                </a>
-                <a href="/management">
-                    <input type="button" class="btn btn-outline-primary" value="Voltar">
-                </a>
-            </form>
-        </ul>
+                {% endfor %}
+            </div>
+
+            <input type="submit" class="btn btn-outline-success" value="Gravar">
+            <a href="">
+                <input type="button" class="btn btn-outline-secondary" value="Desfazer">
+            </a>
+            <a href="/management/delete/{{ person._id }}">
+                <input type="button" class="btn btn-outline-danger" value="Apagar">
+            </a>
+            <a href="/management">
+                <input type="button" class="btn btn-outline-primary" value="Voltar">
+            </a>
+        </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
