@@ -189,6 +189,7 @@ def management():
     if request.method == 'POST':
         form = request.form.to_dict()
         date = Day.from_str(form.pop('presence_date'))
+        presence = Presence[form.pop('presence')]
         ids = form.keys() # gets ids to be marked
 
     for person in persons:
@@ -201,7 +202,7 @@ def management():
         # if marking presence for person, update in database
         if request.method == 'POST':
             if str(person._id) in ids:
-                if person.calendar.mark_presence(date, Presence.PRESENT):
+                if person.calendar.mark_presence(date, presence):
                     recognition.db.update_member_calendar(person)
 
     return render_template('management.html', persons=persons)
