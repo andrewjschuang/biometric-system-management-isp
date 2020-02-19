@@ -22,13 +22,55 @@
     </nav>
 
     <div class="p-3 mb-2 bg-light text-dark">
-        {% for person in persons %}
-            <img src="data:image/jpeg;base64,{{ person.encodings['FRONT'] }}">
-            <ul class="list-group">
-                <a href="/management/{{ person['_id'] }}"
-                    class="list-group-item list-group-item-action">{{ person.name['first_name'] }} {{ person.name['last_name'] }}</a>
-            </ul>
-        {% endfor %}
+        <h2>Select person to view info, or select boxes to mark multiple presence for a chosen day</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Date for marking presence</span>
+                </div>
+                <input type="date" name="presence_date" class="form-control" placeholder="" aria-label=""
+                    aria-describedby="basic-addon1" required>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <select class="form-control" id="presence" name="presence">
+                        <option value="ABSENT">Absent</option>
+                        <option value="LATE">Late</option>
+                        <option value="PRESENT" selected>Present</option>
+                    </select>
+
+                    <div class="col-auto">
+                        <input type="submit" class="btn btn-outline-success" value="Mark as">
+                    </div>
+                </div>
+            </div>
+
+            {% for person in persons %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <img src="data:image/jpeg;base64,{{ person.encodings['FRONT'] }}">
+                    <div class="form-row">
+                        <div class="col-md-auto">
+                            <a href="/management/{{ person['_id'] }}"
+                                class="list-group-item list-group-item-action">{{ person.name['first_name'] }} {{ person.name['last_name'] }}</a>
+                        </div>
+                        <div class="col-auto">
+                            <input type="checkbox" name="{{ person['_id'] }}" value="true" class="form-control" placeholder="" aria-label=""
+                                aria-describedby="basic-addon1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <input type="submit" class="btn btn-outline-success" value="Mark as">
+                </div>
+            </div>
+        </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
