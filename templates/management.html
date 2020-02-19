@@ -28,22 +28,20 @@
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1">Date for marking presence</span>
+                    <input type="date" name="presence_date" class="form-control" placeholder="" aria-label=""
+                        aria-describedby="basic-addon1" required>
                 </div>
-                <input type="date" name="presence_date" class="form-control" placeholder="" aria-label=""
-                    aria-describedby="basic-addon1" required>
-            </div>
 
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
+                <div class="col-auto">
                     <select class="form-control" id="presence" name="presence">
                         <option value="ABSENT">Absent</option>
                         <option value="LATE">Late</option>
                         <option value="PRESENT" selected>Present</option>
                     </select>
+                </div>
 
-                    <div class="col-auto">
-                        <input type="submit" class="btn btn-outline-success" value="Mark as">
-                    </div>
+                <div class="col-auto">
+                    <input type="submit" class="btn btn-outline-success" value="Mark">
                 </div>
             </div>
 
@@ -67,7 +65,7 @@
 
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                    <input type="submit" class="btn btn-outline-success" value="Mark as">
+                    <input type="submit" class="btn btn-outline-success" value="Mark">
                 </div>
             </div>
         </form>
