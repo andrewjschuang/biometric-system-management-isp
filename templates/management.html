@@ -31,22 +31,43 @@
                     aria-describedby="basic-addon1" required>
             </div>
 
-            {% for person in persons %}
-                <img src="data:image/jpeg;base64,{{ person.encodings['FRONT'] }}">
-                <div class="form-row">
-                    <div class="col-md-auto">
-                        <a href="/management/{{ person['_id'] }}"
-                            class="list-group-item list-group-item-action">{{ person.name['first_name'] }} {{ person.name['last_name'] }}</a>
-                    </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <select class="form-control" id="presence" name="presence">
+                        <option value="ABSENT">Absent</option>
+                        <option value="LATE">Late</option>
+                        <option value="PRESENT" selected>Present</option>
+                    </select>
+
                     <div class="col-auto">
-                        <input type="checkbox" name="{{ person['_id'] }}" value="true" class="form-control" placeholder="" aria-label=""
-                            aria-describedby="basic-addon1">
+                        <input type="submit" class="btn btn-outline-success" value="Mark as">
                     </div>
                 </div>
+            </div>
+
+            {% for person in persons %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <img src="data:image/jpeg;base64,{{ person.encodings['FRONT'] }}">
+                    <div class="form-row">
+                        <div class="col-md-auto">
+                            <a href="/management/{{ person['_id'] }}"
+                                class="list-group-item list-group-item-action">{{ person.name['first_name'] }} {{ person.name['last_name'] }}</a>
+                        </div>
+                        <div class="col-auto">
+                            <input type="checkbox" name="{{ person['_id'] }}" value="true" class="form-control" placeholder="" aria-label=""
+                                aria-describedby="basic-addon1">
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
 
-            <p></p>
-            <input type="submit" class="btn btn-outline-success" value="Mark">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <input type="submit" class="btn btn-outline-success" value="Mark as">
+                </div>
+            </div>
         </form>
     </div>
 
