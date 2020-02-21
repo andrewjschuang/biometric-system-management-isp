@@ -25,7 +25,7 @@ class Calendar:
         for sunday in self.sundays:
             if sunday > today:
                 break
-            if sunday.presence == Presence.PRESENT:
+            if sunday.presence == Presence.PRESENT or sunday.presence == Presence.JUSTIFIED:
                 count += 1
             total += 1
         return True if count / total >= active_rate else False
