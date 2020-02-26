@@ -64,8 +64,7 @@
                                     class="list-group-item list-group-item-action">{{ person.name['first_name'] }} {{ person.name['last_name'] }}</a>
                             </div>
                             <div class="col-auto">
-                                <input type="checkbox" name="{{ person['_id'] }}" value="true" class="form-control" placeholder="" aria-label=""
-                                    aria-describedby="basic-addon1">
+                                <input type="checkbox" name="{{ person['_id'] }}" value="true" class="form-control">
                             </div>
                         </div>
                     </div>
@@ -96,7 +95,13 @@
             $("#searchbar").on("keyup", function () {
                 var value = $(this).val().toLowerCase();
                 $("#people *").filter(function () {
-                    $(this).parent("#people").toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                    var shouldToggle = $(this).text().toLowerCase().indexOf(value) > -1;
+                    var parent = $(this).parent("#people");
+                    if (!shouldToggle) {
+                        parent.find("[type=checkbox]").prop("checked", false);
+                    }
+                    parent.toggle(shouldToggle);
+                    return shouldToggle;
                 });
             });
         });
