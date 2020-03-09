@@ -1,5 +1,6 @@
 from itertools import zip_longest
 
+from entities.Gender import Gender
 from entities.Name import Name
 from entities.Day import Day
 from entities.Ministry import Ministry
@@ -62,7 +63,7 @@ class Person:
             'gender': self.gender.name,
             'phone_number': self.phone_number,
             'member': self.member,
-            'ministry': [x.name for x in self.ministry],
+            'ministry': self.ministry.name,
             'sigi': self.sigi,
             'calendar': self.calendar.to_dict(),
             'photos': { (x.name if type(x) == PhotoCategory else x): photos[x] for x in photos },
@@ -71,6 +72,6 @@ class Person:
 
     @staticmethod
     def from_dict(person):
-        return Person(Name.from_dict(person['name']), Day.from_dict(person['birth_date']), person['email'], person['gender'],
-                        person['phone_number'], person['member'], [Ministry[x] for x in person['ministry']], person['sigi'],
+        return Person(Name.from_dict(person['name']), Day.from_dict(person['birth_date']), person['email'], Gender[person['gender']],
+                        person['phone_number'], person['member'], Ministry[person['ministry']], person['sigi'],
                         Calendar.from_dict(person['calendar']), person['photos'], person['encodings'])

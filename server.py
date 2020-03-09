@@ -81,7 +81,7 @@ def create_person(form):
     gender = Gender[form.get('gender')]
     phone_number = phone_number = re.compile('[\W_]+').sub('', form.get('phone_number'))
     member = form.get('member').lower() == 'true'
-    ministry = [Ministry[form.get('ministry')]]
+    ministry = Ministry[form.get('ministry')]
     sigi = int(form.get('sigi'))
     return Person(name, birth_date, email, gender, phone_number, member, ministry, sigi, Calendar(), {}, {})
 
@@ -92,7 +92,7 @@ def update_person_fields(form, person):
     person.gender = Gender[form.get('gender')]
     person.phone_number = phone_number = re.compile('[\W_]+').sub('', form.get('phone_number')) if form.get('phone_number') else person.phone_number
     person.member = form.get('member').lower() == 'true'
-    person.ministry = [Ministry[form.get('ministry')]]
+    person.ministry = Ministry[form.get('ministry')]
     person.sigi = int(form.get('sigi')) if form.get('sigi') else person.sigi
     return person
 
