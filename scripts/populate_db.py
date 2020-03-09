@@ -68,8 +68,7 @@ class Workbook:
 
             email = element[4]
 
-            ministry = [Ministry[x.strip().upper()] for x in element[5].split(',')]
-
+            ministry = Ministry[element[5].upper()]
             member = bool(element[6])
 
             sigi = element[7]
