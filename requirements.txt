@@ -18,5 +18,5 @@ Pillow==6.2.1
 pymongo==3.7.2
 requests==2.21.0
 scipy==1.2.0
-urllib3==1.25.3
+urllib3==1.25.8
 Werkzeug==0.15.3
