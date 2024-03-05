@@ -9,7 +9,7 @@ import os
 import io
 import re
 
-from database.Mongodb import Mongodb
+from database.MongoConnector import MongoConnector
 
 from entities.Person import Person
 from entities.Gender import Gender
@@ -180,8 +180,8 @@ if __name__ == '__main__':
     wb = Workbook(args.file, args.sheet)
     d = wb.dict_of_people(wb.list_of_people())
 
-    db = Mongodb(db=args.database)
-    db.delete_all_encodings(True)
-    db.delete_all_members(True)
+    # db = MongoConnector(db=args.database)
+    # db.delete_all_encodings(True)
+    # db.delete_all_members(True)
 
     populate(d, db, args)

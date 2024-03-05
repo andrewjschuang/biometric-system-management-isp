@@ -10,7 +10,7 @@ import numpy as np
 import cv2
 
 import config
-from database.Mongodb import Mongodb
+from database.MongoConnector import MongoConnector
 from entities.Collections import Collections
 from entities.Event import Event
 from entities.Day import Day
@@ -23,7 +23,7 @@ from entities.Presence import Presence
 class Recognition:
     # constructor using configuration file
     def __init__(self):
-        self.db = Mongodb(config.mongodb['host'], config.mongodb['port'], config.mongodb['db'])
+        self.db = MongoConnector()
         self.video_source = config.video_source
         self.display_image = config.display_image
         self.tolerance = config.tolerance
