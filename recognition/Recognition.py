@@ -10,7 +10,10 @@ import numpy as np
 import cv2
 
 import config
-from database.Mongodb import Mongodb
+from database.EncodingsCollection import EncodingsCollection
+from database.EventsCollection import EventsCollection
+from database.ImagesCollection import ImagesCollection
+from database.MembersCollection import MembersCollection
 from entities.Collections import Collections
 from entities.Event import Event
 from entities.Day import Day
@@ -20,10 +23,14 @@ from entities.PhotoCategory import PhotoCategory
 from entities.PhotoMode import PhotoMode
 from entities.Presence import Presence
 
+
 class Recognition:
     # constructor using configuration file
     def __init__(self):
-        self.db = Mongodb(config.mongodb['host'], config.mongodb['port'], config.mongodb['db'])
+        self.encodings_db = EncodingsCollection()
+        self.events_db = EventsCollection()
+        self.images_db = ImagesCollection()
+        self.members_db = MembersCollection()
         self.video_source = config.video_source
         self.display_image = config.display_image
         self.tolerance = config.tolerance
@@ -66,13 +73,15 @@ class Recognition:
 
     # gets database of registered faces from mongo
     def get_known_encodings(self):
-        self.known_face_encodings = self.db.get_all_encodings()
-        self.known_face_encodings_list = [encoding.data for encoding in self.known_face_encodings]
+        self.known_face_encodings = self.encodings_db.get_all_encodings()
+        self.known_face_encodings_list = [
+            encoding.data for encoding in self.known_face_encodings]
 
         if len(self.known_face_encodings) == 0:
-            print('no face encodings found in database %s' % self.db.db)
+            print('no face encodings found in database %s' % self.encodings_db.db_name)
             return
-        print('got %s encodings from database' % len(self.known_face_encodings))
+        print('got %s encodings from database' %
+              len(self.known_face_encodings))
 
     # saves frame to database with detected info
     def save_event(self, event, coordinates):
@@ -86,8 +95,9 @@ class Recognition:
         ImageDraw.Draw(pil_image).rectangle(
             ((left, top), (right, bottom)), outline=(0, 0, 255))
 
-        event.photo = Photo(PhotoCategory.EVENT, PhotoMode.RGB, pil_image.size, pil_image.tobytes())
-        ids = self.db.insert_event(event)
+        event.photo = Photo(PhotoCategory.EVENT, PhotoMode.RGB,
+                            pil_image.size, pil_image.tobytes())
+        ids = self.events_db.insert_event(event)
         print('saved event to database')
         # to retrieve the saved photo
         # Image.frombytes(event['foto']['mode'], pil_image['foto']['size'], pil_image['foto']['data']).show()
@@ -134,7 +144,7 @@ class Recognition:
     # identifies faces in frame and persists it
     def recognize(self, frame, model='hog', day=None, presence=None):
         if len(self.known_face_encodings) == 0:
-            print('no face encodings found in database %s' % self.db.db)
+            print('no face encodings found in database %s' % self.encodings_db.db_name)
             return
 
         face_locations, face_encodings = self.get_faces_from_picture(
@@ -145,9 +155,9 @@ class Recognition:
         # conf that defines if should update person's presence or not
         if day is not None and day != '':
             for result in results:
-                member = self.db.get_member_by_id(result.member_id)
+                member = self.members_db.get_member_by_id(result.member_id)
                 if member.calendar.mark_presence(Day.from_str(day), Presence[presence]):
-                    self.db.update_member_calendar(member)
+                    self.members_db.update_member_calendar(member)
                 names.append(result.name)
         else:
             names = [x.name for x in results]
@@ -169,9 +179,11 @@ class Recognition:
         # iterates through each face
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # Draw a box around the face
-            cv2.rectangle(frame, (left*4, top*4), (right*4, bottom*4), (0, 0, 255), 2)
+            cv2.rectangle(frame, (left*4, top*4),
+                          (right*4, bottom*4), (0, 0, 255), 2)
 
-            face_distances = face_recognition.face_distance(self.known_face_encodings_list, face_encoding)
+            face_distances = face_recognition.face_distance(
+                self.known_face_encodings_list, face_encoding)
 
             min_face_distance = np.min(face_distances)
             min_face_distance_index = np.argmin(face_distances)
@@ -187,7 +199,8 @@ class Recognition:
                 #     continue
 
                 # create event document and save it to mongodb
-                event = Event(member_id, name, Day.today(), min_face_distance, self.known_face_encodings[min_face_distance_index], frame)
+                event = Event(member_id, name, Day.today(), min_face_distance,
+                              self.known_face_encodings[min_face_distance_index], frame)
                 self.save_event(event, coordinates=(top, right, bottom, left))
 
                 results.append(event)

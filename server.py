@@ -70,7 +70,7 @@ def get_person_image_from_bytes(bytes, resize):
     image = Image.open(io.BytesIO(bytes))
     imgByteArr = io.BytesIO()
     new_size = (int(image.size[0]*resize), int(image.size[0]*resize))
-    image.thumbnail(new_size, Image.ANTIALIAS)
+    image.thumbnail(new_size, Image.LANCZOS)
     image.save(imgByteArr, format='JPEG')
     return b64encode(imgByteArr.getvalue()).decode('utf-8')
 
@@ -137,7 +137,7 @@ def register():
             return render_template('error.html', error=result['message'])
 
         person = create_person(request.form)
-        member_id = recognition.db.insert_member(person)
+        member_id = recognition.members_db.insert_member(person)
 
         images = request.files
         for image_label in images:
@@ -151,11 +151,11 @@ def register():
                     return render_template('error.html', error='more than one face found')
 
                 encoding = Encoding(member_id, person.name, face_encodings[0])
-                encoding_id = recognition.db.insert_encoding(encoding)
+                encoding_id = recognition.encodings_db.insert_encoding(encoding)
 
                 imgByteArr = io.BytesIO()
                 Image.open(images[image_label]).save(imgByteArr, format='JPEG')
-                image_id = recognition.db.insert_image(imgByteArr.getvalue())
+                image_id = recognition.images_db.insert_image(imgByteArr.getvalue())
 
                 # may be switched
                 person.encodings[PhotoCategory[image_label]] = image_id
@@ -163,7 +163,7 @@ def register():
             except Exception as e:
                 print('failed to retrieve image: %s. reason: %s' % (image_label, e))
 
-        recognition.db.replace_member(member_id, person)
+        recognition.members_db.replace_member(member_id, person)
         recognition.get_known_encodings()
 
         return render_template('registered.html', name=person.name)
@@ -184,7 +184,7 @@ def stop():
 
 @app.route('/management', methods=['GET', 'POST'])
 def management():
-    persons = recognition.db.get_all_members()
+    persons = recognition.members_db.get_all_members()
 
     if request.method == 'POST':
         form = request.form.to_dict()
@@ -194,7 +194,7 @@ def management():
 
     for person in persons:
         try:
-            image_bytes = recognition.db.get_image(person.encodings[PhotoCategory.FRONT.name])
+            image_bytes = recognition.images_db.get_image(person.encodings[PhotoCategory.FRONT.name])
             person.encodings[PhotoCategory.FRONT.name] = get_person_image_from_bytes(image_bytes, 0.05)
         except Exception as e:
             person.encodings[PhotoCategory.FRONT.name] = b''
@@ -203,17 +203,17 @@ def management():
         if request.method == 'POST':
             if str(person._id) in ids:
                 if person.calendar.mark_presence(date, presence):
-                    recognition.db.update_member_calendar(person)
+                    recognition.members_db.update_member_calendar(person)
 
     return render_template('management.html', persons=persons)
 
 @app.route('/management/<_id>', methods=['GET', 'POST'])
 def get(_id):
-    person = recognition.db.get_member_by_id(_id)
+    person = recognition.members_db.get_member_by_id(_id)
     images = []
     for encoding_id in person.encodings.values():
         try:
-            image_bytes = recognition.db.get_image(encoding_id)
+            image_bytes = recognition.images_db.get_image(encoding_id)
             image = get_person_image_from_bytes(image_bytes, 0.15)
             images.append(image)
         except Exception as e:
@@ -222,18 +222,18 @@ def get(_id):
     if request.method == 'POST':
         person = update_person_fields(request.form, person)
         person.set_sundays([Sunday.from_str(key.split('calendar.')[1], request.form[key]) for key in request.form if 'calendar' in key])
-        recognition.db.update_member_calendar(person)
-        recognition.db.replace_member(person._id, person)
+        recognition.members_db.update_member_calendar(person)
+        recognition.members_db.replace_member(person._id, person)
 
     return render_template('person.html', person=person, images=images, today=Day.today())
 
 @app.route('/management/delete/<_id>')
 def delete(_id):
     try:
-        member = recognition.db.get_member_by_id(_id)
-        recognition.db.delete_member(_id)
+        member = recognition.members_db.get_member_by_id(_id)
+        recognition.members_db.delete_member(_id)
         for key in member.encodings:
-            recognition.db.delete_encoding(member.encodings[key])
+            recognition.encodings_db.delete_encoding(member.encodings[key])
     except Exception as e:
         print('error deleting member: %s' % e)
     return render_template('deleted.html')
@@ -255,7 +255,7 @@ def configure():
     return render_template('configure.html', config=config)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=5003, debug=True, use_reloader=True)
 
 # curl -X GET http://localhost:5000
 # curl -F "file=@/home/andrewjschuang/dev/biometric-system-management/photos_for_encoding/random/andrew.jpg" -X POST http://localhost:5000
