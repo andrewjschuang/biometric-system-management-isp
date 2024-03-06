@@ -25,20 +25,32 @@ from entities.Presence import Presence
 
 
 class Recognition:
+    _instance = None
+    _is_initialized = False
+
+    # singleton
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Recognition, cls).__new__(
+                cls, *args, **kwargs)
+        return cls._instance
+
     # constructor using configuration file
     def __init__(self):
-        self.encodings_db = EncodingsCollection()
-        self.events_db = EventsCollection()
-        self.images_db = ImagesCollection()
-        self.members_db = MembersCollection()
-        self.video_source = config.video_source
-        self.display_image = config.display_image
-        self.tolerance = config.tolerance
-        self.video_capture = cv2.VideoCapture(self.video_source)
-        self.known_face_encodings = []
-        self.known_face_encodings_list = []
-        self.get_known_encodings()
-        self.run = False
+        if not self._is_initialized:
+            self.encodings_db = EncodingsCollection()
+            self.events_db = EventsCollection()
+            self.images_db = ImagesCollection()
+            self.members_db = MembersCollection()
+            self.video_source = config.video_source
+            self.display_image = config.display_image
+            self.tolerance = config.tolerance
+            self.video_capture = cv2.VideoCapture(self.video_source)
+            self.known_face_encodings = []
+            self.known_face_encodings_list = []
+            self.get_known_encodings()
+            self.run = False
+            self._is_initialized = True
 
     # updates attributes
     def configure(self, video_source=None, display_image=None, tolerance=None):
