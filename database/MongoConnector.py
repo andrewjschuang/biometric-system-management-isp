@@ -12,7 +12,8 @@ default_db_name = config.mongodb['db_name']
 class MongoConnector(ABC):
     def __init__(self, host=default_host, port=default_port, db_name=default_db_name):
         self.client = MongoClient(host, port)
-        self.db = self.client[db_name]
+        self.db_name = db_name
+        self.db = self.client[self.db_name]
         self.fs = GridFS(self.db)
 
     def __set_collection(self, collection_name):

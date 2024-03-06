@@ -10,7 +10,10 @@ import numpy as np
 import cv2
 
 import config
-from database.MongoConnector import MongoConnector
+from database.EncodingsCollection import EncodingsCollection
+from database.EventsCollection import EventsCollection
+from database.ImagesCollection import ImagesCollection
+from database.MembersCollection import MembersCollection
 from entities.Collections import Collections
 from entities.Event import Event
 from entities.Day import Day
@@ -24,7 +27,10 @@ from entities.Presence import Presence
 class Recognition:
     # constructor using configuration file
     def __init__(self):
-        self.db = MongoConnector()
+        self.encodings_db = EncodingsCollection()
+        self.events_db = EventsCollection()
+        self.images_db = ImagesCollection()
+        self.members_db = MembersCollection()
         self.video_source = config.video_source
         self.display_image = config.display_image
         self.tolerance = config.tolerance
@@ -67,12 +73,12 @@ class Recognition:
 
     # gets database of registered faces from mongo
     def get_known_encodings(self):
-        self.known_face_encodings = self.db.get_all_encodings()
+        self.known_face_encodings = self.encodings_db.get_all_encodings()
         self.known_face_encodings_list = [
             encoding.data for encoding in self.known_face_encodings]
 
         if len(self.known_face_encodings) == 0:
-            print('no face encodings found in database %s' % self.db.db)
+            print('no face encodings found in database %s' % self.encodings_db.db_name)
             return
         print('got %s encodings from database' %
               len(self.known_face_encodings))
@@ -91,7 +97,7 @@ class Recognition:
 
         event.photo = Photo(PhotoCategory.EVENT, PhotoMode.RGB,
                             pil_image.size, pil_image.tobytes())
-        ids = self.db.insert_event(event)
+        ids = self.events_db.insert_event(event)
         print('saved event to database')
         # to retrieve the saved photo
         # Image.frombytes(event['foto']['mode'], pil_image['foto']['size'], pil_image['foto']['data']).show()
@@ -138,7 +144,7 @@ class Recognition:
     # identifies faces in frame and persists it
     def recognize(self, frame, model='hog', day=None, presence=None):
         if len(self.known_face_encodings) == 0:
-            print('no face encodings found in database %s' % self.db.db)
+            print('no face encodings found in database %s' % self.encodings_db.db_name)
             return
 
         face_locations, face_encodings = self.get_faces_from_picture(
@@ -149,9 +155,9 @@ class Recognition:
         # conf that defines if should update person's presence or not
         if day is not None and day != '':
             for result in results:
-                member = self.db.get_member_by_id(result.member_id)
+                member = self.members_db.get_member_by_id(result.member_id)
                 if member.calendar.mark_presence(Day.from_str(day), Presence[presence]):
-                    self.db.update_member_calendar(member)
+                    self.members_db.update_member_calendar(member)
                 names.append(result.name)
         else:
             names = [x.name for x in results]

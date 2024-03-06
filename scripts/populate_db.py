@@ -9,7 +9,10 @@ import os
 import io
 import re
 
-from database.MongoConnector import MongoConnector
+from database.EncodingsCollection import EncodingsCollection
+from database.EventsCollection import EventsCollection
+from database.ImagesCollection import ImagesCollection
+from database.MembersCollection import MembersCollection
 
 from entities.Person import Person
 from entities.Gender import Gender
@@ -121,10 +124,10 @@ def rename_lower(path):
     for f in os.listdir(path):
         os.rename(os.path.join(path, f), os.path.join(path, f.lower()))
 
-def populate(d, db, args):
+def populate(d, args):
     for person in d:
         print('saving person...', end=' ')
-        member_id = db.insert_member(person)
+        member_id = members_db.insert_member(person)
 
         encoding_saved = False
         print(person.name)
@@ -146,12 +149,12 @@ def populate(d, db, args):
                     print('saving %s: %s...' % (key, fpath), end=' ')
                     encoding = Encoding(member_id, person.name, encodings)
 
-                    encoding_id = db.insert_encoding(encoding)
+                    encoding_id = encodings_db.insert_encoding(encoding)
                     person.photos[key] = encoding_id
 
                     imgByteArr = io.BytesIO()
                     foto.save(imgByteArr, format='JPEG')
-                    image_id = db.insert_image(imgByteArr.getvalue())
+                    image_id = images_db.insert_image(imgByteArr.getvalue())
                     person.encodings[key] = image_id
 
                     encoding_saved = True
@@ -161,7 +164,7 @@ def populate(d, db, args):
                     continue
 
         print('updating person...')
-        db.replace_member(member_id, person)
+        members_db.replace_member(member_id, person)
 
 def createArgsParser():
     parser = argparse.ArgumentParser()
@@ -180,8 +183,9 @@ if __name__ == '__main__':
     wb = Workbook(args.file, args.sheet)
     d = wb.dict_of_people(wb.list_of_people())
 
-    # db = MongoConnector(db=args.database)
-    # db.delete_all_encodings(True)
-    # db.delete_all_members(True)
+    encodings_db = EncodingsCollection()
+    events_db = EventsCollection()
+    images_db = ImagesCollection()
+    members_db = MembersCollection()
 
-    populate(d, db, args)
+    populate(d, args)
