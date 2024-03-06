@@ -16,51 +16,56 @@ class MongoConnector(ABC):
         self.db = self.client[self.db_name]
         self.fs = GridFS(self.db)
 
-    def __set_collection(self, collection_name):
+    def _set_collection(self, collection_name):
         self.collection = self.db.get_collection(collection_name)
 
-    def __object_id(self, document_id):
+    def _object_id(self, document_id):
         return {'_id': ObjectId(document_id)}
 
-    def __object_document(self, obj):
+    def _object_document(self, obj):
         try:
             return obj.to_dict()
         except:
             return obj
 
-    def __get_all_documents(self):
+    def _get_all_documents(self):
         for document in self.collection.find():
             yield document
 
-    def __insert(self, obj):
+    def _insert(self, obj):
         # TODO: document keys validation
-        document = self.__object_document(obj)
-        return self.collection.insert_one(document)
+        document = self._object_document(obj)
+        result = self.collection.insert_one(document)
+        if not result.acknowledged:
+            raise Exception("Failed to insert")
+        return result.inserted_id
 
-    def __update(self, document_id, field, obj, operator, upsert=True):
-        _id = self.__object_id(document_id)
-        document = self.__object_document(obj)
-        return self.collection.update_one(_id, {operator: {field: document}}, upsert)
+    def _update(self, document_id, field, obj, operator, upsert=True):
+        _id = self._object_id(document_id)
+        document = self._object_document(obj)
+        result = self.collection.update_one(_id, {operator: {field: document}}, upsert)
+        # TODO: return something?
 
-    def __replace(self, document_id, obj):
-        _id = self.__object_id(document_id)
-        document = self.__object_document(obj)
+    def _replace(self, document_id, obj):
+        _id = self._object_id(document_id)
+        document = self._object_document(obj)
         return self.collection.replace_one(_id, document)
 
-    def __delete(self, obj):
-        document = self.__object_document(obj)
+    def _delete(self, obj):
+        document = self._object_document(obj)
         return self.collection.delete_one(document)
 
-    def __delete_by_id(self, document_id):
-        _id = self.__object_id(document_id)
+    def _delete_by_id(self, document_id):
+        _id = self._object_id(document_id)
+        # TODO: return something?
         return self.collection.delete_one(_id)
 
-    def __find(self, obj={}):
-        document = self.__object_document(obj)
+    def _find(self, obj={}):
+        document = self._object_document(obj)
         if type(document) == str or type(document) == ObjectId:
-            return self.collection.find(self.__object_id(document))
+            return self.collection.find(self._object_id(document))
         return self.collection.find(document)
 
-    def __find_by_id(self, document_id):
-        _id = self.__object_id(document_id)
+    def _find_by_id(self, document_id):
+        _id = self._object_id(document_id)
         return self.collection.find(_id)
