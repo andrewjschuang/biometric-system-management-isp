@@ -70,7 +70,7 @@ def get_person_image_from_bytes(bytes, resize):
     image = Image.open(io.BytesIO(bytes))
     imgByteArr = io.BytesIO()
     new_size = (int(image.size[0]*resize), int(image.size[0]*resize))
-    image.thumbnail(new_size, Image.ANTIALIAS)
+    image.thumbnail(new_size, Image.LANCZOS)
     image.save(imgByteArr, format='JPEG')
     return b64encode(imgByteArr.getvalue()).decode('utf-8')
 
