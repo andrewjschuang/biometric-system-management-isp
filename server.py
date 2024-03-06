@@ -1,4 +1,5 @@
 from flask import Flask, request, redirect, url_for, jsonify
+from flask_cors import CORS
 from recognition.Recognition import Recognition
 import api.configuration as api_configuration
 import api.image as api_image
@@ -8,6 +9,7 @@ import api.websocket as api_websocket
 
 
 app = Flask(__name__)
+CORS(app) # TOOD: remove?
 recognition = Recognition()
 
 
