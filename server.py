@@ -1,16 +1,31 @@
-from flask import Flask, request, redirect, url_for, jsonify
+from flask import Flask, request, redirect, url_for, jsonify, Response
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 from recognition.Recognition import Recognition
 import api.configuration as api_configuration
 import api.image as api_image
 import api.management as api_management
 import api.signaling as api_signaling
 import api.websocket as api_websocket
+import base64
+import time
 
 
 app = Flask(__name__)
-CORS(app) # TOOD: remove?
+CORS(app)  # TOOD: remove?
+socketio = SocketIO(app, cors_allowed_origins=['http://localhost:5173'])
 recognition = Recognition()
+recognition.inject_socket(socketio)
+
+
+@socketio.on('connect')
+def websocket_connect():
+    return
+
+
+@socketio.on('disconnect')
+def websocket_disconnect():
+    return
 
 
 @app.route('/', methods=['GET'])
@@ -43,6 +58,15 @@ def recognize():
     return api_image.recognize(request)
 
 
+@app.route('/configure', methods=['GET', 'POST'])
+def configure():
+    try:
+        config = api_configuration.configure(request)
+        return jsonify({'data': config}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
 @app.route('/start', methods=['GET'])
 def start():
     api_signaling.start()
@@ -53,15 +77,6 @@ def start():
 def stop():
     api_signaling.stop()
     return jsonify({'data': {'success': True}}), 200
-
-
-@app.route('/configure', methods=['GET', 'POST'])
-def configure():
-    try:
-        config = api_configuration.configure(request)
-        return jsonify({'data': config}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
 
 
 if __name__ == '__main__':

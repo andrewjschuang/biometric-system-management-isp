@@ -4,6 +4,7 @@ import argparse
 import datetime
 import signal
 import time
+import base64
 
 import face_recognition
 import numpy as np
@@ -47,10 +48,12 @@ class Recognition:
             self.tolerance = config.tolerance
             self.video_capture = cv2.VideoCapture(self.video_source)
             self.known_face_encodings = []
-            self.known_face_encodings_list = []
             self.get_known_encodings()
             self.run = False
             self._is_initialized = True
+
+    def inject_socket(self, socketio):
+        self.socketio = socketio
 
     # updates attributes
     def configure(self, video_source=None, display_image=None, tolerance=None):
@@ -86,8 +89,6 @@ class Recognition:
     # gets database of registered faces from mongo
     def get_known_encodings(self):
         self.known_face_encodings = self.encodings_db.get_all_encodings()
-        self.known_face_encodings_list = [
-            encoding.data for encoding in self.known_face_encodings]
 
         if len(self.known_face_encodings) == 0:
             print('no face encodings found in database %s' % self.encodings_db.db_name)
@@ -125,6 +126,10 @@ class Recognition:
         # captures indefinitely
         while self.run:
             frame = self.capture()
+            _, buffer = cv2.imencode('.jpg', frame)
+            encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
+            self.socketio.emit('frame', {'frame': encoded_frame})
+
             if frame is not None:
                 threading.Thread(target=self.recognize, args=(frame,)).start()
                 print('started recognition thread')
@@ -195,7 +200,7 @@ class Recognition:
                           (right*4, bottom*4), (0, 0, 255), 2)
 
             face_distances = face_recognition.face_distance(
-                self.known_face_encodings_list, face_encoding)
+                [x.data for x in self.known_face_encodings], face_encoding)
 
             min_face_distance = np.min(face_distances)
             min_face_distance_index = np.argmin(face_distances)
@@ -214,6 +219,24 @@ class Recognition:
                 event = Event(member_id, name, Day.today(), min_face_distance,
                               self.known_face_encodings[min_face_distance_index], frame)
                 self.save_event(event, coordinates=(top, right, bottom, left))
+
+                _, buffer = cv2.imencode('.jpg', frame)
+                encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
+
+                photo_id = self.members_db.get_member_by_id(member_id).photos['FRONT']
+                match = self.images_db.get_image(photo_id)
+                encoded_match = base64.b64encode(match).decode('utf-8')
+
+                self.socketio.emit('match', {
+                    'image': {
+                        'src': encoded_frame,
+                    },
+                    'match': {
+                        'src': encoded_match,
+                        'id': str(member_id),
+                        'name': str(name)
+                    }
+                })
 
                 results.append(event)
 

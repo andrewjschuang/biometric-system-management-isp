@@ -3,6 +3,7 @@ import re
 from flask import render_template
 from base64 import b64encode
 from PIL import Image
+from api.image import image_validation, get_image
 from entities.Person import Person
 from entities.PhotoCategory import PhotoCategory
 from entities.Calendar import Calendar
@@ -152,9 +153,9 @@ def register(request):
                 image_id = recognition.images_db.insert_image(
                     imgByteArr.getvalue())
 
-                # may be switched
-                person.encodings[PhotoCategory[image_label]] = image_id
-                person.photos[PhotoCategory[image_label]] = encoding_id
+                # may be broken
+                person.encodings[PhotoCategory[image_label]] = encoding_id
+                person.photos[PhotoCategory[image_label]] = image_id
             except Exception as e:
                 print('failed to retrieve image: %s. reason: %s' %
                       (image_label, e))
