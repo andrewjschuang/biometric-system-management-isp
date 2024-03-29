@@ -33,6 +33,18 @@ def index():
     return redirect(url_for('management'))
 
 
+@app.route('/api/members', methods=['GET'])
+def members():
+    data = api_management.get_members(request)
+    return jsonify({'data': data}), 200
+
+
+@app.route('/api/images/<_id>', methods=['GET'])
+def api_management_image(_id):
+    image_binary = api_management.get_image(request, _id)
+    return Response(response=image_binary, status=200, mimetype='image/jpeg')
+
+
 @app.route('/management', methods=['GET', 'POST'])
 def management():
     return api_management.index(request)

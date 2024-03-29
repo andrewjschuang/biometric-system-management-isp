@@ -27,6 +27,16 @@ photo_labels = [
 ]
 
 
+def image_binary(image_bytes, resize=0.5):
+    image = Image.open(io.BytesIO(image_bytes))
+    imgByteArr = io.BytesIO()
+    new_size = (int(image.size[0] * resize), int(image.size[1] * resize))
+    image.thumbnail(new_size, Image.LANCZOS)
+    image.save(imgByteArr, format='JPEG')
+    imgByteArr.seek(0)
+    return imgByteArr.getvalue()
+
+
 def get_person_image_from_bytes(bytes, resize):
     image = Image.open(io.BytesIO(bytes))
     imgByteArr = io.BytesIO()
@@ -61,6 +71,16 @@ def update_person_fields(form, person):
     person.ministry = [Ministry[form.get('ministry')]]
     person.sigi = int(form.get('sigi')) if form.get('sigi') else person.sigi
     return person
+
+
+def get_members(request):
+    members = recognition.members_db.get_all_members()
+    return {'members': [x.to_dict() for x in members]}
+
+
+def get_image(request, _id):
+    image_bytes = recognition.images_db.get_image(_id)
+    return image_binary(image_bytes)
 
 
 def index(request):

@@ -59,14 +59,14 @@ class Person:
             'name': self.name.to_dict(),
             'birth_date': self.birth_date.to_dict(),
             'email': self.email,
-            'gender': self.gender.name,
+            'gender': self.gender,
             'phone_number': self.phone_number,
             'member': self.member,
             'ministry': [x.name for x in self.ministry],
             'sigi': self.sigi,
             'calendar': self.calendar.to_dict(),
-            'photos': { (x.name if type(x) == PhotoCategory else x): photos[x] for x in photos },
-            'encodings': { (x.name if type(x) == PhotoCategory else x) : encodings[x] for x in encodings }
+            'photos': { (x.name if type(x) == PhotoCategory else x): str(photos[x]) for x in photos },
+            'encodings': { (x.name if type(x) == PhotoCategory else x) : str(encodings[x]) for x in encodings }
         }
 
     @staticmethod
