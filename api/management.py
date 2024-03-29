@@ -75,11 +75,11 @@ def index(request):
     for person in persons:
         try:
             image_bytes = recognition.images_db.get_image(
-                person.encodings[PhotoCategory.FRONT.name])
-            person.encodings[PhotoCategory.FRONT.name] = get_person_image_from_bytes(
+                person.photos[PhotoCategory.FRONT.name])
+            person.photos[PhotoCategory.FRONT.name] = get_person_image_from_bytes(
                 image_bytes, 0.05)
         except Exception as e:
-            person.encodings[PhotoCategory.FRONT.name] = b''
+            person.photos[PhotoCategory.FRONT.name] = b''
 
         # if marking presence for person, update in database
         if request.method == 'POST':
