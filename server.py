@@ -33,10 +33,14 @@ def index():
     return redirect(url_for('management'))
 
 
-@app.route('/api/members', methods=['GET'])
+@app.route('/api/members', methods=['GET', 'POST'])
 def members():
-    data = api_management.get_members(request)
-    return jsonify({'data': data}), 200
+    if request.method == 'GET':
+        data = api_management.get_members(request)
+        return jsonify({'data': data}), 200
+    elif request.method == 'POST':
+        api_management.update_member(request)
+        return jsonify({'data': 'success'}), 200
 
 
 @app.route('/api/images/<_id>', methods=['GET'])

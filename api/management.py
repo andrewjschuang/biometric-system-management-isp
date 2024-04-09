@@ -77,6 +77,9 @@ def get_members(request):
     members = recognition.members_db.get_all_members()
     return {'members': [x.to_dict() for x in members]}
 
+def update_member(request):
+    member = request.json
+    recognition.members_db.replace_member(member.id, member)
 
 def get_image(request, _id):
     image_bytes = recognition.images_db.get_image(_id)
