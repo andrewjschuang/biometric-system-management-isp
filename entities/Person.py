@@ -8,8 +8,10 @@ from entities.Encoding import Encoding
 from entities.PhotoCategory import PhotoCategory
 from entities.Sunday import Sunday
 
+
 class Person:
-    def __init__(self, name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, photos, encodings):
+    def __init__(self, id, name, birth_date, email, gender, phone_number, member, ministry, sigi, calendar, photos, encodings):
+        self.id = id
         self.name = name
         self.birth_date = birth_date
         self.email = email
@@ -24,15 +26,15 @@ class Person:
         self.is_active = self.calendar.is_active()
 
     def __str__(self):
-        return 'Person(name=%s, birth_date=%s, email=%s, gender=%s, phone_number=%s, member=%s, ministry=%s, sigi=%s, calendar=%s, photos=%s, encodings=%s)' % (
-            self.name, self.birth_date, self.email, self.gender, self.phone_number, self.member, self.ministry, self.sigi, self.calendar, self.photos, self.encodings)
+        return 'Person(id=%s, name=%s, birth_date=%s, email=%s, gender=%s, phone_number=%s, member=%s, ministry=%s, sigi=%s, calendar=%s, photos=%s, encodings=%s)' % (
+            self.id, self.name, self.birth_date, self.email, self.gender, self.phone_number, self.member, self.ministry, self.sigi, self.calendar, self.photos, self.encodings)
 
-    def set_id(self, _id):
-        self._id = _id
+    def set_id(self, id):
+        self.id = id
         return self
 
     def set_sundays(self, sundays):
-        for index,t in enumerate(zip_longest(self.calendar.sundays, sundays)):
+        for index, t in enumerate(zip_longest(self.calendar.sundays, sundays)):
             sunday = t[1]
             if sunday is not None:
                 self.calendar.sundays[index] = sunday
@@ -56,6 +58,7 @@ class Person:
                     encodings[x] = self.encodings[x]
 
         return {
+            'id': self.id,
             'name': self.name.to_dict(),
             'birth_date': self.birth_date.to_dict(),
             'email': self.email,
@@ -65,12 +68,13 @@ class Person:
             'ministry': [x.name for x in self.ministry],
             'sigi': self.sigi,
             'calendar': self.calendar.to_dict(),
-            'photos': { (x.name if type(x) == PhotoCategory else x): str(photos[x]) for x in photos },
-            'encodings': { (x.name if type(x) == PhotoCategory else x) : str(encodings[x]) for x in encodings }
+            'photos': {(x.name if type(x) == PhotoCategory else x): str(photos[x]) for x in photos},
+            'encodings': {(x.name if type(x) == PhotoCategory else x): str(encodings[x]) for x in encodings}
         }
 
     @staticmethod
     def from_dict(person):
-        return Person(Name.from_dict(person['name']), Day.from_dict(person['birth_date']), person['email'], person['gender'],
-                        person['phone_number'], person['member'], [Ministry[x] for x in person['ministry']], person['sigi'],
-                        Calendar.from_dict(person['calendar']), person['photos'], person['encodings'])
+        ministry = [Ministry[x] for x in person['ministry']]
+        return Person(str(person['_id']), Name.from_dict(person['name']), Day.from_dict(person['birth_date']), person['email'], person['gender'],
+                      person['phone_number'], person['member'], ministry, person['sigi'],
+                      Calendar.from_dict(person['calendar']), person['photos'], person['encodings'])

@@ -10,12 +10,12 @@ class MembersCollection(MongoConnector):
     # gets all members and initializes to a list of Persons
     def get_all_members(self):
         documents = self._get_all_documents()
-        return [Person.from_dict(member).set_id(member['_id']) for member in documents]
+        return [Person.from_dict(member) for member in documents]
 
     # gets the member by id
     def get_member_by_id(self, _id):
         member = self._find_by_id(_id).next()
-        return Person.from_dict(member).set_id(member['_id'])
+        return Person.from_dict(member)
 
     def insert_member(self, member):
         return self._insert(member)
