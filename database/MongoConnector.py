@@ -2,7 +2,7 @@ import config
 from abc import ABC
 from pymongo import MongoClient
 from gridfs import GridFS
-from bson.objectid import ObjectId
+from bson import ObjectId
 
 default_host = config.mongodb['host']
 default_port = config.mongodb['port']
@@ -39,6 +39,12 @@ class MongoConnector(ABC):
         if not result.acknowledged:
             raise Exception("Failed to insert")
         return result.inserted_id
+
+    def _upsert(self, obj):
+        if '_id' in obj:
+            self._update(obj)
+        else:
+            self._insert(obj)
 
     def _update(self, document_id, field, obj, operator, upsert=True):
         _id = self._object_id(document_id)

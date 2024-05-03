@@ -15,10 +15,8 @@ from database.EncodingsCollection import EncodingsCollection
 from database.EventsCollection import EventsCollection
 from database.ImagesCollection import ImagesCollection
 from database.MembersCollection import MembersCollection
-from entities.Collections import Collections
 from entities.Event import Event
 from entities.Day import Day
-from entities.Name import Name
 from entities.Photo import Photo
 from entities.PhotoCategory import PhotoCategory
 from entities.PhotoMode import PhotoMode
@@ -109,7 +107,7 @@ class Recognition:
             ((left, top), (right, bottom)), outline=(0, 0, 255))
 
         event.photo = Photo(PhotoCategory.EVENT, PhotoMode.RGB,
-                            pil_image.size, pil_image.tobytes())
+                            pil_image.tobytes(), pil_image.size)
         ids = self.events_db.insert_event(event)
         print('saved event to database')
         # to retrieve the saved photo

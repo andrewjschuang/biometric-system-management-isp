@@ -1,8 +1,9 @@
 import numpy as np
-from entities.Name import Name
+
+
 class Encoding:
     def __init__(self, member_id, name, data):
-        self.member_id = member_id
+        self.member_id = str(member_id)
         self.name = name
         self.data = data
 
@@ -12,10 +13,10 @@ class Encoding:
     def to_dict(self):
         return {
             'member_id': self.member_id,
-            'name': self.name.to_dict(),
+            'name': self.name,
             'data': self.data.tolist()
         }
 
     @staticmethod
     def from_dict(encoding):
-        return Encoding(encoding['member_id'], Name.from_dict(encoding['name']), np.array(encoding['data']))
+        return Encoding(encoding['member_id'], encoding['name'], np.array(encoding['data']))

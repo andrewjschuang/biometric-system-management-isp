@@ -18,13 +18,14 @@ class MembersCollection(MongoConnector):
         return Person.from_dict(member)
 
     def insert_member(self, member):
-        return self._insert(member)
+        return self._insert(member.to_dict())
 
     def update_member_calendar(self, member):
-        return self._update(member._id, 'calendar', member.calendar, '$set', upsert=True)
+        pass
+        # return self._update(member._id, 'calendar', member.calendar, '$set', upsert=True)
 
     def replace_member(self, member_id, member):
-        return self._replace(member_id, member)
+        return self._replace(member_id, member.to_dict())
 
     def delete_member(self, _id):
         return self._delete_by_id(_id)

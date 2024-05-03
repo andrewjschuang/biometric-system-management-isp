@@ -12,7 +12,8 @@ import time
 
 
 app = Flask(__name__)
-CORS(app)  # TOOD: remove?
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limit file size to 16MB
+CORS(app, origins=["http://localhost:5173"])  # TOOD: remove?
 socketio = SocketIO(app, cors_allowed_origins=['http://localhost:5173'])
 recognition = Recognition()
 recognition.inject_socket(socketio)
@@ -33,19 +34,22 @@ def index():
     return redirect(url_for('management'))
 
 
-@app.route('/api/members', methods=['GET', 'POST'])
+@app.route('/api/members', methods=['GET', 'POST', 'PUT'])
 def members():
     if request.method == 'GET':
         data = api_management.get_members(request)
         return jsonify({'data': data}), 200
     elif request.method == 'POST':
+        api_management.register_api(request)
+        return jsonify({'data': 'success'}), 200
+    elif request.method == 'PUT':
         api_management.update_member(request)
         return jsonify({'data': 'success'}), 200
 
 
 @app.route('/api/images/<_id>', methods=['GET'])
 def api_management_image(_id):
-    image_binary = api_management.get_image(request, _id)
+    image_binary = api_management.get_image_from_db(request, _id)
     return Response(response=image_binary, status=200, mimetype='image/jpeg')
 
 

@@ -46,17 +46,17 @@ def get_person_image_from_bytes(bytes, resize):
     return b64encode(imgByteArr.getvalue()).decode('utf-8')
 
 
-def create_person(form):
-    name = Name.from_str(form.get('name'))
-    birth_date = Day.from_str(form.get('birth_date'))
-    email = form.get('email')
-    gender = Gender[form.get('gender')]
-    phone_number = phone_number = re.compile(
-        '[\W_]+').sub('', form.get('phone_number'))
-    member = form.get('member').lower() == 'true'
-    ministry = [Ministry[form.get('ministry')]]
-    sigi = int(form.get('sigi'))
-    return Person(name, birth_date, email, gender, phone_number, member, ministry, sigi, Calendar(), {}, {})
+def create_person(data):
+    id = data.get('id')
+    name = data.get('name')
+    birth_date = data.get('birth_date')
+    email = data.get('email')
+    gender = data.get('gender')
+    phone_number = data.get('phone_number')
+    is_member = data.get('is_member')
+    ministry = data.get('ministry')
+    sigi = data.get('sigi')
+    return Person(id, name, birth_date, email, gender, phone_number, is_member, ministry, sigi)
 
 
 def update_person_fields(form, person):
@@ -77,11 +77,56 @@ def get_members(request):
     members = recognition.members_db.get_all_members()
     return {'members': [x.to_dict() for x in members]}
 
-def update_member(request):
-    member = request.json
-    recognition.members_db.replace_member(member.id, member)
 
-def get_image(request, _id):
+def update_member(request):
+    person = create_person(request.form)
+    recognition.members_db.replace_member(person.id, person)
+
+
+def register_api(request):
+    # result = image_validation(data, photo_labels)
+    person = create_person(request.form)
+    member_id = recognition.members_db.insert_member(person)
+
+    # front_photo = request.files.get('front_photo')
+    # left_photo = request.files.get('left_photo')
+    # right_photo = request.files.get('right_photo')
+    # photos = {
+    #     'FRONT': front_photo.read() if front_photo else None,
+    #     'LEFT': left_photo.read() if left_photo else None,
+    #     'RIGHT': right_photo.read() if right_photo else None,
+    # }
+
+    images = request.files
+    for image_label in request.files:
+        try:
+            image = get_image(images[image_label])
+            _, face_encodings = recognition.get_faces_from_picture(image)
+            if len(face_encodings) == 0:
+                raise Exception('no face')
+            if len(face_encodings) > 1:
+                raise Exception('more than one face')
+        except Exception as e:
+            print('failed to retrieve image: %s. reason: %s' %
+                  (image_label, e))
+
+        encoding = Encoding(member_id, person.name, face_encodings[0])
+        encoding_id = recognition.encodings_db.insert_encoding(encoding)
+
+        imgByteArr = io.BytesIO()
+        Image.open(images[image_label]).save(imgByteArr, format='JPEG')
+        image_id = recognition.images_db.insert_image(
+            imgByteArr.getvalue())
+
+        # may be broken
+        person.encodings[PhotoCategory[image_label]] = encoding_id
+        person.photos[PhotoCategory[image_label]] = image_id
+
+    recognition.members_db.replace_member(member_id, person)
+    recognition.get_known_encodings()
+
+
+def get_image_from_db(_id):
     image_bytes = recognition.images_db.get_image(_id)
     return image_binary(image_bytes)
 
@@ -143,49 +188,3 @@ def delete(request, _id):
     except Exception as e:
         print('error deleting member: %s' % e)
     return render_template('deleted.html')
-
-
-def register(request):
-    if request.method == 'POST':
-        result = image_validation(request, photo_labels)
-
-        if result['error']:
-            return render_template('error.html', error=result['message'])
-
-        person = create_person(request.form)
-        member_id = recognition.members_db.insert_member(person)
-
-        images = request.files
-        for image_label in images:
-            try:
-                image = get_image(images[image_label])
-                face_locations, face_encodings = recognition.get_faces_from_picture(
-                    image)
-
-                if len(face_encodings) == 0:
-                    return render_template('error.html', error='no face found')
-                if len(face_encodings) > 1:
-                    return render_template('error.html', error='more than one face found')
-
-                encoding = Encoding(member_id, person.name, face_encodings[0])
-                encoding_id = recognition.encodings_db.insert_encoding(
-                    encoding)
-
-                imgByteArr = io.BytesIO()
-                Image.open(images[image_label]).save(imgByteArr, format='JPEG')
-                image_id = recognition.images_db.insert_image(
-                    imgByteArr.getvalue())
-
-                # may be broken
-                person.encodings[PhotoCategory[image_label]] = encoding_id
-                person.photos[PhotoCategory[image_label]] = image_id
-            except Exception as e:
-                print('failed to retrieve image: %s. reason: %s' %
-                      (image_label, e))
-
-        recognition.members_db.replace_member(member_id, person)
-        recognition.get_known_encodings()
-
-        return render_template('registered.html', name=person.name)
-
-    return render_template('register.html', labels=photo_labels)

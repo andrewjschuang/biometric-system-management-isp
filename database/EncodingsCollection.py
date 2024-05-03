@@ -12,7 +12,7 @@ class EncodingsCollection(MongoConnector):
         return [Encoding.from_dict(encoding) for encoding in encodings]
 
     def insert_encoding(self, encoding):
-        return self._insert(encoding)
+        return self._insert(encoding.to_dict())
 
     def delete_encoding(self, _id):
         return self._delete_by_id(_id)

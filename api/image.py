@@ -40,14 +40,14 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def recognize(request):
-    result = image_validation(request)
+# def recognize(request):
+#     result = image_validation(request)
 
-    if result['error']:
-        return json.dumps({'error': result['message']})
+#     if result['error']:
+#         return json.dumps({'error': result['message']})
 
-    image = get_image(request.files['file'])
-    events = recognition.recognize(
-        image, update_presence=request.form.get('update'))
+#     image = get_image(request.files['file'])
+#     events = recognition.recognize(
+#         image, update_presence=request.form.get('update'))
 
-    return json.dumps({'results': events})
+#     return json.dumps({'results': events})

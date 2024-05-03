@@ -26,6 +26,7 @@ from entities.Name import Name
 from entities.Ministry import Ministry
 from entities.Encoding import Encoding
 
+
 class Workbook:
     rows = range(2, 200)
     columns = 'BEFGIKLQS'
@@ -50,15 +51,12 @@ class Workbook:
         d = []
 
         for element in l:
-            name = Name.from_str(element[0])
+            name = element[0]
 
-            gender = Gender.FEMALE if element[1] == 'F' else Gender.MALE
+            gender = 'FEMALE' if element[1] == 'F' else 'MALE'
 
             day = element[2]
-            if day is None:
-                birth_date = None
-            else:
-                birth_date = Day(day.year, day.month, day.day)
+            birth_date = day.year, day.month, day.day if day else None
 
             if element[3] is None:
                 phone_number = None
@@ -71,31 +69,32 @@ class Workbook:
 
             email = element[4]
 
-            ministry = [Ministry[x.strip().upper()] for x in element[5].split(',')]
+            ministry = element[5].split(',')[0].upper()
 
-            member = bool(element[6])
+            is_member = bool(element[6])
 
             sigi = element[7]
 
             calendar = Calendar()
 
             photos = {
-                PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, 0, element[8].lower() + '-fr.jpg'),
-                PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, 0, element[8].lower() + '-le.jpg'),
-                PhotoCategory.RIGHT: Photo(PhotoCategory.RIGHT, PhotoMode.RAW, 0, element[8].lower() + '-ld.jpg'),
+                PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, element[8].lower() + '-fr.jpg', 0),
+                PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, element[8].lower() + '-le.jpg', 0),
+                PhotoCategory.RIGHT: Photo(PhotoCategory.RIGHT, PhotoMode.RAW, element[8].lower() + '-ld.jpg', 0),
             }
 
             encodings = {
-                PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, 0, element[8].lower() + '-fr.jpg'),
-                PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, 0, element[8].lower() + '-le.jpg'),
+                PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, element[8].lower() + '-fr.jpg', 0),
+                PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, element[8].lower() + '-le.jpg', 0),
                 PhotoCategory.RIGHT: Photo(
-                    PhotoCategory.RIGHT, PhotoMode.RAW, 0, element[8].lower() + '-ld.jpg')
+                    PhotoCategory.RIGHT, PhotoMode.RAW, element[8].lower() + '-ld.jpg', 0)
             }
 
             d.append(Person(name, birth_date, email, gender, phone_number,
-                            member, ministry, sigi, calendar, photos, encodings))
+                            is_member, ministry, sigi, photos, encodings, calendar))
 
         return d
+
 
 class Rotate:
     @staticmethod
@@ -120,9 +119,11 @@ class Rotate:
             image = image.transpose(Image.ROTATE_90)
         return image
 
+
 def rename_lower(path):
     for f in os.listdir(path):
         os.rename(os.path.join(path, f), os.path.join(path, f.lower()))
+
 
 def populate(d, args):
     for person in d:
@@ -137,14 +138,16 @@ def populate(d, args):
                 continue
             else:
                 try:
-                    fpath = os.path.join(args.path, person.photos[key].data.lower())
+                    fpath = os.path.join(
+                        args.path, person.photos[key].data.lower())
 
                     foto = Image.open(fpath)
                     try:
                         foto = Rotate.rotate(foto)
                     except Exception as e:
                         pass
-                    encodings = face_recognition.face_encodings(np.array(foto))[0]
+                    encodings = face_recognition.face_encodings(np.array(foto))[
+                        0]
 
                     print('saving %s: %s...' % (key, fpath), end=' ')
                     encoding = Encoding(member_id, person.name, encodings)
@@ -166,6 +169,7 @@ def populate(d, args):
         print('updating person...')
         members_db.replace_member(member_id, person)
 
+
 def createArgsParser():
     parser = argparse.ArgumentParser()
     parser.add_argument('file', help="xlsx file")
@@ -175,6 +179,7 @@ def createArgsParser():
     parser.add_argument('-d', '--database', required=True,
                         help='database name')
     return parser.parse_args()
+
 
 if __name__ == '__main__':
     args = createArgsParser()
