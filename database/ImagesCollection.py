@@ -14,4 +14,4 @@ class ImagesCollection(MongoConnector):
         return self.fs.get(_id).read()
 
     def insert_image(self, image):
-        return self.fs.put(image)
+        return str(self.fs.put(image))

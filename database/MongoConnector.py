@@ -38,7 +38,7 @@ class MongoConnector(ABC):
         result = self.collection.insert_one(document)
         if not result.acknowledged:
             raise Exception("Failed to insert")
-        return result.inserted_id
+        return str(result.inserted_id)
 
     def _upsert(self, obj):
         if '_id' in obj:
@@ -55,16 +55,16 @@ class MongoConnector(ABC):
     def _replace(self, document_id, obj):
         _id = self._object_id(document_id)
         document = self._object_document(obj)
-        return self.collection.replace_one(_id, document)
+        return str(self.collection.replace_one(_id, document))
 
     def _delete(self, obj):
         document = self._object_document(obj)
-        return self.collection.delete_one(document)
+        return str(self.collection.delete_one(document))
 
     def _delete_by_id(self, document_id):
         _id = self._object_id(document_id)
         # TODO: return something?
-        return self.collection.delete_one(_id)
+        return str(self.collection.delete_one(_id))
 
     def _find(self, obj={}):
         document = self._object_document(obj)
