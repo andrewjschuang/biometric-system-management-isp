@@ -214,7 +214,7 @@ class Recognition:
                 #     continue
 
                 # create event document and save it to mongodb
-                event = Event(member_id, name, Day.today(), min_face_distance,
+                event = Event(member_id, name, int(time.time()), min_face_distance,
                               self.known_face_encodings[min_face_distance_index], frame)
                 self.save_event(event, coordinates=(top, right, bottom, left))
 
