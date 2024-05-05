@@ -55,8 +55,6 @@ def create_person(data):
 
 
 def save_photos_from_request(images, person, member_id):
-    if not images.get('FRONT'):
-        raise Exception('missing front image')
     for image_label in images:
         image = get_image(images[image_label])
         _, face_encodings = recognition.get_faces_from_picture(image)
@@ -96,7 +94,9 @@ def get_members(request):
 
 def update_member(request):
     person = create_person(request.form)
+    save_photos_from_request(request.files, person, person.id)
     recognition.members_db.replace_member(person.id, person)
+    recognition.get_known_encodings()
 
 
 def register_api(request):
