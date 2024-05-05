@@ -20,11 +20,6 @@ from recognition.Recognition import Recognition
 
 
 recognition = Recognition()
-photo_labels = [
-    PhotoCategory.FRONT.name,
-    PhotoCategory.LEFT.name,
-    PhotoCategory.RIGHT.name
-]
 
 
 def image_binary(image_bytes, resize=0.5):
@@ -59,17 +54,36 @@ def create_person(data):
     return Person(id, name, birth_date, email, gender, phone_number, is_member, ministry, sigi)
 
 
+def save_photos_from_request(images, person, member_id):
+    for image_label in images:
+        image = get_image(images[image_label])
+        _, face_encodings = recognition.get_faces_from_picture(image)
+        if len(face_encodings) == 0:
+            raise Exception(f'{image_label}: no face')
+        if len(face_encodings) > 1:
+            raise Exception(f'{image_label} more than one face')
+
+        encoding = Encoding(member_id, person.name, face_encodings[0])
+        encoding_id = recognition.encodings_db.insert_encoding(encoding)
+
+        imgByteArr = io.BytesIO()
+        Image.open(images[image_label]).save(imgByteArr, format='JPEG')
+        image_id = recognition.images_db.insert_image(
+            imgByteArr.getvalue())
+
+        person.encodings[image_label] = encoding_id
+        person.photos[image_label] = image_id
+
+
 def update_person_fields(form, person):
-    person.name = Name.from_str(
-        form.get('name')) if form.get('name') else person.name
-    person.birth_date = Day.from_str(form.get('birth_date'))
-    person.email = form.get('email') or person.email
-    person.gender = Gender[form.get('gender')]
-    person.phone_number = phone_number = re.compile(
-        '[\W_]+').sub('', form.get('phone_number')) if form.get('phone_number') else person.phone_number
-    person.member = form.get('member').lower() == 'true'
-    person.ministry = [Ministry[form.get('ministry')]]
-    person.sigi = int(form.get('sigi')) if form.get('sigi') else person.sigi
+    person.name = form.get('name', person.name)
+    person.birth_date = form.get('birth_date', person.birth_date)
+    person.email = form.get('email', person.email)
+    person.gender = form.get('gender', person.gender)
+    person.phone_number = form.get('phone_number', person.phone_number)
+    person.member = form.get('member', str(person.member)).lower() == 'true'
+    person.ministry = form.get('ministry', person.ministry)
+    person.sigi = int(form.get('sigi', person.sigi))
     return person
 
 
@@ -84,49 +98,18 @@ def update_member(request):
 
 
 def register_api(request):
-    # result = image_validation(data, photo_labels)
     person = create_person(request.form)
     member_id = recognition.members_db.insert_member(person)
-
-    # front_photo = request.files.get('front_photo')
-    # left_photo = request.files.get('left_photo')
-    # right_photo = request.files.get('right_photo')
-    # photos = {
-    #     'FRONT': front_photo.read() if front_photo else None,
-    #     'LEFT': left_photo.read() if left_photo else None,
-    #     'RIGHT': right_photo.read() if right_photo else None,
-    # }
-
-    images = request.files
-    for image_label in request.files:
-        try:
-            image = get_image(images[image_label])
-            _, face_encodings = recognition.get_faces_from_picture(image)
-            if len(face_encodings) == 0:
-                raise Exception('no face')
-            if len(face_encodings) > 1:
-                raise Exception('more than one face')
-        except Exception as e:
-            print('failed to retrieve image: %s. reason: %s' %
-                  (image_label, e))
-
-        encoding = Encoding(member_id, person.name, face_encodings[0])
-        encoding_id = recognition.encodings_db.insert_encoding(encoding)
-
-        imgByteArr = io.BytesIO()
-        Image.open(images[image_label]).save(imgByteArr, format='JPEG')
-        image_id = recognition.images_db.insert_image(
-            imgByteArr.getvalue())
-
-        # may be broken
-        person.encodings[PhotoCategory[image_label]] = encoding_id
-        person.photos[PhotoCategory[image_label]] = image_id
-
-    recognition.members_db.replace_member(member_id, person)
-    recognition.get_known_encodings()
+    try:
+        save_photos_from_request(request.files, person, member_id)
+        recognition.members_db.replace_member(member_id, person)
+        recognition.get_known_encodings()
+    except Exception as e:
+        recognition.members_db.delete_member(member_id)
+        raise e
 
 
-def get_image_from_db(_id):
+def get_image_from_db(request, _id):
     image_bytes = recognition.images_db.get_image(_id)
     return image_binary(image_bytes)
 
@@ -143,11 +126,11 @@ def index(request):
     for person in persons:
         try:
             image_bytes = recognition.images_db.get_image(
-                person.photos[PhotoCategory.FRONT.name])
-            person.photos[PhotoCategory.FRONT.name] = get_person_image_from_bytes(
+                person.photos['FRONT'])
+            person.photos['FRONT'] = get_person_image_from_bytes(
                 image_bytes, 0.05)
         except Exception as e:
-            person.photos[PhotoCategory.FRONT.name] = b''
+            person.photos['FRONT'] = b''
 
         # if marking presence for person, update in database
         if request.method == 'POST':
