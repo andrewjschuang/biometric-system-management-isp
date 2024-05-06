@@ -10,10 +10,12 @@ class Person:
         self.birth_date = birth_date
         self.email = email
         self.gender = gender
-        self.phone_number = phone_number
+        self.phone_number = int(phone_number)
         self.is_member = is_member
+        if type(is_member) == str:
+            self.is_member = is_member.lower() == 'true'
         self.ministry = ministry
-        self.sigi = sigi
+        self.sigi = int(sigi)
         self.photos = photos
         self.encodings = encodings
         # self.calendar = calendar
