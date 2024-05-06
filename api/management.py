@@ -54,6 +54,18 @@ def create_person(data):
     return Person(id, name, birth_date, email, gender, phone_number, is_member, ministry, sigi)
 
 
+def update_person_fields(form, person):
+    person.name = form.get('name', person.name)
+    person.birth_date = form.get('birth_date', person.birth_date)
+    person.email = form.get('email', person.email)
+    person.gender = form.get('gender', person.gender)
+    person.phone_number = form.get('phone_number', person.phone_number)
+    person.is_member = form.get('is_member', person.is_member) # TODO: fix
+    person.ministry = form.get('ministry', person.ministry)
+    person.sigi = int(form.get('sigi') or person.sigi)
+    return person
+
+
 def save_photos_from_request(images, person, member_id):
     for image_label in images:
         image = get_image(images[image_label])
@@ -75,25 +87,15 @@ def save_photos_from_request(images, person, member_id):
         person.photos[image_label] = image_id
 
 
-def update_person_fields(form, person):
-    person.name = form.get('name', person.name)
-    person.birth_date = form.get('birth_date', person.birth_date)
-    person.email = form.get('email', person.email)
-    person.gender = form.get('gender', person.gender)
-    person.phone_number = form.get('phone_number', person.phone_number)
-    person.member = form.get('member', str(person.member)).lower() == 'true'
-    person.ministry = form.get('ministry', person.ministry)
-    person.sigi = int(form.get('sigi', person.sigi))
-    return person
-
-
 def get_members(request):
     members = recognition.members_db.get_all_members()
     return {'members': [x.to_dict() for x in members]}
 
 
 def update_member(request):
-    person = create_person(request.form)
+    member_id = request.form.get('id')
+    person = recognition.members_db.get_member_by_id(member_id)
+    person = update_person_fields(request.form, person)
     save_photos_from_request(request.files, person, person.id)
     recognition.members_db.replace_member(person.id, person)
     recognition.get_known_encodings()
