@@ -15,3 +15,6 @@ class ImagesCollection(MongoConnector):
 
     def insert_image(self, image):
         return str(self.fs.put(image))
+
+    def delete_image(self, _id):
+        return self.fs.delete(_id)

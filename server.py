@@ -1,14 +1,11 @@
 from flask import Flask, request, redirect, url_for, jsonify, Response
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 from recognition.Recognition import Recognition
 import api.configuration as api_configuration
 import api.image as api_image
 import api.management as api_management
 import api.signaling as api_signaling
-import api.websocket as api_websocket
-import base64
-import time
 
 
 app = Flask(__name__)
@@ -40,37 +37,24 @@ def members():
         data = api_management.get_members(request)
         return jsonify({'data': data}), 200
     elif request.method == 'POST':
-        api_management.register_api(request)
+        api_management.create_member(request)
         return jsonify({'data': 'success'}), 200
     elif request.method == 'PUT':
         api_management.update_member(request)
         return jsonify({'data': 'success'}), 200
 
 
+@app.route('/api/members/<_id>', methods=['DELETE'])
+def members_by_id(_id):
+    if request.method == 'DELETE':
+        api_management.delete_member(request, _id)
+        return jsonify({'data': 'success'}), 200
+
+
 @app.route('/api/images/<_id>', methods=['GET'])
 def api_management_image(_id):
-    image_binary = api_management.get_image_from_db(request, _id)
-    return Response(response=image_binary, status=200, mimetype='image/jpeg')
-
-
-@app.route('/management', methods=['GET', 'POST'])
-def management():
-    return api_management.index(request)
-
-
-@app.route('/management/<_id>', methods=['GET', 'POST'])
-def get(_id):
-    return api_management.get(request, _id)
-
-
-@app.route('/management/delete/<_id>')
-def delete(_id):
-    return api_management.delete(request, _id)
-
-
-@app.route('/management/register', methods=['GET', 'POST'])
-def register():
-    return api_management.register(request)
+    image = api_management.get_image_from_db(request, _id)
+    return Response(response=image, status=200, mimetype='image/jpeg')
 
 
 @app.route('/recognize', methods=['POST'])
