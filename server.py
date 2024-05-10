@@ -26,9 +26,16 @@ def websocket_disconnect():
     return
 
 
-@app.route('/', methods=['GET'])
-def index():
-    return redirect(url_for('management'))
+@app.route('/start', methods=['GET'])
+def start():
+    api_signaling.start()
+    return jsonify({'data': {'success': True}}), 200
+
+
+@app.route('/stop', methods=['GET'])
+def stop():
+    api_signaling.stop()
+    return jsonify({'data': {'success': True}}), 200
 
 
 @app.route('/api/members', methods=['GET', 'POST', 'PUT'])
@@ -57,30 +64,22 @@ def api_management_image(_id):
     return Response(response=image, status=200, mimetype='image/jpeg')
 
 
+@app.route('/api/configuration', methods=['GET', 'POST'])
+def configuration():
+    if request.method == 'GET':
+        config = api_configuration.get_configuration(request)
+        return jsonify({'data': config}), 200
+    elif request.method == 'POST':
+        try:
+            config = api_configuration.update_configuration(request)
+            return jsonify({'data': config}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+
+
 @app.route('/recognize', methods=['POST'])
 def recognize():
     return api_image.recognize(request)
-
-
-@app.route('/configure', methods=['GET', 'POST'])
-def configure():
-    try:
-        config = api_configuration.configure(request)
-        return jsonify({'data': config}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-@app.route('/start', methods=['GET'])
-def start():
-    api_signaling.start()
-    return jsonify({'data': {'success': True}}), 200
-
-
-@app.route('/stop', methods=['GET'])
-def stop():
-    api_signaling.stop()
-    return jsonify({'data': {'success': True}}), 200
 
 
 if __name__ == '__main__':
