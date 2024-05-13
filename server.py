@@ -77,9 +77,13 @@ def configuration():
             return jsonify({'error': str(e)}), 400
 
 
-@app.route('/recognize', methods=['POST'])
+@app.route('/api/recognize', methods=['POST'])
 def recognize():
-    return api_image.recognize(request)
+    try:
+        result = api_image.recognize(request)
+        return jsonify({'data': result}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 
 if __name__ == '__main__':

@@ -9,6 +9,7 @@ import base64
 import face_recognition
 import numpy as np
 import cv2
+import io
 
 import config
 from database.EncodingsCollection import EncodingsCollection
@@ -89,7 +90,8 @@ class Recognition:
         self.known_face_encodings = self.encodings_db.get_all_encodings()
 
         if len(self.known_face_encodings) == 0:
-            print('no face encodings found in database %s' % self.encodings_db.db_name)
+            print('no face encodings found in database %s' %
+                  self.encodings_db.db_name)
             return
         print('got %s encodings from database' %
               len(self.known_face_encodings))
@@ -97,8 +99,7 @@ class Recognition:
     # saves frame to database with detected info
     def save_event(self, event, coordinates):
         # switches back to original color
-        frame = event.photo
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        frame = cv2.cvtColor(event.photo, cv2.COLOR_RGB2BGR)
 
         # draws rectangle around face
         top, right, bottom, left = coordinates
@@ -106,12 +107,17 @@ class Recognition:
         ImageDraw.Draw(pil_image).rectangle(
             ((left, top), (right, bottom)), outline=(0, 0, 255))
 
-        event.photo = Photo(PhotoCategory.EVENT, PhotoMode.RGB,
-                            pil_image.tobytes(), pil_image.size)
+        imgByteArr = io.BytesIO()
+        pil_image.save(imgByteArr, format='JPEG')
+        imgByteArr.seek(0)
+        image_id = self.images_db.insert_image(imgByteArr.getvalue())
+        print('saved image to database')
+
+        event.photo = image_id
         ids = self.events_db.insert_event(event)
         print('saved event to database')
-        # to retrieve the saved photo
-        # Image.frombytes(event['foto']['mode'], pil_image['foto']['size'], pil_image['foto']['data']).show()
+
+        return ids
 
     # starts face recognition
     def start(self, capture_interval=0.5):
@@ -159,25 +165,15 @@ class Recognition:
     # identifies faces in frame and persists it
     def recognize(self, frame, model='hog', day=None, presence=None):
         if len(self.known_face_encodings) == 0:
-            print('no face encodings found in database %s' % self.encodings_db.db_name)
+            print('no face encodings found in database %s' %
+                  self.encodings_db.db_name)
             return
 
         face_locations, face_encodings = self.get_faces_from_picture(
             frame, model=model)
         results = self.identify(frame, face_locations, face_encodings)
-        names = []
 
-        # conf that defines if should update person's presence or not
-        if day is not None and day != '':
-            for result in results:
-                member = self.members_db.get_member_by_id(result.member_id)
-                if member.calendar.mark_presence(Day.from_str(day), Presence[presence]):
-                    self.members_db.update_member_calendar(member)
-                names.append(result.name)
-        else:
-            names = [x.name for x in results]
-
-        print("found in frame: %s" % names)
+        print("found in frame: %s" % [x.name for x in results])
         return results
 
     # detects faces in frame
@@ -219,9 +215,11 @@ class Recognition:
                 self.save_event(event, coordinates=(top, right, bottom, left))
 
                 _, buffer = cv2.imencode('.jpg', frame)
-                encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
+                encoded_frame = base64.b64encode(
+                    buffer.tobytes()).decode('utf-8')
 
-                photo_id = self.members_db.get_member_by_id(member_id).photos['FRONT']
+                photo_id = self.members_db.get_member_by_id(
+                    member_id).photos['FRONT']
                 match = self.images_db.get_image(photo_id)
                 encoded_match = base64.b64encode(match).decode('utf-8')
 

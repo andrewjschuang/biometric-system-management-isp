@@ -17,5 +17,5 @@ class Event:
             'timestamp': self.timestamp,
             'face_distance': self.face_distance,
             'encoding': self.encoding.to_dict(),
-            'photo': self.photo.to_dict()
+            'photo': self.photo,
         }
