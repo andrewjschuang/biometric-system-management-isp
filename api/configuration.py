@@ -11,6 +11,7 @@ def get_configuration(request):
         'tolerance': config.tolerance,
         'delay': config.delay,
         'display_image': config.display_image,
+        'active_rate': config.active_rate,
     }
 
 
@@ -19,6 +20,7 @@ def update_configuration(request):
     tolerance = request.json.get('tolerance')
     delay = request.json.get('delay')
     display_image = request.json.get('display_image')
+    active_rate = request.json.get('active_rate')
 
     if video_source:
         try:
@@ -50,6 +52,13 @@ def update_configuration(request):
             config.display_image = False
         else:
             raise Exception('Error: config is not a valid value')
+
+    if active_rate:
+        try:
+            float(active_rate)
+        except:
+            raise Exception('Error: active_rate not a floating number')
+        config.active_rate = active_rate
 
     recognition.configure()
 
