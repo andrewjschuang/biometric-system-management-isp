@@ -42,10 +42,7 @@ class Recognition:
             self.events_db = EventsCollection()
             self.images_db = ImagesCollection()
             self.members_db = MembersCollection()
-            self.video_source = config.video_source
-            self.display_image = config.display_image
-            self.tolerance = config.tolerance
-            self.video_capture = cv2.VideoCapture(self.video_source)
+            self.video_capture = cv2.VideoCapture(config.video_source)
             self.known_face_encodings = []
             self.get_known_encodings()
             self.run = False
@@ -55,35 +52,9 @@ class Recognition:
         self.socketio = socketio
 
     # updates attributes
-    def configure(self, video_source=None, display_image=None, tolerance=None):
-        if tolerance:
-            try:
-                tolerance = float(tolerance)
-            except Exception as e:
-                error = 'Error: tolerance not a floating number'
-                print(error)
-                return error
-            if tolerance < 0 or tolerance > 1:
-                error = 'Error: tolerance not between 0 and 1'
-                print(error)
-                return error
-            self.tolerance = tolerance
-
-        if video_source:
-            try:
-                video_source = int(video_source)
-            except:
-                pass
-            self.video_source = video_source
-            self.video_capture.release()
-            self.video_capture = cv2.VideoCapture(self.video_source)
-
-        if display_image and (display_image.lower() == 'true' or display_image == '1'):
-            self.display_image = True
-        elif display_image and (display_image.lower() == 'false' or display_image == '0'):
-            self.display_image = False
-
-        return None
+    def configure(self):
+        self.video_capture.release()
+        self.video_capture = cv2.VideoCapture(config.video_source)
 
     # gets database of registered faces from mongo
     def get_known_encodings(self):
@@ -120,9 +91,9 @@ class Recognition:
         return ids
 
     # starts face recognition
-    def start(self, capture_interval=0.5):
+    def start(self):
         if not self.video_capture.isOpened():
-            print('error opening capture device %s' % self.video_source)
+            print('error opening capture device %s' % config.video_source)
             return
 
         print('connected to capture device')
@@ -137,10 +108,10 @@ class Recognition:
             if frame is not None:
                 threading.Thread(target=self.recognize, args=(frame,)).start()
                 print('started recognition thread')
-                time.sleep(capture_interval)
+                time.sleep(config.delay)
 
             # displays raw captured frame
-            if self.display_image and frame is not None:
+            if config.display_image and frame is not None:
                 cv2.imshow('Biometric System Management', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     self.signal_handler()
@@ -200,7 +171,7 @@ class Recognition:
             min_face_distance_index = np.argmin(face_distances)
 
             # detected and found face in database
-            if min_face_distance <= self.tolerance:
+            if min_face_distance <= config.tolerance:
                 name = self.known_face_encodings[min_face_distance_index].name
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
 
