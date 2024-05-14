@@ -1,24 +1,22 @@
 import json
 from itertools import zip_longest
-from entities.Calendar import Calendar
+# from entities.Calendar import Calendar
 
 
 class Person:
-    def __init__(self, id, name, birth_date, email, gender, phone_number, is_member, ministry, sigi, photos={}, encodings={}, calendar=Calendar()):
+    def __init__(self, id, name, birth_date, email, gender, phone_number, is_member, ministry, sigi, photos={}, encodings={}, calendar=None):
         self.id = str(id)
         self.name = name
         self.birth_date = birth_date
         self.email = email
         self.gender = gender
         self.phone_number = int(phone_number)
-        self.is_member = is_member
-        if type(is_member) == str:
-            self.is_member = is_member.lower() == 'true'
+        self.is_member = is_member.lower() == 'true' if type(is_member) == str else is_member
         self.ministry = ministry
         self.sigi = int(sigi)
         self.photos = photos
         self.encodings = encodings
-        # self.calendar = calendar
+        # self.calendar = Calendar()
         # self.is_active = self.calendar.is_active()
 
     def __str__(self):

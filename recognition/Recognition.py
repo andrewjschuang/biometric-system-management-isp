@@ -1,7 +1,5 @@
 from PIL import Image, ImageDraw
 import threading
-import argparse
-import datetime
 import signal
 import time
 import base64
@@ -17,11 +15,6 @@ from database.EventsCollection import EventsCollection
 from database.ImagesCollection import ImagesCollection
 from database.MembersCollection import MembersCollection
 from entities.Event import Event
-from entities.Day import Day
-from entities.Photo import Photo
-from entities.PhotoCategory import PhotoCategory
-from entities.PhotoMode import PhotoMode
-from entities.Presence import Presence
 
 
 class Recognition:

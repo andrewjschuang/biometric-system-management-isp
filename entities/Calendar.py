@@ -1,8 +1,7 @@
+'''
 from datetime import datetime
 from config import active_rate
 from entities.Presence import Presence
-from entities.Sunday import Sunday
-from entities.Day import Day
 
 class Calendar:
     def __init__(self, sundays=None, year=datetime.now().year):
@@ -38,3 +37,4 @@ class Calendar:
     @staticmethod
     def from_dict(calendar):
         return Calendar([Sunday.from_dict(x) for x in calendar['sundays']])
+'''
