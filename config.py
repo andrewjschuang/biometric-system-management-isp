@@ -1,7 +1,7 @@
 import os
 
 video_source = 0
-tolerance = 0.8
+tolerance = 0.3
 active_rate = 0.5
 delay = 0.1
 display_image = False

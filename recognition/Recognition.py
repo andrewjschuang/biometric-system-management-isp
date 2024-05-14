@@ -142,10 +142,7 @@ class Recognition:
 
         face_locations, face_encodings = self.get_faces_from_picture(
             frame, model=model)
-        results = self.identify(frame, face_locations, face_encodings)
-
-        print("found in frame: %s" % [x.name for x in results])
-        return results
+        return self.identify(frame, face_locations, face_encodings)
 
     # detects faces in frame
     def get_faces_from_picture(self, frame, model='hog'):
@@ -183,7 +180,8 @@ class Recognition:
                 # create event document and save it to mongodb
                 event = Event(member_id, name, int(time.time()), min_face_distance,
                               self.known_face_encodings[min_face_distance_index], frame)
-                self.save_event(event, coordinates=(top, right, bottom, left))
+                # self.save_event(event, coordinates=(top, right, bottom, left))
+                results.append(event)
 
                 _, buffer = cv2.imencode('.jpg', frame)
                 encoded_frame = base64.b64encode(
@@ -205,8 +203,7 @@ class Recognition:
                     }
                 })
 
-                results.append(event)
-
+        print("found in frame: %s" % [f'{x.name}: {x.face_distance}' for x in results])
         return results
 
     # handles start / stop capturing
