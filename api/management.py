@@ -54,7 +54,7 @@ def _update_person_fields(form, person):
     return person
 
 
-def _save_photos_from_request(images, person, member_id):
+def _save_photos_from_request(images, person):
     for image_label in images:
         image = get_image(images[image_label])
         _, face_encodings = recognition.get_faces_from_picture(image)
@@ -63,7 +63,7 @@ def _save_photos_from_request(images, person, member_id):
         if len(face_encodings) > 1:
             raise Exception(f'{image_label} more than one face')
 
-        encoding = Encoding(member_id, person.name, face_encodings[0])
+        encoding = Encoding(person.id, person.name, face_encodings[0])
         encoding_id = recognition.encodings_db.insert_encoding(encoding)
 
         imgByteArr = io.BytesIO()
@@ -88,8 +88,9 @@ def get_image_from_db(request, _id):
 def create_member(request):
     person = _create_person(request.form)
     member_id = recognition.members_db.insert_member(person)
+    person.set_id(member_id)
     try:
-        _save_photos_from_request(request.files, person, member_id)
+        _save_photos_from_request(request.files, person)
         recognition.members_db.replace_member(member_id, person)
         recognition.get_known_encodings()
     except Exception as e:
@@ -101,7 +102,7 @@ def update_member(request):
     member_id = request.form.get('id')
     person = recognition.members_db.get_member_by_id(member_id)
     person = _update_person_fields(request.form, person)
-    _save_photos_from_request(request.files, person, person.id)
+    _save_photos_from_request(request.files, person)
     recognition.members_db.replace_member(person.id, person)
     recognition.get_known_encodings()
 

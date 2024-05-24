@@ -74,4 +74,4 @@ class MongoConnector(ABC):
 
     def _find_by_id(self, document_id):
         _id = self._object_id(document_id)
-        return self.collection.find(_id)
+        return self.collection.find_one(_id)

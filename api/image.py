@@ -18,6 +18,7 @@ def image_validation(request):
         raise Exception('no image received')
     if not allowed_file(file.filename):
         raise Exception('file is not an image')
+    return file
 
 
 def get_image(image):
@@ -29,7 +30,7 @@ def get_image(image):
 
 
 def recognize(request):
-    image_validation(request)
-    image = get_image(request.files.get('image'))
+    file = image_validation(request)
+    image = get_image(file)
     results = recognition.recognize(image)
     return [result.to_dict() for result in results]

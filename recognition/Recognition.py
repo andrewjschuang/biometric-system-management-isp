@@ -196,7 +196,8 @@ class Recognition:
                     }
                 })
 
-        print("found in frame: %s" % [f'{x.name}: {x.face_distance}' for x in results])
+        print("found in frame: %s" %
+              [f'{x.name}: {x.face_distance}' for x in results])
         return results
 
     # handles start / stop capturing

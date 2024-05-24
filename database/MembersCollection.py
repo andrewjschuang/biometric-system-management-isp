@@ -14,7 +14,7 @@ class MembersCollection(MongoConnector):
 
     # gets the member by id
     def get_member_by_id(self, _id):
-        member = self._find_by_id(_id).next()
+        member = self._find_by_id(_id)
         return Person.from_dict(member)
 
     def insert_member(self, member):
