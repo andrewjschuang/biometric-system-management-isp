@@ -51,8 +51,11 @@ def members():
         return jsonify({'data': 'success'}), 200
 
 
-@app.route('/api/members/<_id>', methods=['DELETE'])
+@app.route('/api/members/<_id>', methods=['GET', 'DELETE'])
 def members_by_id(_id):
+    if request.method == 'GET':
+        data = api_management.get_member(request, _id)
+        return jsonify({'data': data}), 200
     if request.method == 'DELETE':
         api_management.delete_member(request, _id)
         return jsonify({'data': 'success'}), 200

@@ -85,6 +85,11 @@ def get_image_from_db(request, _id):
     return _image_binary(image_bytes)
 
 
+def get_member(request, _id):
+    member = recognition.members_db.get_member_by_id(_id)
+    return member.to_dict()
+
+
 def create_member(request):
     person = _create_person(request.form)
     member_id = recognition.members_db.insert_member(person)
