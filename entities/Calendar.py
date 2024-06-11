@@ -1,4 +1,5 @@
 import datetime
+import time
 import config
 
 
@@ -23,14 +24,13 @@ class Calendar:
     def _is_sunday(self, date):
         return datetime.datetime.strptime(date, "%Y-%m-%d").weekday() == 6
 
-    def mark_presence(self, timestamp):
-        if isinstance(timestamp, list):
-            for t in timestamp:
-                self.mark_presence(t)
+    def mark_presence(self, photo, timestamp=None):
+        if timestamp is None:
+            timestamp = int(time.time())
 
         date = datetime.date.fromtimestamp(timestamp).strftime("%Y-%m-%d")
         if date in self.calendar:
-            self.calendar[date] = True
+            self.calendar[date] = photo
 
     # TODO: consider justified (Presence entity)
     def is_active(self):

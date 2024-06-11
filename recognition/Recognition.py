@@ -78,10 +78,10 @@ class Recognition:
         print('saved image to database')
 
         event.photo = image_id
-        ids = self.events_db.insert_event(event)
+        self.events_db.insert_event(event)
         print('saved event to database')
 
-        return ids
+        return image_id
 
     # starts face recognition
     def start(self):
@@ -146,7 +146,11 @@ class Recognition:
 
     # identifies faces and info
     def identify(self, frame, face_locations, face_encodings):
-        results = []
+        matches = {}
+
+        # TODO: change to confirmed=True
+        for event in self.events_db.get_events_by_date(confirmed=None):
+            matches[event.member_id] = event.name
 
         # iterates through each face
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
@@ -166,23 +170,30 @@ class Recognition:
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
 
                 # don't repeat for already found faces
-                # if name in found:
-                #     print('%s already in cache. skipping..' % name)
-                #     continue
+                if member_id in matches:
+                    print(f'already matched with {name}')
+                    continue
 
                 # create event document and save it to mongodb
-                event = Event(member_id, name, int(time.time()), min_face_distance,
-                              self.known_face_encodings[min_face_distance_index], frame)
-                # self.save_event(event, coordinates=(top, right, bottom, left))
-                results.append(event)
+                event = Event(member_id, name, int(time.time()), min_face_distance, frame,
+                              self.known_face_encodings[min_face_distance_index], confirmed=True)
+                event_photo_id = self.save_event(
+                    event, coordinates=(top, right, bottom, left))
+
+                # TODO: should be transaction / atomic
+                member = self.members_db.get_member_by_id(member_id)
+                member.calendar.mark_presence(event_photo_id)
+                self.members_db.replace_member(member_id, member)
+
+                matches[member_id] = name
+                print(f"matched {name}: {min_face_distance}")
 
                 _, buffer = cv2.imencode('.jpg', frame)
                 encoded_frame = base64.b64encode(
                     buffer.tobytes()).decode('utf-8')
 
-                photo_id = self.members_db.get_member_by_id(
-                    member_id).photos['FRONT']
-                match = self.images_db.get_image(photo_id)
+                match = self.images_db.get_image(
+                    self.members_db.get_member_by_id(member_id).photos['FRONT'])
                 encoded_match = base64.b64encode(match).decode('utf-8')
 
                 self.socketio.emit('match', {
@@ -196,9 +207,7 @@ class Recognition:
                     }
                 })
 
-        print("found in frame: %s" %
-              [f'{x.name}: {x.face_distance}' for x in results])
-        return results
+        return list(matches.values())
 
     # handles start / stop capturing
     def signal_handler(self, run=False):

@@ -66,11 +66,11 @@ class MongoConnector(ABC):
         # TODO: return something?
         return str(self.collection.delete_one(_id))
 
-    def _find(self, obj={}):
+    def _find(self, obj={}, projection=None):
         document = self._object_document(obj)
         if type(document) == str or type(document) == ObjectId:
-            return self.collection.find(self._object_id(document))
-        return self.collection.find(document)
+            return self.collection.find(self._object_id(document), projection)
+        return self.collection.find(document, projection)
 
     def _find_by_id(self, document_id):
         _id = self._object_id(document_id)

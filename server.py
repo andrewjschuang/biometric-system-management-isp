@@ -6,6 +6,7 @@ import api.configuration as api_configuration
 import api.image as api_image
 import api.management as api_management
 import api.signaling as api_signaling
+import api.event as api_event
 
 
 app = Flask(__name__)
@@ -65,6 +66,12 @@ def members_by_id(_id):
 def api_management_image(_id):
     image = api_management.get_image_from_db(request, _id)
     return Response(response=image, status=200, mimetype='image/jpeg')
+
+
+@app.route('/api/events', methods=['GET'])
+def get_events():
+    data = api_event.get_events(request)
+    return jsonify({'data': data}), 200
 
 
 @app.route('/api/configuration', methods=['GET', 'POST'])
