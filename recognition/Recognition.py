@@ -15,6 +15,7 @@ from database.EventsCollection import EventsCollection
 from database.ImagesCollection import ImagesCollection
 from database.MembersCollection import MembersCollection
 from entities.Event import Event
+from utils.logger import logger
 
 
 class Recognition:
@@ -53,12 +54,11 @@ class Recognition:
     def get_known_encodings(self):
         self.known_face_encodings = self.encodings_db.get_all_encodings()
 
-        if len(self.known_face_encodings) == 0:
-            print('no face encodings found in database %s' %
-                  self.encodings_db.db_name)
-            return
-        print('got %s encodings from database' %
-              len(self.known_face_encodings))
+        n = len(self.known_face_encodings)
+        if n == 0:
+            logger.info('zero encodings found in database')
+        else:
+            logger.info(f'loaded {n} encodings from database')
 
     # saves frame to database with detected info
     def save_event(self, event, coordinates):
@@ -75,21 +75,21 @@ class Recognition:
         pil_image.save(imgByteArr, format='JPEG')
         imgByteArr.seek(0)
         image_id = self.images_db.insert_image(imgByteArr.getvalue())
-        print('saved image to database')
+        logger.debug('saved event image to database')
 
         event.photo = image_id
         self.events_db.insert_event(event)
-        print('saved event to database')
+        logger.debug('saved event to database')
 
         return image_id
 
     # starts face recognition
     def start(self):
         if not self.video_capture.isOpened():
-            print('error opening capture device %s' % config.video_source)
+            logger.error(f'error opening capture device {config.video_source}')
             return
 
-        print('connected to capture device')
+        logger.debug('connected to capture device')
 
         # captures indefinitely
         while self.run:
@@ -100,7 +100,7 @@ class Recognition:
 
             if frame is not None:
                 threading.Thread(target=self.recognize, args=(frame,)).start()
-                print('started recognition thread')
+                logger.debug('started recognition thread')
                 time.sleep(config.delay)
 
             # displays raw captured frame
@@ -108,10 +108,10 @@ class Recognition:
                 cv2.imshow('Biometric System Management', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     self.signal_handler()
-                    print('quitting display')
+                    logger.debug('quitting display')
                     break
 
-        print('run stopped')
+        logger.debug('run stopped')
 
         # releases everything
         self.signal_handler()
@@ -121,16 +121,14 @@ class Recognition:
     def capture(self):
         ret, frame = self.video_capture.read()
         if ret:
-            print('got new frame')
+            logger.debug('new frame')
             return frame
-        print('error in getting frame')
-        return None
+        logger.debug('failed to capture frame')
 
     # identifies faces in frame and persists it
     def recognize(self, frame, model='hog', day=None, presence=None):
         if len(self.known_face_encodings) == 0:
-            print('no face encodings found in database %s' %
-                  self.encodings_db.db_name)
+            logger.warning('zero encodings found in database')
             return
 
         face_locations, face_encodings = self.get_faces_from_picture(
@@ -171,7 +169,7 @@ class Recognition:
 
                 # don't repeat for already found faces
                 if member_id in matches:
-                    print(f'already matched with {name}')
+                    logger.debug(f'already matched with {name}')
                     continue
 
                 # create event document and save it to mongodb
@@ -186,7 +184,7 @@ class Recognition:
                 self.members_db.replace_member(member_id, member)
 
                 matches[member_id] = name
-                print(f"matched {name}: {min_face_distance}")
+                logger.debug(f"matched {name}: {min_face_distance}")
 
                 _, buffer = cv2.imencode('.jpg', frame)
                 encoded_frame = base64.b64encode(
