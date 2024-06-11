@@ -126,14 +126,15 @@ class Recognition:
         logger.debug('failed to capture frame')
 
     # identifies faces in frame and persists it
-    def recognize(self, frame, model='hog', day=None, presence=None):
+    def recognize(self, frame, model='hog', dry_run=False):
         if len(self.known_face_encodings) == 0:
             logger.warning('zero encodings found in database')
             return
 
         face_locations, face_encodings = self.get_faces_from_picture(
             frame, model=model)
-        return self.identify(frame, face_locations, face_encodings)
+
+        return self.identify(frame, face_locations, face_encodings, dry_run)
 
     # detects faces in frame
     def get_faces_from_picture(self, frame, model='hog'):
@@ -143,7 +144,7 @@ class Recognition:
         return face_locations, face_encodings
 
     # identifies faces and info
-    def identify(self, frame, face_locations, face_encodings):
+    def identify(self, frame, face_locations, face_encodings, dry_run=False):
         matches = {}
 
         # TODO: change to confirmed=True
@@ -167,10 +168,18 @@ class Recognition:
                 name = self.known_face_encodings[min_face_distance_index].name
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
 
+                if dry_run:
+                    matches[member_id] = name
+                    logger.debug(f"matched {name}: {min_face_distance}")
+                    continue
+
                 # don't repeat for already found faces
                 if member_id in matches:
                     logger.debug(f'already matched with {name}')
                     continue
+
+                matches[member_id] = name
+                logger.debug(f"matched {name}: {min_face_distance}")
 
                 # create event document and save it to mongodb
                 event = Event(member_id, name, int(time.time()), min_face_distance, frame,
@@ -182,9 +191,6 @@ class Recognition:
                 member = self.members_db.get_member_by_id(member_id)
                 member.calendar.mark_presence(event_photo_id)
                 self.members_db.replace_member(member_id, member)
-
-                matches[member_id] = name
-                logger.debug(f"matched {name}: {min_face_distance}")
 
                 _, buffer = cv2.imencode('.jpg', frame)
                 encoded_frame = base64.b64encode(
