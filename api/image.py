@@ -32,5 +32,4 @@ def get_image(image):
 def recognize(request):
     file = image_validation(request)
     image = get_image(file)
-    results = recognition.recognize(image)
-    return [result.to_dict() for result in results]
+    return recognition.recognize(image)
