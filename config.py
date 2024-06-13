@@ -1,7 +1,8 @@
 import os
 
+# default config, db values will take precedence
 video_source = 0
-tolerance = 0.5
+tolerance = 0.2
 active_rate = 0.5
 delay = 0.1
 display_image = False

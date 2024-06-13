@@ -1,10 +1,11 @@
 import datetime
 import time
-import config
+from database.ConfigCollection import ConfigCollection
 
 
 class Calendar:
     def __init__(self, calendar={}, year=datetime.datetime.now().year):
+        self.config_db = ConfigCollection()
         self.calendar = calendar
         if len(self.calendar) == 0:
             self._init_calendar(year)
@@ -37,7 +38,7 @@ class Calendar:
         sundays = self._find_sundays()
         present_sundays = [date for date in sundays if self.calendar[date]]
         presence_rate = len(present_sundays) / len(sundays)
-        return presence_rate >= config.active_rate
+        return presence_rate >= self.config_db.get_active_rate()
 
     def to_dict(self):
         return self.calendar

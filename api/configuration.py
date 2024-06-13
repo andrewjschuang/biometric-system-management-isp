@@ -1,4 +1,3 @@
-import config
 from recognition.Recognition import Recognition
 
 
@@ -7,11 +6,11 @@ recognition = Recognition()
 
 def get_configuration(request):
     return {
-        'video_source': config.video_source,
-        'tolerance': config.tolerance,
-        'delay': config.delay,
-        'display_image': config.display_image,
-        'active_rate': config.active_rate,
+        'video_source': recognition.config_db.get_video_source(),
+        'tolerance': recognition.config_db.get_tolerance(),
+        'delay': recognition.config_db.get_delay(),
+        'display_image': recognition.config_db.get_display_image(),
+        'active_rate': recognition.config_db.get_active_rate(),
     }
 
 
@@ -27,7 +26,8 @@ def update_configuration(request):
             video_source = int(video_source)
         except:
             raise Exception('Error: video_source not an integer')
-        config.video_source = video_source
+        recognition.config_db.set_video_source(video_source)
+        recognition.update_video_source(video_source)
 
     if tolerance:
         try:
@@ -36,20 +36,20 @@ def update_configuration(request):
             raise Exception('Error: tolerance not a floating number')
         if tolerance < 0 or tolerance > 1:
             raise Exception('Error: tolerance not between 0 and 1')
-        config.tolerance = tolerance
+        recognition.config_db.set_tolerance(tolerance)
 
     if delay:
         try:
             delay = float(delay)
         except:
             raise Exception('Error: delay not an integer')
-        config.delay = delay
+        recognition.config_db.set_delay(delay)
 
     if display_image:
         if display_image.lower() == 'true' or display_image == '1':
-            config.display_image = True
+            recognition.config_db.set_display_image(True)
         elif display_image.lower() == 'false' or display_image == '0':
-            config.display_image = False
+            recognition.config_db.set_display_image(False)
         else:
             raise Exception('Error: config is not a valid value')
 
@@ -58,8 +58,6 @@ def update_configuration(request):
             float(active_rate)
         except:
             raise Exception('Error: active_rate not a floating number')
-        config.active_rate = active_rate
-
-    recognition.configure()
+        recognition.config_db.set_active_rate(active_rate)
 
     return get_configuration(request)

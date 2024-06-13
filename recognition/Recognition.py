@@ -9,7 +9,7 @@ import numpy as np
 import cv2
 import io
 
-import config
+from database.ConfigCollection import ConfigCollection
 from database.EncodingsCollection import EncodingsCollection
 from database.EventsCollection import EventsCollection
 from database.ImagesCollection import ImagesCollection
@@ -32,11 +32,12 @@ class Recognition:
     # constructor using configuration file
     def __init__(self):
         if not self._is_initialized:
+            self.config_db = ConfigCollection()
             self.encodings_db = EncodingsCollection()
             self.events_db = EventsCollection()
             self.images_db = ImagesCollection()
             self.members_db = MembersCollection()
-            self.video_capture = cv2.VideoCapture(config.video_source)
+            self.video_capture = cv2.VideoCapture(self.config_db.get_video_source())
             self.known_face_encodings = []
             self.get_known_encodings()
             self.run = False
@@ -46,9 +47,9 @@ class Recognition:
         self.socketio = socketio
 
     # updates attributes
-    def configure(self):
+    def update_video_source(self, video_source):
         self.video_capture.release()
-        self.video_capture = cv2.VideoCapture(config.video_source)
+        self.video_capture = cv2.VideoCapture(video_source)
 
     # gets database of registered faces from mongo
     def get_known_encodings(self):
@@ -86,7 +87,7 @@ class Recognition:
     # starts face recognition
     def start(self):
         if not self.video_capture.isOpened():
-            logger.error(f'error opening capture device {config.video_source}')
+            logger.error(f'error opening capture device {self.config_db.get_video_source()}')
             return
 
         logger.debug('connected to capture device')
@@ -101,10 +102,10 @@ class Recognition:
             if frame is not None:
                 threading.Thread(target=self.recognize, args=(frame,)).start()
                 logger.debug('started recognition thread')
-                time.sleep(config.delay)
+                time.sleep(self.config_db.get_delay())
 
             # displays raw captured frame
-            if config.display_image and frame is not None:
+            if self.config_db.get_display_image() and frame is not None:
                 cv2.imshow('Biometric System Management', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     self.signal_handler()
@@ -164,7 +165,7 @@ class Recognition:
             min_face_distance_index = np.argmin(face_distances)
 
             # detected and found face in database
-            if min_face_distance <= config.tolerance:
+            if min_face_distance <= self.config_db.get_tolerance():
                 name = self.known_face_encodings[min_face_distance_index].name
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
 
