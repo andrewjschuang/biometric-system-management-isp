@@ -9,26 +9,27 @@ class ConfigCollection(MongoConnector):
         self._init_config()
 
     def _init_config(self):
-        if not self._get_config("video_source"):
-            self._insert({"video_source": config.video_source})
-        if not self._get_config("tolerance"):
-            self._insert({"tolerance": config.tolerance})
-        if not self._get_config("active_rate"):
-            self._insert({"active_rate": config.active_rate})
-        if not self._get_config("delay"):
-            self._insert({"delay": config.delay})
-        if not self._get_config("display_image"):
-            self._insert({"display_image": config.display_image})
+        if self._get_config("video_source") is None:
+            self._set_config("video_source", config.video_source)
+        if self._get_config("tolerance") is None:
+            self._set_config("tolerance", config.tolerance)
+        if self._get_config("active_rate") is None:
+            self._set_config("active_rate", config.active_rate)
+        if self._get_config("delay") is None:
+            self._set_config("delay", config.delay)
+        if self._get_config("display_image") is None:
+            self._set_config("display_image", config.display_image)
 
     def _get_config(self, config):
-        return self.collection.find_one(
-            {config: {"$exists": True}},
-        )[config]
+        result = self.collection.find_one({config: {"$exists": True}})
+        if result:
+            return result[config]
 
     def _set_config(self, config, value):
         return self.collection.update_one(
             {config: {"$exists": True}},
             {"$set": {config: value}},
+            upsert=True,
         )
 
     def get_video_source(self):
