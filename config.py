@@ -6,6 +6,8 @@ tolerance = 0.2
 active_rate = 0.5
 delay = 0.1
 display_image = False
+enable_match_confirmation = False
+show_only_sundays = True
 
 mongodb = {
     'host': os.environ.get('MONGO_HOST') or 'localhost',

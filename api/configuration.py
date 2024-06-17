@@ -61,3 +61,21 @@ def update_configuration(request):
         recognition.config_db.set_active_rate(active_rate)
 
     return get_configuration(request)
+
+
+def get_settings(request):
+    return {
+        "enable_match_confirmation": recognition.config_db.get_enable_match_confirmation(),
+        "show_only_sundays": recognition.config_db.get_show_only_sundays()
+    }
+
+
+def update_settings(request):
+    enable_match_confirmation = request.json.get('enable_match_confirmation')
+    if enable_match_confirmation is not None:
+        recognition.config_db.set_enable_match_confirmation(
+            enable_match_confirmation)
+
+    show_only_sundays = request.json.get('show_only_sundays')
+    if show_only_sundays is not None:
+        recognition.config_db.set_show_only_sundays(show_only_sundays)
