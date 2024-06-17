@@ -19,6 +19,11 @@ class ConfigCollection(MongoConnector):
             self._set_config("delay", config.delay)
         if self._get_config("display_image") is None:
             self._set_config("display_image", config.display_image)
+        if self._get_config("enable_match_confirmation") is None:
+            self._set_config("enable_match_confirmation",
+                             config.enable_match_confirmation)
+        if self._get_config("show_only_sundays") is None:
+            self._set_config("show_only_sundays", config.show_only_sundays)
 
     def _get_config(self, config):
         result = self.collection.find_one({config: {"$exists": True}})
@@ -61,3 +66,15 @@ class ConfigCollection(MongoConnector):
 
     def set_display_image(self, value):
         return self._set_config("display_image", value)
+
+    def get_enable_match_confirmation(self):
+        return self._get_config("enable_match_confirmation")
+
+    def set_enable_match_confirmation(self, value):
+        return self._set_config("enable_match_confirmation", value)
+
+    def get_show_only_sundays(self):
+        return self._get_config("show_only_sundays")
+
+    def set_show_only_sundays(self, value):
+        return self._set_config("show_only_sundays", value)

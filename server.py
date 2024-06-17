@@ -96,5 +96,17 @@ def recognize():
         return jsonify({'error': str(e)}), 400
 
 
+@app.route('/api/settings', methods=['GET', 'POST'])
+def settings():
+    try:
+        if request.method == 'GET':
+            result = api_configuration.get_settings(request)
+        elif request.method == 'POST':
+            result = api_configuration.update_settings(request)
+        return jsonify({'data': result}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003, debug=True, use_reloader=True)
