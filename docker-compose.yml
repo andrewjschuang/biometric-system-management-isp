@@ -1,0 +1,39 @@
+version: '3.2'
+
+services:
+  frontend:
+    image: andrewjsc/bmsisp-frontend:3.0.0
+    restart: always
+    ports:
+      - 5173:5173
+
+  backend:
+    image: andrewjsc/bmsisp-backend:3.0.0
+    restart: always
+    environment:
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_DB_NAME: bmsisp
+    ports:
+      - 5003:5003
+    # devices:
+    #   - /dev/video0:/dev/video0
+
+  mongodb:
+    image: mongo:4.0
+    restart: always
+    # volumes:
+    #   - mongodb-volume
+
+  # mongodb-setup:
+  #   image: mongo:4.0
+  #   volumes:
+  #     - type: bind
+  #       source: ../mongodb/dump.bak
+  #       target: /dump.bak
+  #     - ../mongodb/encodings_dump:/dump
+  #   entrypoint: bash /bin/true
+    # entrypoint: bash -c "mongodump --host mongodb -d bmsisp -o dump.bak && mongorestore --host mongodb --drop /dump"
+
+# volumes:
+#   mongodb-volume:

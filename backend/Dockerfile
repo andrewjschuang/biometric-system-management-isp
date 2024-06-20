@@ -1,8 +1,12 @@
-FROM python:3.6-slim-stretch
+# Contains Python 3.12
+FROM ubuntu:24.04
 
-RUN apt-get -y update
+SHELL ["/bin/bash", "-c"]
 
-RUN apt-get install -y --fix-missing \
+ENV PYTHONUNBUFFERED=0
+ENV OPENCV_FFMPEG_CAPTURE_OPTIONS=null
+
+RUN apt-get -y update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     gfortran \
@@ -11,26 +15,30 @@ RUN apt-get install -y --fix-missing \
     curl \
     graphicsmagick \
     libgraphicsmagick1-dev \
-    libatlas-dev \
+    libatlas-base-dev \
     libavcodec-dev \
     libavformat-dev \
     libgtk2.0-dev \
     libjpeg-dev \
     liblapack-dev \
     libswscale-dev \
+    libopencv-dev \
     pkg-config \
+    python3-pip \
+    python3.12-venv \
     python3-dev \
     python3-numpy \
+    python3-opencv \
     software-properties-common \
     zip \
-    && apt-get clean && rm -rf /tmp/* /var/tmp/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY . /app
 WORKDIR /app
+COPY . /app
 
-RUN pip install -r requirements.txt
+# # Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="/root/.local/bin:$PATH"
+RUN poetry install
 
-ENV PYTHONUNBUFFERED=0
-ENV OPENCV_FFMPEG_CAPTURE_OPTIONS=null
-
-CMD ["python", "-m", "server"]
+CMD ["poetry", "run", "python", "-m", "server"]
