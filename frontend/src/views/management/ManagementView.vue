@@ -30,10 +30,10 @@
                     <DialogDescription v-else>Create a new profile here. Click save when you're done.
                     </DialogDescription>
                 </DialogHeader>
-                <Button variant="secondary" @click="goTo(activeCard.id, activeCard.src)">
+                <Button v-if="activeCard.id" variant="secondary" @click="goTo(activeCard.id, activeCard.src)">
                     View Presence Report
                 </Button>
-                <!-- <Button variant="secondary" @click="goTo(activeCard.id, activeCard.src, true)">
+                <!-- <Button v-if="activeCard.id" variant="secondary" @click="goTo(activeCard.id, activeCard.src, true)">
                     View Pending Approvals
                 </Button> -->
                 <MemberFormComponent :member="activeCard" :create="!hasActiveCard" @updateMember="handleUpdateMember"
