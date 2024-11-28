@@ -37,9 +37,9 @@ class Recognition:
             self.events_db = EventsCollection()
             self.images_db = ImagesCollection()
             self.members_db = MembersCollection()
-            self.video_capture = cv2.VideoCapture(self.config_db.get_video_source())
             self.known_face_encodings = []
             self.get_known_encodings()
+            self.video_capture = cv2.VideoCapture(self.config_db.get_video_source(), cv2.CAP_GSTREAMER)
             self.run = False
             self._is_initialized = True
 
@@ -49,7 +49,11 @@ class Recognition:
     # updates attributes
     def update_video_source(self, video_source):
         self.video_capture.release()
-        self.video_capture = cv2.VideoCapture(video_source)
+        self.video_capture = cv2.VideoCapture(video_source, cv2.CAP_GSTREAMER)
+        if self.video_capture.isOpened():
+            logger.info('successfully updated video source')
+        else:
+            logger.error(f'error updating video source {video_source}')
 
     # gets database of registered faces from mongo
     def get_known_encodings(self):
