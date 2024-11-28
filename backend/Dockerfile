@@ -14,6 +14,10 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
     wget \
     curl \
     graphicsmagick \
+    gstreamer1.0-tools \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
     libgraphicsmagick1-dev \
     libatlas-base-dev \
     libavcodec-dev \
