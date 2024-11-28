@@ -22,10 +22,6 @@ def update_configuration(request):
     active_rate = request.json.get('active_rate')
 
     if video_source:
-        try:
-            video_source = int(video_source)
-        except:
-            raise Exception('Error: video_source not an integer')
         recognition.config_db.set_video_source(video_source)
         recognition.update_video_source(video_source)
 
