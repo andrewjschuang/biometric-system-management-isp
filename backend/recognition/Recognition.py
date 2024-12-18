@@ -1,3 +1,4 @@
+from queue import Queue
 from PIL import Image, ImageDraw
 import threading
 import signal
@@ -32,6 +33,7 @@ class Recognition:
     # constructor using configuration file
     def __init__(self):
         if not self._is_initialized:
+            self.queue = Queue()
             self.config_db = ConfigCollection()
             self.encodings_db = EncodingsCollection()
             self.events_db = EventsCollection()
@@ -42,6 +44,15 @@ class Recognition:
             self.video_capture = cv2.VideoCapture(self.config_db.get_video_source())
             self.run = False
             self._is_initialized = True
+            threading.Thread(target=self.recognition_worker, daemon=True).start()
+
+    def recognition_worker(self):
+        while True:
+            frame = self.queue.get()
+            logger.debug(f'queue size: {self.queue.qsize()}')
+            logger.debug(f'starting recognition for new frame')
+            self.recognize(frame)
+            self.queue.task_done()
 
     def inject_socket(self, socketio):
         self.socketio = socketio
@@ -96,27 +107,31 @@ class Recognition:
 
         logger.debug('connected to capture device')
 
-        # captures indefinitely
-        while self.run:
-            frame = self.capture()
-            _, buffer = cv2.imencode('.jpg', frame)
-            encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
-            self.socketio.emit('frame', {'frame': encoded_frame})
+        try:
+            frame_count = -1
+            # captures indefinitely
+            while self.run:
+                frame = self.capture()
+                frame_count += 1
+                _, buffer = cv2.imencode('.jpg', frame)
+                encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
+                self.socketio.emit('frame', {'frame': encoded_frame})
 
-            if frame is not None:
-                threading.Thread(target=self.recognize, args=(frame,)).start()
-                logger.debug('started recognition thread')
-                time.sleep(self.config_db.get_delay())
+                if frame is not None and frame_count % 30 == 0:
+                    if not self.queue.full():
+                        self.queue.put(frame)
 
-            # displays raw captured frame
-            if self.config_db.get_display_image() and frame is not None:
-                cv2.imshow('Biometric System Management', frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    self.signal_handler()
-                    logger.debug('quitting display')
-                    break
+                # displays raw captured frame
+                if frame is not None and self.config_db.get_display_image():
+                    cv2.imshow('Biometric System Management', frame)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        self.signal_handler()
+                        logger.debug('quitting display')
+                        break
 
-        logger.debug('run stopped')
+        except Exception as e:
+            logger.error(e)
+            logger.debug('run stopped')
 
         # releases everything
         self.signal_handler()
