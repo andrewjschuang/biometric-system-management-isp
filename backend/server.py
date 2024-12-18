@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -109,4 +110,7 @@ def settings():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5003, debug=True, use_reloader=True)
+    debug = True # make environment variable
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+    app.run(host='0.0.0.0', port=5003, debug=debug, use_reloader=debug)

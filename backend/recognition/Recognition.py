@@ -33,7 +33,7 @@ class Recognition:
     # constructor using configuration file
     def __init__(self):
         if not self._is_initialized:
-            self.queue = Queue()
+            self.queue = Queue(maxsize=1000)
             self.config_db = ConfigCollection()
             self.encodings_db = EncodingsCollection()
             self.events_db = EventsCollection()
@@ -62,10 +62,10 @@ class Recognition:
         self.video_capture.release()
         self.video_capture = cv2.VideoCapture(video_source)
         if self.video_capture.isOpened():
-            logger.info('successfully updated video source')
+            logger.info('successfully opened video source')
             return True
         else:
-            logger.error(f'error updating video source {video_source}')
+            logger.error(f'error opening video source {video_source}')
             return False
 
     # gets database of registered faces from mongo
@@ -103,29 +103,26 @@ class Recognition:
 
     # starts face recognition
     def start(self):
-        if not self.video_capture.isOpened():
-            if not self.update_video_source(self.config_db.get_video_source()):
-                logger.error('please try again')
-                return
-
-        logger.debug('connected to capture device')
-
         try:
             frame_count = -1
             # captures indefinitely
             while self.run:
                 frame = self.capture()
+                if frame is None:
+                    if not self.update_video_source(self.config_db.get_video_source()):
+                        raise Exception('please try again')
+                    frame = self.capture() # try again
+
                 frame_count += 1
                 _, buffer = cv2.imencode('.jpg', frame)
                 encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
                 self.socketio.emit('frame', {'frame': encoded_frame})
 
-                if frame is not None and frame_count % 30 == 0:
-                    if not self.queue.full():
-                        self.queue.put(frame)
+                if frame_count % 30 == 0 and not self.queue.full():
+                    self.queue.put(frame)
 
                 # displays raw captured frame
-                if frame is not None and self.config_db.get_display_image():
+                if self.config_db.get_display_image():
                     cv2.imshow('Biometric System Management', frame)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         self.signal_handler()
@@ -240,7 +237,6 @@ class Recognition:
 
     # handles start / stop capturing
     def signal_handler(self, run=False):
-        self.video_capture.release()
         self.run = run
 
 
