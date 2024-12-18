@@ -4,7 +4,7 @@
             <FormItem class="form-item">
                 <FormLabel>Video Source</FormLabel>
                 <FormControl class="form-control">
-                    <Input type="number" min="0" step="1" v-model="videoSource" />
+                    <Input type="text" v-model="videoSource" />
                 </FormControl>
                 <FormMessage />
             </FormItem>
@@ -52,7 +52,7 @@ import { useToast } from '@/components/ui/toast/use-toast'
 
 const { toast } = useToast()
 
-const videoSource = ref<number>();
+const videoSource = ref<string>('');
 const tolerance = ref<number>();
 const delay = ref<number>();
 

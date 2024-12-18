@@ -1,21 +1,25 @@
 services:
   frontend:
-    image: andrewjsc/bmsisp-frontend:3.0.0-alpha
+    image: andrewjsc/bmsisp-frontend:3.0.1-alpha
     restart: always
     platform: linux/amd64
+    networks:
+      - custom_network
     ports:
       - 5173:5173
 
   backend:
-    image: andrewjsc/bmsisp-backend:3.0.0-alpha
+    image: andrewjsc/bmsisp-backend:3.0.1-alpha
     restart: always
     platform: linux/amd64
+    networks:
+      - custom_network
+    ports:
+      - 5003:5003
     environment:
       MONGO_HOST: mongodb
       MONGO_PORT: 27017
       MONGO_DB_NAME: bmsisp
-    ports:
-      - 5003:5003
     # devices:
     #   - /dev/video0:/dev/video0
 
@@ -23,6 +27,8 @@ services:
     image: mongo:4.0
     restart: always
     platform: linux/amd64
+    networks:
+      - custom_network
     # volumes:
     #   - mongodb-volume
 
@@ -38,3 +44,7 @@ services:
 
 # volumes:
 #   mongodb-volume:
+
+networks:
+  custom_network:
+    driver: bridge
