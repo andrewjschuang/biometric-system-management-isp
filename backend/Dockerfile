@@ -4,7 +4,7 @@ FROM ubuntu:24.04
 SHELL ["/bin/bash", "-c"]
 
 ENV PYTHONUNBUFFERED=0
-ENV OPENCV_FFMPEG_CAPTURE_OPTIONS=null
+ENV OPENCV_FFMPEG_CAPTURE_OPTIONS="rtsp_transport;tcp|stimeout;10000000"
 
 RUN apt-get -y update && apt-get install -y --no-install-recommends \
     build-essential \
