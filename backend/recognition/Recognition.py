@@ -63,8 +63,10 @@ class Recognition:
         self.video_capture = cv2.VideoCapture(video_source)
         if self.video_capture.isOpened():
             logger.info('successfully updated video source')
+            return True
         else:
             logger.error(f'error updating video source {video_source}')
+            return False
 
     # gets database of registered faces from mongo
     def get_known_encodings(self):
@@ -102,8 +104,9 @@ class Recognition:
     # starts face recognition
     def start(self):
         if not self.video_capture.isOpened():
-            logger.error(f'error opening capture device {self.config_db.get_video_source()}')
-            return
+            if not self.update_video_source(self.config_db.get_video_source()):
+                logger.error('please try again')
+                return
 
         logger.debug('connected to capture device')
 
@@ -183,8 +186,10 @@ class Recognition:
             min_face_distance = np.min(face_distances)
             min_face_distance_index = np.argmin(face_distances)
 
+            if min_face_distance > self.config_db.get_tolerance():
+                logger.debug(f'did not meet minimum tolerance: {min_face_distance}')
             # detected and found face in database
-            if min_face_distance <= self.config_db.get_tolerance():
+            else:
                 name = self.known_face_encodings[min_face_distance_index].name
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
 
@@ -235,6 +240,7 @@ class Recognition:
 
     # handles start / stop capturing
     def signal_handler(self, run=False):
+        self.video_capture.release()
         self.run = run
 
 
