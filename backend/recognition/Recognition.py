@@ -39,7 +39,7 @@ class Recognition:
             self.members_db = MembersCollection()
             self.known_face_encodings = []
             self.get_known_encodings()
-            self.video_capture = cv2.VideoCapture(self.config_db.get_video_source(), cv2.CAP_GSTREAMER)
+            self.video_capture = cv2.VideoCapture(self.config_db.get_video_source())
             self.run = False
             self._is_initialized = True
 
@@ -49,7 +49,7 @@ class Recognition:
     # updates attributes
     def update_video_source(self, video_source):
         self.video_capture.release()
-        self.video_capture = cv2.VideoCapture(video_source, cv2.CAP_GSTREAMER)
+        self.video_capture = cv2.VideoCapture(video_source)
         if self.video_capture.isOpened():
             logger.info('successfully updated video source')
         else:
