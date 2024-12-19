@@ -1,3 +1,4 @@
+from queue import Queue
 from PIL import Image, ImageDraw
 import threading
 import signal
@@ -32,6 +33,7 @@ class Recognition:
     # constructor using configuration file
     def __init__(self):
         if not self._is_initialized:
+            self.queue = Queue(maxsize=1000)
             self.config_db = ConfigCollection()
             self.encodings_db = EncodingsCollection()
             self.events_db = EventsCollection()
@@ -42,6 +44,15 @@ class Recognition:
             self.video_capture = cv2.VideoCapture(self.config_db.get_video_source())
             self.run = False
             self._is_initialized = True
+            threading.Thread(target=self.recognition_worker, daemon=True).start()
+
+    def recognition_worker(self):
+        while True:
+            frame = self.queue.get()
+            logger.debug(f'queue size: {self.queue.qsize()}')
+            logger.debug(f'starting recognition for new frame')
+            self.recognize(frame)
+            self.queue.task_done()
 
     def inject_socket(self, socketio):
         self.socketio = socketio
@@ -51,9 +62,11 @@ class Recognition:
         self.video_capture.release()
         self.video_capture = cv2.VideoCapture(video_source)
         if self.video_capture.isOpened():
-            logger.info('successfully updated video source')
+            logger.info('successfully opened video source')
+            return True
         else:
-            logger.error(f'error updating video source {video_source}')
+            logger.error(f'error opening video source {video_source}')
+            return False
 
     # gets database of registered faces from mongo
     def get_known_encodings(self):
@@ -90,33 +103,35 @@ class Recognition:
 
     # starts face recognition
     def start(self):
-        if not self.video_capture.isOpened():
-            logger.error(f'error opening capture device {self.config_db.get_video_source()}')
-            return
+        try:
+            frame_count = -1
+            # captures indefinitely
+            while self.run:
+                frame = self.capture()
+                if frame is None:
+                    if not self.update_video_source(self.config_db.get_video_source()):
+                        raise Exception('please try again')
+                    frame = self.capture() # try again
 
-        logger.debug('connected to capture device')
+                frame_count += 1
+                _, buffer = cv2.imencode('.jpg', frame)
+                encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
+                self.socketio.emit('frame', {'frame': encoded_frame})
 
-        # captures indefinitely
-        while self.run:
-            frame = self.capture()
-            _, buffer = cv2.imencode('.jpg', frame)
-            encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
-            self.socketio.emit('frame', {'frame': encoded_frame})
+                if frame_count % 30 == 0 and not self.queue.full():
+                    self.queue.put(frame)
 
-            if frame is not None:
-                threading.Thread(target=self.recognize, args=(frame,)).start()
-                logger.debug('started recognition thread')
-                time.sleep(self.config_db.get_delay())
+                # displays raw captured frame
+                if self.config_db.get_display_image():
+                    cv2.imshow('Biometric System Management', frame)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        self.signal_handler()
+                        logger.debug('quitting display')
+                        break
 
-            # displays raw captured frame
-            if self.config_db.get_display_image() and frame is not None:
-                cv2.imshow('Biometric System Management', frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    self.signal_handler()
-                    logger.debug('quitting display')
-                    break
-
-        logger.debug('run stopped')
+        except Exception as e:
+            logger.error(e)
+            logger.debug('run stopped')
 
         # releases everything
         self.signal_handler()
@@ -168,8 +183,10 @@ class Recognition:
             min_face_distance = np.min(face_distances)
             min_face_distance_index = np.argmin(face_distances)
 
+            if min_face_distance > self.config_db.get_tolerance():
+                logger.debug(f'did not meet minimum tolerance: {min_face_distance}')
             # detected and found face in database
-            if min_face_distance <= self.config_db.get_tolerance():
+            else:
                 name = self.known_face_encodings[min_face_distance_index].name
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
 
