@@ -1,30 +1,10 @@
 # NOME COMPLETO B | SEXO E | DATA NASC F | TELEFONE G | EMAIL I | CULTO K | MEMBRO L | SIGI Q | NOME EM FOTO S
 
-from PIL import Image
-import face_recognition
-import numpy as np
+import os
+import re
 import openpyxl
 import argparse
-import os
-import io
-import re
-
-from database.EncodingsCollection import EncodingsCollection
-from database.EventsCollection import EventsCollection
-from database.ImagesCollection import ImagesCollection
-from database.MembersCollection import MembersCollection
-
-from entities.Person import Person
-from entities.Gender import Gender
-from entities.Calendar import Calendar
-from entities.Day import Day
-from entities.Collections import Collections
-from entities.Photo import Photo
-from entities.PhotoCategory import PhotoCategory
-from entities.PhotoMode import PhotoMode
-from entities.Name import Name
-from entities.Ministry import Ministry
-from entities.Encoding import Encoding
+import requests
 
 
 class Workbook:
@@ -35,162 +15,93 @@ class Workbook:
         self.wb = openpyxl.load_workbook(fp)
         self.ws = self.wb.get_sheet_by_name(sheet)
 
-    def list_of_people(self):
-        l = []
+    def parse_wb(self):
+        rows = []
         for row in Workbook.rows:
-            p = []
+            person = []
             for column in Workbook.columns:
                 cell = column + str(row)
                 value = self.ws[cell].value
-                p.append(value)
-            if p[0] is not None and p[-1] is not None:
-                l.append(p)
-        return l
+                person.append(value)
+            if person[0] is not None and person[-1] is not None:
+                rows.append(person)
+        return rows
 
-    def dict_of_people(self, l):
-        d = []
+    def parse_rows(self, rows):
+        return [self.parse_row(row) for row in rows]
 
-        for element in l:
-            name = element[0]
+    def parse_row(self, row):
+        data = {}
 
-            gender = 'FEMALE' if element[1] == 'F' else 'MALE'
+        data['name'] = row[0]
 
-            day = element[2]
-            birth_date = day.year, day.month, day.day if day else None
+        data['gender'] = 'FEMALE' if row[1] == 'F' else 'MALE'
 
-            if element[3] is None:
-                phone_number = None
-            elif type(element[3]) == float:
-                phone_number = str(element[3])[:-2]
-            elif type(element[3]) == int:
-                phone_number = str(element[3])
-            else:
-                phone_number = re.compile('[\W_]+').sub('', element[3])
+        # data['birth_date'] = row[2].year, row[2].month, row[2].day if row[2] else None
+        data['birth_date'] = '01/01/1990'
 
-            email = element[4]
+        if row[3] is None:
+            data['phone_number'] = None
+        elif type(row[3]) == float:
+            data['phone_number'] = str(row[3])[:-2]
+        elif type(row[3]) == int:
+            data['phone_number'] = str(row[3])
+        else:
+            data['phone_number'] = re.compile('[\W_]+').sub('', row[3])
 
-            ministry = element[5].split(',')[0].upper()
+        data['email'] = row[4]
 
-            is_member = bool(element[6])
+        data['ministry'] = row[5].split(',')[0].upper()
 
-            sigi = element[7]
+        data['is_member'] = bool(row[6])
 
-            calendar = Calendar()
+        data['sigi'] = row[7]
 
-            photos = {
-                PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, element[8].lower() + '-fr.jpg', 0),
-                PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, element[8].lower() + '-le.jpg', 0),
-                PhotoCategory.RIGHT: Photo(PhotoCategory.RIGHT, PhotoMode.RAW, element[8].lower() + '-ld.jpg', 0),
-            }
+        data['photos'] = {
+            'FRONT': row[8].lower() + '-fr.jpg',
+            'LEFT': row[8].lower() + '-le.jpg',
+            'RIGHT': row[8].lower() + '-ld.jpg',
+        }
 
-            encodings = {
-                PhotoCategory.FRONT: Photo(PhotoCategory.FRONT, PhotoMode.RAW, element[8].lower() + '-fr.jpg', 0),
-                PhotoCategory.LEFT: Photo(PhotoCategory.LEFT, PhotoMode.RAW, element[8].lower() + '-le.jpg', 0),
-                PhotoCategory.RIGHT: Photo(
-                    PhotoCategory.RIGHT, PhotoMode.RAW, element[8].lower() + '-ld.jpg', 0)
-            }
-
-            d.append(Person(name, birth_date, email, gender, phone_number,
-                            is_member, ministry, sigi, photos, encodings, calendar))
-
-        return d
+        return data
 
 
-class Rotate:
-    @staticmethod
-    def rotate(image):
-        image_exif = image._getexif()
-        image_orientation = image_exif[274]
-        if image_orientation == 2:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
-        if image_orientation == 3:
-            image = image.transpose(Image.ROTATE_180)
-        if image_orientation == 4:
-            image = image.transpose(Image.FLIP_TOP_BOTTOM)
-        if image_orientation == 5:
-            image = image.transpose(
-                Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_90)
-        if image_orientation == 6:
-            image = image.transpose(Image.ROTATE_270)
-        if image_orientation == 7:
-            image = image.transpose(
-                Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_90)
-        if image_orientation == 8:
-            image = image.transpose(Image.ROTATE_90)
-        return image
+def post(person, base_path):
+    path = person['photos']['FRONT']
+    photos = { 'FRONT': open(os.path.join(base_path, path), 'rb') }
+    del person['photos']
+
+    print(f'Posting {person['name']}')
+
+    response = requests.post('http://localhost:5003/api/members',
+                             data=person,
+                             files=photos)
+
+    print(f'Status Code: {response.status_code}')
 
 
-def rename_lower(path):
-    for f in os.listdir(path):
-        os.rename(os.path.join(path, f), os.path.join(path, f.lower()))
-
-
-def populate(d, args):
-    for person in d:
-        print('saving person...', end=' ')
-        member_id = members_db.insert_member(person)
-
-        encoding_saved = False
-        print(person.name)
-
-        for key in person.photos.keys():
-            if person.photos[key] is None:
-                continue
-            else:
-                try:
-                    fpath = os.path.join(
-                        args.path, person.photos[key].data.lower())
-
-                    foto = Image.open(fpath)
-                    try:
-                        foto = Rotate.rotate(foto)
-                    except Exception as e:
-                        pass
-                    encodings = face_recognition.face_encodings(np.array(foto))[
-                        0]
-
-                    print('saving %s: %s...' % (key, fpath), end=' ')
-                    encoding = Encoding(member_id, person.name, encodings)
-
-                    encoding_id = encodings_db.insert_encoding(encoding)
-                    person.photos[key] = encoding_id
-
-                    imgByteArr = io.BytesIO()
-                    foto.save(imgByteArr, format='JPEG')
-                    image_id = images_db.insert_image(imgByteArr.getvalue())
-                    person.encodings[key] = image_id
-
-                    encoding_saved = True
-                    print('done')
-                except Exception as e:
-                    print(e)
-                    continue
-
-        print('updating person...')
-        members_db.replace_member(member_id, person)
-
-
-def createArgsParser():
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('file', help="xlsx file")
     parser.add_argument('-s', '--sheet', required=True, help='xlsx sheet')
     parser.add_argument('-p', '--path', required=True,
                         help='folder with pictures')
-    parser.add_argument('-d', '--database', required=True,
-                        help='database name')
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    for file in os.listdir(args.path):
+        os.rename(os.path.join(args.path, file),
+                  os.path.join(args.path, file.lower()))
+
+    wb = Workbook(args.file, args.sheet)
+    rows = wb.parse_wb()
+    people = wb.parse_rows(rows)
+
+    for person in people:
+        try:
+            post(person, args.path)
+        except Exception as e:
+            print(f'Error creating {person['name']}: {e}')
 
 
 if __name__ == '__main__':
-    args = createArgsParser()
-    rename_lower(args.path)
-
-    wb = Workbook(args.file, args.sheet)
-    d = wb.dict_of_people(wb.list_of_people())
-
-    encodings_db = EncodingsCollection()
-    events_db = EventsCollection()
-    images_db = ImagesCollection()
-    members_db = MembersCollection()
-
-    populate(d, args)
+    main()
