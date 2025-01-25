@@ -9,6 +9,11 @@ const router = createRouter({
       component: () => import('../views/streaming/StreamingView.vue')
     },
     {
+      path: '/matches',
+      name: 'matches',
+      component: () => import('../views/matches/Matches.vue')
+    },
+    {
       path: '/management',
       name: 'management',
       component: () => import('../views/management/ManagementView.vue')
