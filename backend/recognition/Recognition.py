@@ -189,6 +189,7 @@ class Recognition:
             else:
                 name = self.known_face_encodings[min_face_distance_index].name
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
+                ts = int(time.time())
 
                 if dry_run:
                     matches[member_id] = name
@@ -204,15 +205,12 @@ class Recognition:
                 logger.debug(f"matched {name}: {min_face_distance}")
 
                 # create event document and save it to mongodb
-                event = Event(member_id, name, int(time.time()), min_face_distance, frame,
+                event = Event(member_id, name, ts, min_face_distance, frame,
                               self.known_face_encodings[min_face_distance_index], confirmed=True)
                 event_photo_id = self.save_event(
                     event, coordinates=(top, right, bottom, left))
 
-                # TODO: should be transaction / atomic
-                member = self.members_db.get_member_by_id(member_id)
-                member.calendar.mark_presence(event_photo_id)
-                self.members_db.replace_member(member_id, member)
+                self.members_db.add_presence(member_id, ts, event_photo_id)
 
                 _, buffer = cv2.imencode('.jpg', frame)
                 encoded_frame = base64.b64encode(

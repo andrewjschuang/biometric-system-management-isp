@@ -16,7 +16,7 @@
         <TableBody>
             <TableRow v-for="date in presence" :key="date[0]">
                 <TableCell class="font-medium">
-                    {{ date[0].replaceAll("-", "/") }}
+                    {{ formatDate(date[0]) }}
                 </TableCell>
                 <TableCell>{{ date[1] ? 'Present' : 'Absent' }}</TableCell>
                 <TableCell>
@@ -75,7 +75,7 @@ onMounted(async () => {
         member.value = (await response.json()).data
         photo.value = await fetchImage(member.value.photos.FRONT)
         presence.value = getDates(member.value.calendar, showOnlySundays.value)
-        presencePercentage.value = calculatePresence(presence.value)
+        presencePercentage.value = calculatePresence(presence.value, showOnlySundays.value)
 
     } catch (e: any) {
         console.error(`Failed to fetch member: ${e.message}`);
@@ -86,24 +86,56 @@ onMounted(async () => {
     }
 })
 
-const getDates = (calendar: object, showOnlySundays: boolean) => {
+const getDates = (calendar: Array<Record<string, string>>, showOnlySundays: boolean) => {
     const today = new Date();
-    return Object.entries(calendar)
-        .filter(([date]) => {
-            const day = new Date(date);
+    return calendar
+        .flatMap(entry => Object.entries(entry))
+        .filter(([timestamp]) => {
+            const day = new Date(parseInt(timestamp) * 1000);
             const isSunday = day.getDay() === 0;
             const isBeforeToday = day <= today;
             return showOnlySundays
                 ? isSunday && isBeforeToday
-                : isBeforeToday
+                : isBeforeToday;
         })
-        .reverse()
+        .reverse();
 };
 
-const calculatePresence = (calendar: any) => {
-    const present = calendar.filter(([_, present]: any) => present).length
-    return present / calendar.length * 100
-}
+const formatDate = (timestamp: string) => {
+    const date = new Date(parseInt(timestamp) * 1000);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
+
+const calculatePresence = (calendar: Array<Record<string, string>>, showOnlySundays: boolean) => {
+    const today = new Date();
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+    let totalDays = 0;
+    for (let date = startOfYear; date <= today; date.setDate(date.getDate() + 1)) {
+        if (showOnlySundays) {
+            if (date.getDay() === 0) {
+                totalDays++;
+            }
+        } else {
+            totalDays++;
+        }
+    }
+
+    const daysPresent = calendar.filter(entry => {
+        const [timestamp] = Object.keys(entry);
+        const day = new Date(parseInt(timestamp) * 1000);
+        if (showOnlySundays) {
+            return day.getDay() === 0;
+        }
+        return true;
+    }).length;
+
+    return totalDays === 0 ? 0 : (daysPresent / totalDays) * 100;
+};
 
 const fetchImage = async (imageId: string) => {
     const imageResponse = await fetch(`http://localhost:5003/api/images/${imageId}`);

@@ -31,10 +31,10 @@ all: detect-platform
 	$(MAKE) backend frontend
 
 backend:
-	docker build -t $(BACKEND_IMAGE) $(BACKEND_DIR)
+	docker build -t $(BACKEND_IMAGE) -f $(BACKEND_DIR)/Dockerfile ${BACKEND_DIR}
 
 frontend:
-	docker build -t $(FRONTEND_IMAGE) $(FRONTEND_DIR)
+	docker build -t $(FRONTEND_IMAGE) -f $(FRONTEND_DIR)/Dockerfile ${FRONTEND_DIR}
 
 prod:
 	@echo "Building for Windows (targeting linux/amd64)"; \

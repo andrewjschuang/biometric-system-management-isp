@@ -1,48 +1,44 @@
 import datetime
-import time
 from database.ConfigCollection import ConfigCollection
 
 
 class Calendar:
-    def __init__(self, calendar={}, year=datetime.datetime.now().year):
+    def __init__(self, calendar=[]):
         self.config_db = ConfigCollection()
         self.calendar = calendar
-        if len(self.calendar) == 0:
-            self._init_calendar(year)
-
-    def _init_calendar(self, year):
-        start_date = datetime.date(year, 1, 1)
-        end_date = datetime.date(year, 12, 31)
-        delta = datetime.timedelta(days=1)
-        current_date = start_date
-        while current_date <= end_date:
-            self.calendar[current_date.strftime("%Y-%m-%d")] = False
-            current_date += delta
 
     def _find_sundays(self):
-        return [date for date, _ in self.calendar.items() if self._is_sunday(date)]
+        return {
+            int(timestamp)
+            for entry in self.calendar
+            for timestamp in entry.keys()
+            if self._is_sunday(int(timestamp))
+        }
 
-    def _is_sunday(self, date):
-        return datetime.datetime.strptime(date, "%Y-%m-%d").weekday() == 6
-
-    def mark_presence(self, photo, timestamp=None):
-        if timestamp is None:
-            timestamp = int(time.time())
-
-        date = datetime.date.fromtimestamp(timestamp).strftime("%Y-%m-%d")
-        if date in self.calendar:
-            self.calendar[date] = photo
+    def _is_sunday(self, ts):
+        return datetime.datetime.fromtimestamp(ts).weekday() == 6
 
     # TODO: consider justified (Presence entity)
     def is_active(self):
-        sundays = self._find_sundays()
-        present_sundays = [date for date in sundays if self.calendar[date]]
-        presence_rate = len(present_sundays) / len(sundays)
+        today = datetime.date.today()
+        first_day_of_year = datetime.date(today.year, 1, 1)
+        sundays = 0
+
+        current_day = first_day_of_year
+        while current_day <= today:
+            if current_day.weekday() == 6:
+                sundays += 1
+            current_day += datetime.timedelta(days=1)
+
+        if sundays == 0:
+            return False
+
+        presence_rate = len(self._find_sundays()) / sundays
         return presence_rate >= self.config_db.get_active_rate()
 
     def to_dict(self):
         return self.calendar
 
     @staticmethod
-    def from_dict(calendar={}):
+    def from_dict(calendar=[]):
         return Calendar(calendar=calendar)
