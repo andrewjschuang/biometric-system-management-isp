@@ -9,9 +9,10 @@ class Calendar:
 
     def _find_sundays(self):
         return {
-            entry["timestamp"]
+            int(timestamp)
             for entry in self.calendar
-            if self._is_sunday(int(entry["timestamp"]))
+            for timestamp in entry.keys()
+            if self._is_sunday(int(timestamp))
         }
 
     def _is_sunday(self, ts):
