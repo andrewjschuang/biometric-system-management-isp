@@ -1,8 +1,8 @@
 # Variables
-VERSION ?= 3.0.1-alpha
+VERSION ?= 3.0.2
 DOCKER_USER=andrewjsc
-BACKEND_IMAGE=$(DOCKER_USER)/bmsisp-backend:$(VERSION)
-FRONTEND_IMAGE=$(DOCKER_USER)/bmsisp-frontend:$(VERSION)
+BACKEND_IMAGE=$(DOCKER_USER)/bmsisp-backend
+FRONTEND_IMAGE=$(DOCKER_USER)/bmsisp-frontend
 BACKEND_DIR=./backend
 FRONTEND_DIR=./frontend
 
@@ -31,20 +31,20 @@ all: detect-platform
 	$(MAKE) backend frontend
 
 backend:
-	docker build -t $(BACKEND_IMAGE) -f $(BACKEND_DIR)/Dockerfile ${BACKEND_DIR}
+	docker build -t $(BACKEND_IMAGE):$(VERSION)-alpha -f $(BACKEND_DIR)/Dockerfile ${BACKEND_DIR}
 
 frontend:
-	docker build -t $(FRONTEND_IMAGE) -f $(FRONTEND_DIR)/Dockerfile ${FRONTEND_DIR}
+	docker build -t $(FRONTEND_IMAGE):$(VERSION)-alpha -f $(FRONTEND_DIR)/Dockerfile ${FRONTEND_DIR}
 
 prod:
 	@echo "Building for Windows (targeting linux/amd64)"; \
 	$(MAKE) backend-prod frontend-prod
 
 backend-prod:
-	docker buildx build --platform linux/amd64 -t $(BACKEND_IMAGE) --push $(BACKEND_DIR)
+	docker buildx build --platform linux/amd64 -t $(BACKEND_IMAGE):$(VERSION) --push $(BACKEND_DIR)
 
 frontend-prod:
-	docker buildx build --platform linux/amd64 -t $(FRONTEND_IMAGE) --push $(FRONTEND_DIR)
+	docker buildx build --platform linux/amd64 -t $(FRONTEND_IMAGE):$(VERSION) --push $(FRONTEND_DIR)
 
 # Run Docker Compose with dynamic architecture detection
 dev: detect-platform
@@ -58,7 +58,7 @@ dev: detect-platform
 	  exit 1; \
 	fi; \
 	echo "Starting Docker Compose with TARGET_PLATFORM=$$TARGET_PLATFORM"; \
-	VERSION=$(VERSION) TARGET_PLATFORM=$$TARGET_PLATFORM docker-compose up -d
+	VERSION=$(VERSION)-alpha TARGET_PLATFORM=$$TARGET_PLATFORM docker-compose up -d
 
 kill:
 	docker-compose down
