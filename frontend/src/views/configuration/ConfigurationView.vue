@@ -13,7 +13,7 @@
             <FormItem class="form-item">
                 <FormLabel>Tolerance</FormLabel>
                 <FormControl class="form-control">
-                    <Input type="number" min="0.1" max="1.0" step="0.1" v-model="tolerance" />
+                    <Input type="number" min="0.1" max="1.0" step="0.01" v-model="tolerance" />
                 </FormControl>
                 <FormMessage />
             </FormItem>
