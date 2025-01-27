@@ -9,6 +9,11 @@ const router = createRouter({
       component: () => import('../views/streaming/StreamingView.vue')
     },
     {
+      path: '/matches',
+      name: 'matches',
+      component: () => import('../views/matches/Matches.vue')
+    },
+    {
       path: '/management',
       name: 'management',
       component: () => import('../views/management/ManagementView.vue')
@@ -18,11 +23,6 @@ const router = createRouter({
       name: 'ManagementView',
       component: () => import('../views/management/PresenceReport.vue'),
       props: true
-    },
-    {
-      path: '/configuration',
-      name: 'configuration',
-      component: () => import('../views/configuration/ConfigurationView.vue')
     },
     {
       path: '/recognize',

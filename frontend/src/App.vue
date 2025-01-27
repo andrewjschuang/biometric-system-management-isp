@@ -32,8 +32,8 @@ import { Separator } from '@/components/ui/separator'
 
 const tags = [
     { name: "Home", path: "/" },
+    { name: "Matches", path: "/matches" },
     { name: "Management", path: "/management" },
-    { name: "Configuration", path: "/configuration" },
     { name: "Recognize", path: "/recognize" },
     { name: "Settings", path: "/settings" },
 ]
