@@ -18,15 +18,6 @@
                 <FormMessage />
             </FormItem>
         </FormField>
-        <FormField name="delay">
-            <FormItem class="form-item">
-                <FormLabel>Delay</FormLabel>
-                <FormControl class="form-control">
-                    <Input type="number" step="0.1" v-model="delay" />
-                </FormControl>
-                <FormMessage />
-            </FormItem>
-        </FormField>
         <div class="button-container">
             <Button type="submit">
                 Save Changes
@@ -54,7 +45,6 @@ const { toast } = useToast()
 
 const videoSource = ref<string>('');
 const tolerance = ref<number>();
-const delay = ref<number>();
 
 onMounted(async () => {
     try {
@@ -62,7 +52,6 @@ onMounted(async () => {
         const data = (await response.json()).data
         videoSource.value = data.video_source
         tolerance.value = data.tolerance
-        delay.value = data.delay
     } catch (e: any) {
         console.error(`Failed to retrieve configuration: ${e.message}`);
         toast({
@@ -82,7 +71,6 @@ const handleSubmit = async () => {
             body: JSON.stringify({
                 video_source: videoSource.value,
                 tolerance: tolerance.value,
-                delay: delay.value,
             }),
         })
         if (!response.ok) {
