@@ -17,8 +17,8 @@ const events = ref<any>([]);
 
 const fetchEvents = async () => {
     try {
-        const sevenDaysAgo = Math.floor((new Date().getTime() - 7 * 24 * 60 * 60 * 1000) / 1000)
-        const response = await fetch(`http://localhost:5003/api/events?start_range=${sevenDaysAgo}`)
+        const startOf2024 = Math.floor(new Date('2024-01-01T00:00:00Z').getTime() / 1000);
+        const response = await fetch(`http://localhost:5003/api/events?start_range=${startOf2024}`)
         events.value = (await response.json()).data
         console.log(events)
     } catch (error) {
