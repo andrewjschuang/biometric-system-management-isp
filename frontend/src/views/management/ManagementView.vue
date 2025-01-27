@@ -20,24 +20,29 @@
                     </DialogTrigger>
                 </CardContent>
             </Card>
-            <DialogContent class="sm:max-w-[450px]">
-                <DialogHeader>
-                    <DialogTitle v-if="activeCard.id">Edit profile</DialogTitle>
-                    <DialogTitle v-else>New profile</DialogTitle>
-                    <DialogDescription v-if="activeCard.id">Make changes to the profile here. Click save when you're
-                        done.
-                    </DialogDescription>
-                    <DialogDescription v-else>Create a new profile here. Click save when you're done.
-                    </DialogDescription>
-                </DialogHeader>
-                <Button v-if="activeCard.id" variant="secondary" @click="goTo(activeCard.id, activeCard.src)">
-                    View Presence Report
-                </Button>
-                <!-- <Button v-if="activeCard.id" variant="secondary" @click="goTo(activeCard.id, activeCard.src, true)">
+            <DialogContent>
+                <ScrollArea class="w-full max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle v-if="activeCard.id">Edit profile</DialogTitle>
+                        <DialogTitle v-else>New profile</DialogTitle>
+                        <DialogDescription v-if="activeCard.id">Make changes to the profile here. Click save when you're
+                            done.
+                        </DialogDescription>
+                        <DialogDescription v-else>Create a new profile here. Click save when you're done.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div class="flex justify-center items-center py-2">
+                        <Button v-if="activeCard.id" class="w-full" variant="secondary"
+                            @click="goTo(activeCard.id, activeCard.src)">
+                            View Presence Report
+                        </Button>
+                    </div>
+                    <!-- <Button v-if="activeCard.id" variant="secondary" @click="goTo(activeCard.id, activeCard.src, true)">
                     View Pending Approvals
                 </Button> -->
-                <MemberFormComponent :member="activeCard" :create="!hasActiveCard" @updateMember="handleUpdateMember"
-                    @deleteMember="handleDeleteMember" />
+                    <MemberFormComponent :member="activeCard" :create="!hasActiveCard"
+                        @updateMember="handleUpdateMember" @deleteMember="handleDeleteMember" />
+                </ScrollArea>
             </DialogContent>
         </Dialog>
     </div>
@@ -49,6 +54,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { useToast } from '@/components/ui/toast/use-toast'
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from '@/components/ui/button'
 import {
     Card,
