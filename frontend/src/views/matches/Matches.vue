@@ -1,15 +1,29 @@
 <template>
     <div>
-        <h1>Events</h1>
         <ul v-if="events.length > 0">
             <li>
-                <strong>Date | Match | Face Distance | Image</strong>
+                <div class="flex h-5 items-center space-x-4 text-lg">
+                    <Label class="flex-1">Date</Label>
+                    <Separator orientation="vertical" />
+                    <Label class="flex-1">Match</Label>
+                    <Separator orientation="vertical" />
+                    <Label class="flex-1">Face Distance</Label>
+                    <Separator orientation="vertical" />
+                    <Label class="flex-1 text-center">Image</Label>
+                </div>
             </li>
             <li v-for="(event, index) in events" :key="index">
-                {{ formatTimestamp(event.timestamp) }} | {{ event.name }} | {{ event.face_distance }} |
-                <Button class="p-0" variant="link" @click="viewImage(event.photo)">
-                    View
-                </Button>
+                <div class="flex h-5 items-center space-x-4 text-sm">
+                    <div class="flex-1 text-gray-600">{{ formatTimestamp(event.timestamp) }}</div>
+                    <Separator orientation="vertical" />
+                    <div class="flex-1 text-gray-600">{{ event.name }}</div>
+                    <Separator orientation="vertical" />
+                    <div class="flex-1 text-gray-600">{{ event.face_distance }}</div>
+                    <Separator orientation="vertical" />
+                    <Button class="p-0 flex-1 text-center text-sm text-gray-600" variant="link" @click="viewImage(event.photo)">
+                        View
+                    </Button>
+                </div>
             </li>
         </ul>
         <p v-else>No events available.</p>
@@ -24,14 +38,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { useToast } from '@/components/ui/toast/use-toast'
-import Toaster from '@/components/ui/toast/Toaster.vue'
+import { useToast } from '@/components/ui/toast/use-toast';
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import Toaster from '@/components/ui/toast/Toaster.vue';
+import { Button } from "@/components/ui/button";
 
-const { toast } = useToast()
+const { toast } = useToast();
 
-const events = ref<any>([]);
-const isModalVisible = ref(false)
-const modalImage = ref('')
+const events = ref<any[]>([]);
+const isModalVisible = ref(false);
+const modalImage = ref('');
 
 onMounted(() => {
     fetchEvents();
@@ -40,17 +57,21 @@ onMounted(() => {
 const fetchEvents = async () => {
     try {
         const startOf2024 = Math.floor(new Date('2024-01-01T00:00:00Z').getTime() / 1000);
-        const response = await fetch(`http://localhost:5003/api/events?start_range=${startOf2024}`)
-        events.value = (await response.json()).data
+        const response = await fetch(`http://localhost:5003/api/events?start_range=${startOf2024}`);
+        events.value = (await response.json()).data;
     } catch (error) {
         console.error('Error fetching events:', error);
+        toast({
+            title: 'Error fetching events',
+            variant: 'destructive',
+        });
     }
 };
 
 const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const datePart = date.toLocaleDateString('en-GB').replace(/\//g, '/'); // Formats as DD/MM/YYYY
+    const datePart = date.toLocaleDateString('en-GB'); // DD/MM/YYYY
     const timePart = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
     return `${datePart} ${timePart} ${dayName}`;
 };
@@ -59,18 +80,18 @@ const fetchImage = async (imageId: string) => {
     const imageResponse = await fetch(`http://localhost:5003/api/images/${imageId}`);
     const imageBlob = await imageResponse.blob();
     return URL.createObjectURL(imageBlob);
-}
+};
 
 const viewImage = async (imageId: string) => {
     try {
         modalImage.value = await fetchImage(imageId);
-        document.addEventListener('keydown', handleKeyDown);
         isModalVisible.value = true;
+        document.addEventListener('keydown', handleKeyDown);
     } catch (e: any) {
         console.error(`Failed to fetch image: ${e.message}`);
         toast({
-            title: `Failed to fetch image`,
-            variant: 'destructive'
+            title: 'Failed to fetch image',
+            variant: 'destructive',
         });
     }
 };
@@ -96,11 +117,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-h1 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
 ul {
     list-style: none;
     padding: 0;
@@ -111,8 +127,12 @@ li {
     border-bottom: 1px solid #ddd;
 }
 
-p {
-    color: gray;
+.flex-1 {
+    flex: 1;
+}
+
+.text-center {
+    text-align: center;
 }
 
 .modal-overlay {
@@ -128,11 +148,13 @@ p {
 }
 
 .modal-content {
-    width: 50%;
-    height: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    max-width: 80%;
+    max-height: 80%;
+}
+
+.modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
 }
 </style>
