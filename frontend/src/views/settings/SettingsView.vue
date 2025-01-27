@@ -119,9 +119,10 @@ const handleSubmit = async () => {
             enable_match_confirmation: enableMatchConfirmation.value,
             show_only_sundays: showOnlySundays.value,
         })
-        toast({
-            title: `Successfully updated configuration`,
-        });
+        window.location.reload(); // TODO: should not need to reload
+        // toast({
+        //     title: `Successfully updated configuration`,
+        // });
     } catch (e: any) {
         console.error(`Failed to update configuration`);
         toast({
