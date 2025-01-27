@@ -7,7 +7,7 @@ BACKEND_DIR=./backend
 FRONTEND_DIR=./frontend
 
 # Targets
-.PHONY: backend frontend backend-prod frontend-prod all prod dev detect-platform
+.PHONY: backend frontend build push dev prod detect-platform
 
 # Detect Architecture and Set TARGET_PLATFORM
 detect-platform:
@@ -26,7 +26,7 @@ detect-platform:
 	echo "Using TARGET_PLATFORM=$$TARGET_PLATFORM"
 
 # Native build for current architecture
-all: detect-platform
+build: detect-platform
 	@echo "Building natively"; \
 	$(MAKE) backend frontend
 
@@ -45,6 +45,11 @@ backend-prod:
 
 frontend-prod:
 	docker buildx build --platform linux/amd64 -t $(FRONTEND_IMAGE):$(VERSION) --push $(FRONTEND_DIR)
+
+push:
+	@echo "Building for Windows (targeting linux/amd64)"; \
+	docker buildx build --platform linux/amd64 -t $(BACKEND_IMAGE):$(VERSION)-alpha --push $(BACKEND_DIR)
+	docker buildx build --platform linux/amd64 -t $(FRONTEND_IMAGE):$(VERSION)-alpha --push $(FRONTEND_DIR)
 
 # Run Docker Compose with dynamic architecture detection
 dev: detect-platform
