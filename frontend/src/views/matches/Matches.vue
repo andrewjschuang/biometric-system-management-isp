@@ -2,25 +2,46 @@
     <div>
         <h1>Events</h1>
         <ul v-if="events.length > 0">
+            <li>
+                <strong>Date | Match | Face Distance | Image</strong>
+            </li>
             <li v-for="(event, index) in events" :key="index">
-                {{ formatTimestamp(event.timestamp) }} | {{ event.name }}
+                {{ formatTimestamp(event.timestamp) }} | {{ event.name }} | {{ event.face_distance }} |
+                <Button class="p-0" variant="link" @click="viewImage(event.photo)">
+                    View
+                </Button>
             </li>
         </ul>
         <p v-else>No events available.</p>
     </div>
+    <Toaster />
+    <div v-if="isModalVisible" class="modal-overlay" @click="handleOverlayClick">
+        <div class="modal-content" @click.stop>
+            <img :src="modalImage" alt="Modal Image" />
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useToast } from '@/components/ui/toast/use-toast'
+import Toaster from '@/components/ui/toast/Toaster.vue'
+
+const { toast } = useToast()
 
 const events = ref<any>([]);
+const isModalVisible = ref(false)
+const modalImage = ref('')
+
+onMounted(() => {
+    fetchEvents();
+});
 
 const fetchEvents = async () => {
     try {
         const startOf2024 = Math.floor(new Date('2024-01-01T00:00:00Z').getTime() / 1000);
         const response = await fetch(`http://localhost:5003/api/events?start_range=${startOf2024}`)
         events.value = (await response.json()).data
-        console.log(events)
     } catch (error) {
         console.error('Error fetching events:', error);
     }
@@ -31,11 +52,46 @@ const formatTimestamp = (timestamp: number) => {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
     const datePart = date.toLocaleDateString('en-GB').replace(/\//g, '/'); // Formats as DD/MM/YYYY
     const timePart = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-    return `${dayName}, ${datePart} ${timePart}`;
+    return `${datePart} ${timePart} ${dayName}`;
 };
 
-onMounted(() => {
-    fetchEvents();
+const fetchImage = async (imageId: string) => {
+    const imageResponse = await fetch(`http://localhost:5003/api/images/${imageId}`);
+    const imageBlob = await imageResponse.blob();
+    return URL.createObjectURL(imageBlob);
+}
+
+const viewImage = async (imageId: string) => {
+    try {
+        modalImage.value = await fetchImage(imageId);
+        document.addEventListener('keydown', handleKeyDown);
+        isModalVisible.value = true;
+    } catch (e: any) {
+        console.error(`Failed to fetch image: ${e.message}`);
+        toast({
+            title: `Failed to fetch image`,
+            variant: 'destructive'
+        });
+    }
+};
+
+const closeModal = () => {
+    isModalVisible.value = false;
+    document.removeEventListener('keydown', handleKeyDown);
+};
+
+const handleOverlayClick = () => {
+    closeModal();
+};
+
+const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+};
+
+onBeforeUnmount(() => {
+    document.removeEventListener('keydown', handleKeyDown);
 });
 </script>
 
@@ -57,5 +113,26 @@ li {
 
 p {
     color: gray;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    width: 50%;
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 </style>
