@@ -25,11 +25,6 @@ const router = createRouter({
       props: true
     },
     {
-      path: '/configuration',
-      name: 'configuration',
-      component: () => import('../views/configuration/ConfigurationView.vue')
-    },
-    {
       path: '/recognize',
       name: 'recognize',
       component: () => import('../views/recognition/RecognitionView.vue')
