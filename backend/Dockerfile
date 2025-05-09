@@ -43,6 +43,9 @@ COPY . /app
 # # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
+
+RUN poetry run pip install --no-cache-dir setuptools wheel
+
 RUN poetry install --no-root
 
 CMD ["poetry", "run", "python", "-m", "server"]
