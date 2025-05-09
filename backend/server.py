@@ -92,7 +92,7 @@ def configuration():
 def recognize():
     try:
         result = api_image.recognize(request)
-        return jsonify({'data': result}), 200
+        return jsonify({'data': 'success'}), 202
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
