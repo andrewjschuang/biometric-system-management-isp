@@ -1,19 +1,33 @@
 services:
+  presence:
+    image: andrewjsc/bmsisp-presence:${VERSION}
+    restart: always
+    platform: ${TARGET_PLATFORM}
+    networks:
+      - open_network
+    ports:
+      - 5174:5173
+    depends_on:
+      - backend
+
   frontend:
     image: andrewjsc/bmsisp-frontend:${VERSION}
     restart: always
     platform: ${TARGET_PLATFORM}
     networks:
-      - custom_network
+      - local_network
     ports:
       - 5173:5173
+    depends_on:
+      - backend
 
   backend:
     image: andrewjsc/bmsisp-backend:${VERSION}
     restart: always
     platform: ${TARGET_PLATFORM}
     networks:
-      - custom_network
+      - local_network
+      - open_network
     ports:
       - 5003:5003
     environment:
@@ -22,13 +36,15 @@ services:
       MONGO_DB_NAME: bmsisp
     # devices:
     #   - /dev/video0:/dev/video0
+    depends_on:
+      - mongodb
 
   mongodb:
     image: mongo:4.0
     restart: always
     platform: ${TARGET_PLATFORM}
     networks:
-      - custom_network
+      - local_network
     volumes:
       - mongodb-volume:/data/db
 
@@ -36,5 +52,7 @@ volumes:
   mongodb-volume:
 
 networks:
-  custom_network:
+  local_network:
+    driver: bridge
+  open_network:
     driver: bridge
