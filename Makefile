@@ -3,11 +3,13 @@ VERSION ?= 3.0.3
 DOCKER_USER=andrewjsc
 BACKEND_IMAGE=$(DOCKER_USER)/bmsisp-backend
 FRONTEND_IMAGE=$(DOCKER_USER)/bmsisp-frontend
+PRESENCE_IMAGE=$(DOCKER_USER)/bmsisp-presence
 BACKEND_DIR=./backend
 FRONTEND_DIR=./frontend
+PRESENCE_DIR=./presence
 
 # Targets
-.PHONY: backend frontend build push dev prod detect-platform
+.PHONY: presence frontend backend build push dev prod detect-platform
 
 # Detect Architecture and Set TARGET_PLATFORM
 detect-platform:
@@ -28,7 +30,10 @@ detect-platform:
 # Native build for current architecture
 build: detect-platform
 	@echo "Building natively"; \
-	$(MAKE) backend frontend
+	$(MAKE) presence frontend backend
+
+presence:
+	docker build -t $(PRESENCE_IMAGE):$(VERSION)-alpha -f $(PRESENCE_DIR)/Dockerfile ${PRESENCE_DIR}
 
 backend:
 	docker build -t $(BACKEND_IMAGE):$(VERSION)-alpha -f $(BACKEND_DIR)/Dockerfile ${BACKEND_DIR}
@@ -38,7 +43,10 @@ frontend:
 
 prod:
 	@echo "Building for Windows (targeting linux/amd64)"; \
-	$(MAKE) backend-prod frontend-prod
+	$(MAKE) presence-prod frontend-prod backend-prod
+
+presence-prod:
+	docker buildx build --platform linux/amd64 -t $(PRESENCE_IMAGE):$(VERSION) --push $(PRESENCE_DIR)
 
 backend-prod:
 	docker buildx build --platform linux/amd64 -t $(BACKEND_IMAGE):$(VERSION) --push $(BACKEND_DIR)
@@ -48,6 +56,7 @@ frontend-prod:
 
 push:
 	@echo "Building for Windows (targeting linux/amd64)"; \
+	docker buildx build --platform linux/amd64 -t $(PRESENCE_IMAGE):$(VERSION)-alpha --push $(PRESENCE_DIR)
 	docker buildx build --platform linux/amd64 -t $(BACKEND_IMAGE):$(VERSION)-alpha --push $(BACKEND_DIR)
 	docker buildx build --platform linux/amd64 -t $(FRONTEND_IMAGE):$(VERSION)-alpha --push $(FRONTEND_DIR)
 

@@ -1,6 +1,6 @@
 import logging
 from flask import Flask, Response, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO
 from recognition.Recognition import Recognition
 import api.configuration as api_configuration
@@ -89,10 +89,11 @@ def configuration():
 
 
 @app.route('/api/recognize', methods=['POST'])
+@cross_origin(origins="*")
 def recognize():
     try:
         result = api_image.recognize(request)
-        return jsonify({'data': result}), 200
+        return jsonify({'data': 'success'}), 202
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 

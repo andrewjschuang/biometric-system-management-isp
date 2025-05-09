@@ -41,10 +41,12 @@ class Recognition:
             self.members_db = MembersCollection()
             self.known_face_encodings = []
             self.get_known_encodings()
-            self.video_capture = cv2.VideoCapture(self.config_db.get_video_source())
+            self.video_capture = cv2.VideoCapture(
+                self.config_db.get_video_source())
             self.run = False
             self._is_initialized = True
-            threading.Thread(target=self.recognition_worker, daemon=True).start()
+            threading.Thread(target=self.recognition_worker,
+                             daemon=True).start()
 
     def recognition_worker(self):
         while True:
@@ -111,11 +113,12 @@ class Recognition:
                 if frame is None:
                     if not self.update_video_source(self.config_db.get_video_source()):
                         raise Exception('please try again')
-                    frame = self.capture() # try again
+                    frame = self.capture()  # try again
 
                 frame_count += 1
                 _, buffer = cv2.imencode('.jpg', frame)
-                encoded_frame = base64.b64encode(buffer.tobytes()).decode('utf-8')
+                encoded_frame = base64.b64encode(
+                    buffer.tobytes()).decode('utf-8')
                 self.socketio.emit('frame', {'frame': encoded_frame})
 
                 if frame_count % 30 == 0 and not self.queue.full():
@@ -146,7 +149,7 @@ class Recognition:
         logger.debug('failed to capture frame')
 
     # identifies faces in frame and persists it
-    def recognize(self, frame, model='hog', dry_run=False):
+    def recognize(self, frame, model='hog', dry_run=False, event_name=""):
         if len(self.known_face_encodings) == 0:
             logger.warning('zero encodings found in database')
             return
@@ -154,7 +157,7 @@ class Recognition:
         face_locations, face_encodings = self.get_faces_from_picture(
             frame, model=model)
 
-        return self.identify(frame, face_locations, face_encodings, dry_run)
+        return self.identify(frame, face_locations, face_encodings, dry_run, event_name)
 
     # detects faces in frame
     def get_faces_from_picture(self, frame, model='hog'):
@@ -164,7 +167,7 @@ class Recognition:
         return face_locations, face_encodings
 
     # identifies faces and info
-    def identify(self, frame, face_locations, face_encodings, dry_run=False):
+    def identify(self, frame, face_locations, face_encodings, dry_run=False, event_name=""):
         matches = {}
 
         # TODO: change to confirmed=True
@@ -184,7 +187,8 @@ class Recognition:
             min_face_distance_index = np.argmin(face_distances)
 
             if min_face_distance > self.config_db.get_tolerance():
-                logger.debug(f'did not meet minimum tolerance: {min_face_distance}')
+                logger.debug(
+                    f'did not meet minimum tolerance: {min_face_distance}')
             # detected and found face in database
             else:
                 name = self.known_face_encodings[min_face_distance_index].name
@@ -206,7 +210,7 @@ class Recognition:
 
                 # create event document and save it to mongodb
                 event = Event(member_id, name, ts, min_face_distance, frame,
-                              self.known_face_encodings[min_face_distance_index], confirmed=True)
+                              self.known_face_encodings[min_face_distance_index], confirmed=True, event_name=event_name)
                 event_photo_id = self.save_event(
                     event, coordinates=(top, right, bottom, left))
 
