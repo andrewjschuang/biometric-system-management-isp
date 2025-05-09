@@ -1,5 +1,5 @@
 # Variables
-VERSION ?= 3.0.3
+VERSION ?= 3.0.4
 DOCKER_USER=andrewjsc
 BACKEND_IMAGE=$(DOCKER_USER)/bmsisp-backend
 FRONTEND_IMAGE=$(DOCKER_USER)/bmsisp-frontend
