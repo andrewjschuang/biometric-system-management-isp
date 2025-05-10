@@ -42,6 +42,10 @@ frontend:
 	docker build -t $(FRONTEND_IMAGE):$(VERSION)-alpha \
 	  --platform=$$TARGET_PLATFORM -f $(FRONTEND_DIR)/Dockerfile $(FRONTEND_DIR)
 
+presence:
+	docker build -t $(PRESENCE_IMAGE):$(VERSION)-alpha \
+	  --platform=$$TARGET_PLATFORM -f $(PRESENCE_DIR)/Dockerfile $(PRESENCE_DIR)
+
 # Build and push all services for production (amd64)
 prod: presence-prod frontend-prod backend-prod
 	@echo "🚀 All production images built and pushed."
