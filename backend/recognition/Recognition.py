@@ -176,6 +176,8 @@ class Recognition:
 
         # iterates through each face
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            timestamp = int(time.time())
+
             # Draw a box around the face
             cv2.rectangle(frame, (left*4, top*4),
                           (right*4, bottom*4), (0, 0, 255), 2)
@@ -189,11 +191,15 @@ class Recognition:
             if min_face_distance > self.config_db.get_tolerance():
                 logger.debug(
                     f'did not meet minimum tolerance: {min_face_distance}')
+                # save event without match
+                event = Event(None, None, timestamp, min_face_distance, frame,
+                              self.known_face_encodings[min_face_distance_index], confirmed=False, event_name=event_name)
+                event_photo_id = self.save_event(
+                    event, coordinates=(top, right, bottom, left))
             # detected and found face in database
             else:
                 name = self.known_face_encodings[min_face_distance_index].name
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
-                ts = int(time.time())
 
                 # don't repeat for already found faces
                 if member_id in matches:
@@ -204,12 +210,13 @@ class Recognition:
                 logger.debug(f"matched {name}: {min_face_distance}")
 
                 # create event document and save it to mongodb
-                event = Event(member_id, name, ts, min_face_distance, frame,
+                event = Event(member_id, name, timestamp, min_face_distance, frame,
                               self.known_face_encodings[min_face_distance_index], confirmed=True, event_name=event_name)
                 event_photo_id = self.save_event(
                     event, coordinates=(top, right, bottom, left))
 
-                self.members_db.add_presence(member_id, ts, event_photo_id)
+                self.members_db.add_presence(
+                    member_id, timestamp, event_photo_id)
 
                 _, buffer = cv2.imencode('.jpg', frame)
                 encoded_frame = base64.b64encode(
