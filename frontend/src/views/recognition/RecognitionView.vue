@@ -86,7 +86,6 @@ const handleSubmit = async () => {
     const formData = new FormData()
     formData.append('image', selectedFile.value)
     formData.append('event_name', eventName.value)
-    formData.append('dry_run', 'false')
 
     try {
         const response = await fetch('http://localhost:5003/api/recognize', {

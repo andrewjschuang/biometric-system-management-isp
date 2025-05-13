@@ -32,9 +32,7 @@ def get_image(image):
 def recognize(request):
     file = image_validation(request)
     image = get_image(file)
-    raw = request.form.get("dry_run", "false")
-    dry_run = raw.lower() not in ("false", "0", "no")
     event_name = request.form.get("event_name")
-    if not dry_run and not event_name:
+    if not event_name:
         raise Exception('Error: missing event_name')
-    return recognition.recognize(image, dry_run=dry_run, event_name=event_name)
+    return recognition.recognize(image, event_name=event_name)

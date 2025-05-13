@@ -149,7 +149,7 @@ class Recognition:
         logger.debug('failed to capture frame')
 
     # identifies faces in frame and persists it
-    def recognize(self, frame, model='hog', dry_run=False, event_name=""):
+    def recognize(self, frame, event_name="", model='hog'):
         if len(self.known_face_encodings) == 0:
             logger.warning('zero encodings found in database')
             return
@@ -157,7 +157,7 @@ class Recognition:
         face_locations, face_encodings = self.get_faces_from_picture(
             frame, model=model)
 
-        return self.identify(frame, face_locations, face_encodings, dry_run, event_name)
+        return self.identify(frame, face_locations, face_encodings, event_name=event_name)
 
     # detects faces in frame
     def get_faces_from_picture(self, frame, model='hog'):
@@ -167,7 +167,7 @@ class Recognition:
         return face_locations, face_encodings
 
     # identifies faces and info
-    def identify(self, frame, face_locations, face_encodings, dry_run=False, event_name=""):
+    def identify(self, frame, face_locations, face_encodings, event_name=""):
         matches = {}
 
         # TODO: change to confirmed=True
@@ -194,11 +194,6 @@ class Recognition:
                 name = self.known_face_encodings[min_face_distance_index].name
                 member_id = self.known_face_encodings[min_face_distance_index].member_id
                 ts = int(time.time())
-
-                if dry_run:
-                    matches[member_id] = name
-                    logger.debug(f"matched {name}: {min_face_distance}")
-                    continue
 
                 # don't repeat for already found faces
                 if member_id in matches:
