@@ -64,16 +64,7 @@ frontend-prod:
 	  -t $(FRONTEND_IMAGE):$(VERSION) --push $(FRONTEND_DIR)
 
 # Start docker-compose using dynamic architecture detection
-dev: detect-platform
-	@ARCH=$$(uname -m); \
-	if [ "$$ARCH" = "x86_64" ]; then \
-	  export TARGET_PLATFORM="linux/amd64"; \
-	elif [ "$$ARCH" = "arm64" ]; then \
-	  export TARGET_PLATFORM="linux/arm64"; \
-	else \
-	  echo "Unsupported architecture: $$ARCH"; exit 1; \
-	fi; \
-	echo "Starting Docker Compose with TARGET_PLATFORM=$$TARGET_PLATFORM"; \
+dev: build
 	VERSION=$(VERSION)-alpha TARGET_PLATFORM=$$TARGET_PLATFORM docker-compose up -d
 
 # Stop docker-compose
