@@ -188,54 +188,49 @@ class Recognition:
             min_face_distance = np.min(face_distances)
             min_face_distance_index = np.argmin(face_distances)
 
-            if min_face_distance > self.config_db.get_tolerance():
-                logger.debug(
-                    f'did not meet minimum tolerance: {min_face_distance}')
-                # save event without match
-                event = Event(None, None, timestamp, min_face_distance, frame,
-                              self.known_face_encodings[min_face_distance_index], confirmed=False, event_name=event_name)
-                event_photo_id = self.save_event(
-                    event, coordinates=(top, right, bottom, left))
-            # detected and found face in database
-            else:
-                name = self.known_face_encodings[min_face_distance_index].name
-                member_id = self.known_face_encodings[min_face_distance_index].member_id
+            name = self.known_face_encodings[min_face_distance_index].name
+            member_id = self.known_face_encodings[min_face_distance_index].member_id
 
-                # don't repeat for already found faces
-                if member_id in matches:
-                    logger.debug(f'already matched with {name}')
-                    continue
+            confirmed = True if min_face_distance < self.config_db.get_tolerance() else False
 
-                matches[member_id] = name
-                logger.debug(f"matched {name}: {min_face_distance}")
+            event = Event(member_id, name, timestamp, min_face_distance, frame,
+                          self.known_face_encodings[min_face_distance_index], confirmed=confirmed, event_name=event_name)
+            event_photo_id = self.save_event(
+                event, coordinates=(top, right, bottom, left))
 
-                # create event document and save it to mongodb
-                event = Event(member_id, name, timestamp, min_face_distance, frame,
-                              self.known_face_encodings[min_face_distance_index], confirmed=True, event_name=event_name)
-                event_photo_id = self.save_event(
-                    event, coordinates=(top, right, bottom, left))
+            # don't repeat for already found faces
+            if member_id in matches:
+                logger.debug(f'already matched with {name}')
+                continue
 
-                self.members_db.add_presence(
-                    member_id, timestamp, event_photo_id)
+            if confirmed == False:
+                logger.debug(f'did not reach tolerance level')
+                continue
 
-                _, buffer = cv2.imencode('.jpg', frame)
-                encoded_frame = base64.b64encode(
-                    buffer.tobytes()).decode('utf-8')
+            matches[member_id] = name
+            logger.debug(f"matched {name}: {min_face_distance}")
 
-                match = self.images_db.get_image(
-                    self.members_db.get_member_by_id(member_id).photos['FRONT'])
-                encoded_match = base64.b64encode(match).decode('utf-8')
+            self.members_db.add_presence(
+                member_id, timestamp, event_photo_id)
 
-                self.socketio.emit('match', {
-                    'image': {
-                        'src': encoded_frame,
-                    },
-                    'match': {
-                        'src': encoded_match,
-                        'id': str(member_id),
-                        'name': str(name)
-                    }
-                })
+            _, buffer = cv2.imencode('.jpg', frame)
+            encoded_frame = base64.b64encode(
+                buffer.tobytes()).decode('utf-8')
+
+            match = self.images_db.get_image(
+                self.members_db.get_member_by_id(member_id).photos['FRONT'])
+            encoded_match = base64.b64encode(match).decode('utf-8')
+
+            self.socketio.emit('match', {
+                'image': {
+                    'src': encoded_frame,
+                },
+                'match': {
+                    'src': encoded_match,
+                    'id': str(member_id),
+                    'name': str(name)
+                }
+            })
 
         return list(matches.values())
 

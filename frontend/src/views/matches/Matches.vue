@@ -11,6 +11,8 @@
                     <Separator orientation="vertical" />
                     <Label class="flex-1">Event</Label>
                     <Separator orientation="vertical" />
+                    <Label class="flex-1">Confirmed</Label>
+                    <Separator orientation="vertical" />
                     <Label class="flex-1 text-center">Image</Label>
                 </div>
             </li>
@@ -23,6 +25,8 @@
                     <div class="flex-1 text-gray-600">{{ event.face_distance }}</div>
                     <Separator orientation="vertical" />
                     <div class="flex-1 text-gray-600">{{ event.event_name || '' }}</div>                                      <!-- NEW -->
+                    <Separator orientation="vertical" />
+                    <div class="flex-1 text-gray-600">{{ event.confirmed }}</div>                                      <!-- NEW -->
                     <Separator orientation="vertical" />
                     <Button class="p-0 flex-1 text-center text-sm text-gray-600" variant="link" @click="viewImage(event.photo)">
                         View
