@@ -149,7 +149,7 @@ class Recognition:
         logger.debug('failed to capture frame')
 
     # identifies faces in frame and persists it
-    def recognize(self, frame, model='hog', dry_run=False, event_name=""):
+    def recognize(self, frame, event_name="", model='hog'):
         if len(self.known_face_encodings) == 0:
             logger.warning('zero encodings found in database')
             return
@@ -157,7 +157,7 @@ class Recognition:
         face_locations, face_encodings = self.get_faces_from_picture(
             frame, model=model)
 
-        return self.identify(frame, face_locations, face_encodings, dry_run, event_name)
+        return self.identify(frame, face_locations, face_encodings, event_name=event_name)
 
     # detects faces in frame
     def get_faces_from_picture(self, frame, model='hog'):
@@ -167,7 +167,7 @@ class Recognition:
         return face_locations, face_encodings
 
     # identifies faces and info
-    def identify(self, frame, face_locations, face_encodings, dry_run=False, event_name=""):
+    def identify(self, frame, face_locations, face_encodings, event_name=""):
         matches = {}
 
         # TODO: change to confirmed=True
@@ -176,6 +176,8 @@ class Recognition:
 
         # iterates through each face
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            timestamp = int(time.time())
+
             # Draw a box around the face
             cv2.rectangle(frame, (left*4, top*4),
                           (right*4, bottom*4), (0, 0, 255), 2)
@@ -186,54 +188,49 @@ class Recognition:
             min_face_distance = np.min(face_distances)
             min_face_distance_index = np.argmin(face_distances)
 
-            if min_face_distance > self.config_db.get_tolerance():
-                logger.debug(
-                    f'did not meet minimum tolerance: {min_face_distance}')
-            # detected and found face in database
-            else:
-                name = self.known_face_encodings[min_face_distance_index].name
-                member_id = self.known_face_encodings[min_face_distance_index].member_id
-                ts = int(time.time())
+            name = self.known_face_encodings[min_face_distance_index].name
+            member_id = self.known_face_encodings[min_face_distance_index].member_id
 
-                if dry_run:
-                    matches[member_id] = name
-                    logger.debug(f"matched {name}: {min_face_distance}")
-                    continue
+            confirmed = True if min_face_distance < self.config_db.get_tolerance() else False
 
-                # don't repeat for already found faces
-                if member_id in matches:
-                    logger.debug(f'already matched with {name}')
-                    continue
+            event = Event(member_id, name, timestamp, min_face_distance, frame,
+                          self.known_face_encodings[min_face_distance_index], confirmed=confirmed, event_name=event_name)
+            event_photo_id = self.save_event(
+                event, coordinates=(top, right, bottom, left))
 
-                matches[member_id] = name
-                logger.debug(f"matched {name}: {min_face_distance}")
+            # don't repeat for already found faces
+            if member_id in matches:
+                logger.debug(f'already matched with {name}')
+                continue
 
-                # create event document and save it to mongodb
-                event = Event(member_id, name, ts, min_face_distance, frame,
-                              self.known_face_encodings[min_face_distance_index], confirmed=True, event_name=event_name)
-                event_photo_id = self.save_event(
-                    event, coordinates=(top, right, bottom, left))
+            if confirmed == False:
+                logger.debug(f'did not reach tolerance level')
+                continue
 
-                self.members_db.add_presence(member_id, ts, event_photo_id)
+            matches[member_id] = name
+            logger.debug(f"matched {name}: {min_face_distance}")
 
-                _, buffer = cv2.imencode('.jpg', frame)
-                encoded_frame = base64.b64encode(
-                    buffer.tobytes()).decode('utf-8')
+            self.members_db.add_presence(
+                member_id, timestamp, event_photo_id)
 
-                match = self.images_db.get_image(
-                    self.members_db.get_member_by_id(member_id).photos['FRONT'])
-                encoded_match = base64.b64encode(match).decode('utf-8')
+            _, buffer = cv2.imencode('.jpg', frame)
+            encoded_frame = base64.b64encode(
+                buffer.tobytes()).decode('utf-8')
 
-                self.socketio.emit('match', {
-                    'image': {
-                        'src': encoded_frame,
-                    },
-                    'match': {
-                        'src': encoded_match,
-                        'id': str(member_id),
-                        'name': str(name)
-                    }
-                })
+            match = self.images_db.get_image(
+                self.members_db.get_member_by_id(member_id).photos['FRONT'])
+            encoded_match = base64.b64encode(match).decode('utf-8')
+
+            self.socketio.emit('match', {
+                'image': {
+                    'src': encoded_frame,
+                },
+                'match': {
+                    'src': encoded_match,
+                    'id': str(member_id),
+                    'name': str(name)
+                }
+            })
 
         return list(matches.values())
 
