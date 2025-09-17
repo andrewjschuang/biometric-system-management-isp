@@ -3,9 +3,10 @@ from entities.Calendar import Calendar
 
 
 class Person:
-    def __init__(self, id, name, birth_date, email, gender, phone_number, is_member, ministry, sigi, photos={}, encodings={}, calendar=Calendar()):
+    def __init__(self, id, name, nickname, birth_date, email, gender, phone_number, is_member, ministry, sigi, photos={}, encodings={}, calendar=Calendar()):
         self.id = str(id)
         self.name = name
+        self.nickname = nickname
         self.birth_date = birth_date
         self.email = email
         self.gender = gender
@@ -20,8 +21,8 @@ class Person:
         self.is_active = self.calendar.is_active()
 
     def __str__(self):
-        return 'Person(id=%s, name=%s, birth_date=%s, email=%s, gender=%s, phone_number=%s, is_member=%s, ministry=%s, sigi=%s, photos=%s, encodings=%s, is_active=%s)' % (
-            self.id, self.name, self.birth_date, self.email, self.gender, self.phone_number, self.is_member, self.ministry, self.sigi, self.photos, self.encodings, self.is_active)
+        return 'Person(id=%s, name=%s, nickname=%s birth_date=%s, email=%s, gender=%s, phone_number=%s, is_member=%s, ministry=%s, sigi=%s, photos=%s, encodings=%s, is_active=%s)' % (
+            self.id, self.name, self.nickname, self.birth_date, self.email, self.gender, self.phone_number, self.is_member, self.ministry, self.sigi, self.photos, self.encodings, self.is_active)
 
     def set_id(self, id):
         self.id = id
@@ -31,6 +32,7 @@ class Person:
         return {
             'id': self.id,
             'name': self.name,
+            'nickname': self.nickname,
             'birth_date': self.birth_date,
             'email': self.email,
             'gender': self.gender,
@@ -46,6 +48,17 @@ class Person:
 
     @staticmethod
     def from_dict(person):
-        return Person(person['_id'], person['name'], person['birth_date'], person['email'], person['gender'],
-                      person['phone_number'], person['is_member'], person['ministry'], person['sigi'],
-                      person['photos'], person['encodings'], Calendar.from_dict(person['calendar']))
+        return Person(
+            person['_id'],
+            person['name'],
+            person.get('nickname') or '',
+            person['birth_date'],
+            person['email'],
+            person['gender'],
+            person['phone_number'],
+            person['is_member'],
+            person['ministry'],
+            person['sigi'],
+            person['photos'],
+            person['encodings'],
+            Calendar.from_dict(person['calendar']))
