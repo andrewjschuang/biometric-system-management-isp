@@ -239,7 +239,7 @@ class Recognition:
         members = self.members_db.get_member_by_phone_number(phone_number) # not assuming there is only one, but should
         timestamp = int(time.time())
         for member in members:
-            event = Event(
+            self.events_db.insert_event(Event(
                 member.id,
                 member.name,
                 timestamp,
@@ -247,8 +247,11 @@ class Recognition:
                 None,
                 None,
                 confirmed=False,
-                event_name=event_name)
-            self.events_db.insert_event(event)
+                event_name=event_name))
+            self.members_db.add_presence(
+                member.id,
+                timestamp,
+                None)
 
 
     # handles start / stop capturing
