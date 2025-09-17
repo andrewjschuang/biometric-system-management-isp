@@ -234,6 +234,23 @@ class Recognition:
 
         return list(matches.values())
 
+
+    def phone_number_match(self, phone_number, event_name):
+        members = self.members_db.get_member_by_phone_number(phone_number) # not assuming there is only one, but should
+        timestamp = int(time.time())
+        for member in members:
+            event = Event(
+                member.id,
+                member.name,
+                timestamp,
+                None,
+                None,
+                None,
+                confirmed=False,
+                event_name=event_name)
+            self.events_db.insert_event(event)
+
+
     # handles start / stop capturing
     def signal_handler(self, run=False):
         self.run = run
