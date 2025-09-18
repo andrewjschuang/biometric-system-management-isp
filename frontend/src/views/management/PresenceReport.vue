@@ -9,7 +9,18 @@
         <TableHeader>
             <TableRow>
                 <TableHead>Date</TableHead>
-                <TableHead>Presence</TableHead>
+                <TableHead>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger as-child>
+                                <span>Presence</span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Face Match or Phone Number Match</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </TableHead>
                 <TableHead>Image</TableHead>
             </TableRow>
         </TableHeader>
@@ -18,7 +29,7 @@
                 <TableCell class="font-medium">
                     {{ formatDate(date[0]) }}
                 </TableCell>
-                <TableCell>{{ date[1] ? 'Present' : 'Absent' }}</TableCell>
+                <TableCell>{{ date[1] ? 'Face Match' : 'Phone Number Match' }}</TableCell>
                 <TableCell>
                     <Button class="p-0" variant="link" :disabled="!date[1]" @click="viewImage(date[1])">
                         View
@@ -49,6 +60,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const { toast } = useToast()
 
@@ -76,7 +93,6 @@ onMounted(async () => {
         photo.value = await fetchImage(member.value.photos.FRONT)
         presence.value = getDates(member.value.calendar, showOnlySundays.value)
         presencePercentage.value = calculatePresence(presence.value, showOnlySundays.value)
-
     } catch (e: any) {
         console.error(`Failed to fetch member: ${e.message}`);
         toast({
