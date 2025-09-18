@@ -92,15 +92,15 @@ def configuration():
 @app.route('/api/recognize', methods=['POST'])
 @cross_origin(origins="*")
 def recognize():
-    if request.form.get("phone_number"):
+    if request.files.get("image"):
         try:
-            result = api_phone_number.phone_number_match(request)
+            result = api_image.recognize(request)
             return jsonify({'data': 'success'}), 202
         except Exception as e:
             return jsonify({'error': str(e)}), 400
     else:
         try:
-            result = api_image.recognize(request)
+            result = api_phone_number.phone_number_match(request)
             return jsonify({'data': 'success'}), 202
         except Exception as e:
             return jsonify({'error': str(e)}), 400
