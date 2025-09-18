@@ -24,11 +24,11 @@
                     <Separator orientation="vertical" />
                     <div class="flex-1 text-gray-600">{{ event.face_distance }}</div>
                     <Separator orientation="vertical" />
-                    <div class="flex-1 text-gray-600">{{ event.event_name || '' }}</div>                                      <!-- NEW -->
+                    <div class="flex-1 text-gray-600">{{ event.event_name || '' }}</div>
                     <Separator orientation="vertical" />
-                    <div class="flex-1 text-gray-600">{{ event.confirmed }}</div>                                      <!-- NEW -->
+                    <div class="flex-1 text-gray-600">{{ event.confirmed }}</div>
                     <Separator orientation="vertical" />
-                    <Button class="p-0 flex-1 text-center text-sm text-gray-600" variant="link" @click="viewImage(event.photo)">
+                    <Button class="p-0 flex-1 text-center text-sm text-gray-600" variant="link" :disabled="!event.photo" @click="viewImage(event.photo)">
                         View
                     </Button>
                 </div>

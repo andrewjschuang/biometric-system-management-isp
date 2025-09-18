@@ -17,6 +17,10 @@ class MembersCollection(MongoConnector):
         member = self._find_by_id(_id)
         return Person.from_dict(member)
 
+    def get_member_by_phone_number(self, phone_number):
+        documents = self._find_by_phone_number(phone_number) # not assuming there is only one, but should
+        return [Person.from_dict(member) for member in documents]
+
     def insert_member(self, member):
         return self._insert(member.to_dict())
 

@@ -32,6 +32,7 @@ def _get_person_image_from_bytes(bytes, resize):
 def _create_person(data):
     id = data.get('id')
     name = data.get('name')
+    nickname = data.get('nickname')
     birth_date = data.get('birth_date')
     email = data.get('email')
     gender = data.get('gender')
@@ -39,11 +40,12 @@ def _create_person(data):
     is_member = data.get('is_member')
     ministry = data.get('ministry')
     sigi = data.get('sigi')
-    return Person(id, name, birth_date, email, gender, phone_number, is_member, ministry, sigi)
+    return Person(id, name, nickname, birth_date, email, gender, phone_number, is_member, ministry, sigi)
 
 
 def _update_person_fields(form, person):
     person.name = form.get('name', person.name)
+    person.nickname = form.get('nickname', person.nickname)
     person.birth_date = form.get('birth_date', person.birth_date)
     person.email = form.get('email', person.email)
     person.gender = form.get('gender', person.gender)
