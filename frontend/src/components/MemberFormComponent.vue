@@ -12,7 +12,7 @@
         </FormField>
         <FormField v-slot="{ componentField }" name="nickname">
             <FormItem class="form-item">
-                <FormLabel>Nickname<span v-if="props.create">*</span></FormLabel>
+                <FormLabel>Nickname</FormLabel>
                 <FormControl class="form-control">
                     <Input type="text" placeholder="Nickname" v-bind="componentField" v-model="localMember.nickname"
                         :required="props.create" />
