@@ -66,7 +66,8 @@ const fetchEvents = async () => {
     try {
         const startOf2024 = Math.floor(new Date('2024-01-01T00:00:00Z').getTime() / 1000);
         const response = await fetch(`http://localhost:5003/api/events?start_range=${startOf2024}`);
-        events.value = (await response.json()).data;
+        const data = (await response.json()).data;
+        events.value = data.sort((a: any, b: any) => b.timestamp - a.timestamp);
     } catch (error) {
         console.error('Error fetching events:', error);
         toast({
