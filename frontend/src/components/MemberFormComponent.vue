@@ -10,6 +10,16 @@
                 <FormMessage />
             </FormItem>
         </FormField>
+        <FormField v-slot="{ componentField }" name="nickname">
+            <FormItem class="form-item">
+                <FormLabel>Nickname<span v-if="props.create">*</span></FormLabel>
+                <FormControl class="form-control">
+                    <Input type="text" placeholder="Nickname" v-bind="componentField" v-model="localMember.nickname"
+                        :required="props.create" />
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+        </FormField>
         <FormField v-slot="{ componentField }" name="birthDate">
             <FormItem class="form-item">
                 <FormLabel>Birth Date<span v-if="props.create">*</span></FormLabel>
@@ -223,6 +233,7 @@ import { Button } from '@/components/ui/button'
 interface Member {
     id: string | undefined;
     name: string;
+    nickname: string;
     birthDate: string;
     email: string;
     gender: string;

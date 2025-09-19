@@ -91,6 +91,7 @@ const updateMembersList = async () => {
         const card: any = {
             id: member.id,
             name: member.name,
+            nickname: member.nickname,
             birthDate: member.birth_date,
             email: member.email,
             gender: member.gender,
@@ -126,6 +127,7 @@ const clearActiveCard = () => {
     activeCard.value = {
         id: undefined,
         name: undefined,
+        nickname: undefined,
         birthDate: undefined,
         email: undefined,
         gender: undefined,
@@ -141,6 +143,7 @@ const buildMemberData = (member: any) => {
     const formData = new FormData();
     formData.append('id', member.id);
     formData.append('name', member.name);
+    formData.append('nickname', member.nickname);
     formData.append('birth_date', member.birthDate);
     formData.append('email', member.email);
     formData.append('gender', member.gender);
