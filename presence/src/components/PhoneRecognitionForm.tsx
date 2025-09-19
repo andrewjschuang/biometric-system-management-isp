@@ -68,13 +68,13 @@ const PhoneRecognitionForm: React.FC<PhoneRecognitionFormProps> = ({ onBack }) =
         <div className="text-center mb-6">
           <Smartphone className="w-12 h-12 text-green-500 mx-auto mb-3" />
           <h2 className="text-xl font-semibold text-gray-900">
-            Reconhecimento por Celular
+            Reconhecimento por Telefone
           </h2>
         </div>
 
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Número do Celular
+            Número do Telefone
           </label>
           <input
             type="tel"

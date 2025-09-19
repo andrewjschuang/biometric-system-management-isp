@@ -41,7 +41,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectFaceRecognition, onSelectPh
           >
             <Smartphone className="w-12 h-12 text-green-500 mb-3" />
             <span className="text-lg font-medium text-gray-900">
-              Reconhecer por Celular
+              Reconhecer por Telefone
             </span>
             <span className="text-sm text-gray-500 mt-1">
               Digite seu número de telefone
