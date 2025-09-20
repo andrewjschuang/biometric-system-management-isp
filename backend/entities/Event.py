@@ -1,7 +1,17 @@
 class Event:
-    def __init__(self, member_id, name, timestamp, face_distance, photo, encoding=None, confirmed=False, event_name=None):
+    def __init__(self,
+                 member_id,
+                 name,
+                 phone_number,
+                 timestamp,
+                 face_distance,
+                 photo,
+                 encoding=None,
+                 confirmed=False,
+                 event_name=None):
         self.member_id = member_id
         self.name = name
+        self.phone_number = phone_number
         self.timestamp = timestamp
         self.face_distance = face_distance
         self.photo = photo
@@ -10,12 +20,13 @@ class Event:
         self.event_name = event_name
 
     def __str__(self):
-        return 'Event(member_id=%s, name=%s, timestamp=%s, face_distance=%s, photo=%s, confirmed=%s, event_name=%s)' % (self.member_id, self.name, self.timestamp, self.face_distance, self.photo, self.confirmed, self.event_name)
+        return 'Event(member_id=%s, name=%s, phone_number=%s, timestamp=%s, face_distance=%s, photo=%s, confirmed=%s, event_name=%s)' % (self.member_id, self.name, self.phone_number, self.timestamp, self.face_distance, self.photo, self.confirmed, self.event_name)
 
     def to_dict(self):
         return {
             'member_id': self.member_id,
             'name': self.name,
+            'phone_number': self.phone_number,
             'timestamp': self.timestamp,
             'face_distance': self.face_distance,
             'photo': self.photo,
@@ -25,4 +36,13 @@ class Event:
 
     @staticmethod
     def from_dict(event):
-        return Event(event['member_id'], event['name'], event['timestamp'], event['face_distance'], event['photo'], event.get('encoding'), event.get('confirmed'), event.get('event_name'))
+        return Event(
+            event['member_id'],
+            event['name'],
+            event.get('phone_number'),
+            event['timestamp'],
+            event['face_distance'],
+            event['photo'],
+            event.get('encoding'),
+            event.get('confirmed'),
+            event.get('event_name'))

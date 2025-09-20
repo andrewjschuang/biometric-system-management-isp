@@ -193,7 +193,7 @@ class Recognition:
 
             confirmed = True if min_face_distance < self.config_db.get_tolerance() else False
 
-            event = Event(member_id, name, timestamp, min_face_distance, frame,
+            event = Event(member_id, name, None, timestamp, min_face_distance, frame,
                           self.known_face_encodings[min_face_distance_index], confirmed=confirmed, event_name=event_name)
             event_photo_id = self.save_event(
                 event, coordinates=(top, right, bottom, left))
@@ -242,6 +242,7 @@ class Recognition:
             self.events_db.insert_event(Event(
                 None,
                 None,
+                phone_number,
                 timestamp,
                 None,
                 None,
@@ -252,6 +253,7 @@ class Recognition:
             self.events_db.insert_event(Event(
                 member.id,
                 member.name,
+                phone_number,
                 timestamp,
                 None,
                 None,
