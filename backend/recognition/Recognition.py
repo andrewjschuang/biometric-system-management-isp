@@ -236,8 +236,18 @@ class Recognition:
 
 
     def phone_number_match(self, phone_number, event_name):
-        members = self.members_db.get_member_by_phone_number(phone_number) # not assuming there is only one, but should
         timestamp = int(time.time())
+        members = self.members_db.get_member_by_phone_number(phone_number) # not assuming there is only one, but should
+        if not members:
+            self.events_db.insert_event(Event(
+                None,
+                None,
+                timestamp,
+                None,
+                None,
+                None,
+                confirmed=False,
+                event_name=event_name))
         for member in members:
             self.events_db.insert_event(Event(
                 member.id,
