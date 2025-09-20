@@ -193,7 +193,7 @@ class Recognition:
 
             confirmed = True if min_face_distance < self.config_db.get_tolerance() else False
 
-            event = Event(member_id, name, timestamp, min_face_distance, frame,
+            event = Event(member_id, name, None, timestamp, min_face_distance, frame,
                           self.known_face_encodings[min_face_distance_index], confirmed=confirmed, event_name=event_name)
             event_photo_id = self.save_event(
                 event, coordinates=(top, right, bottom, left))
@@ -236,12 +236,24 @@ class Recognition:
 
 
     def phone_number_match(self, phone_number, event_name):
-        members = self.members_db.get_member_by_phone_number(phone_number) # not assuming there is only one, but should
         timestamp = int(time.time())
+        members = self.members_db.get_member_by_phone_number(phone_number) # not assuming there is only one, but should
+        if not members:
+            self.events_db.insert_event(Event(
+                None,
+                None,
+                phone_number,
+                timestamp,
+                None,
+                None,
+                None,
+                confirmed=False,
+                event_name=event_name))
         for member in members:
             self.events_db.insert_event(Event(
                 member.id,
                 member.name,
+                phone_number,
                 timestamp,
                 None,
                 None,
