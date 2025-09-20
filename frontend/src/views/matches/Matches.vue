@@ -7,6 +7,8 @@
                     <Separator orientation="vertical" />
                     <Label class="flex-1">Match</Label>
                     <Separator orientation="vertical" />
+                    <Label class="flex-1">Phone Number</Label>
+                    <Separator orientation="vertical" />
                     <Label class="flex-1">Face Distance</Label>
                     <Separator orientation="vertical" />
                     <Label class="flex-1">Event</Label>
@@ -21,6 +23,8 @@
                     <div class="flex-1 text-gray-600">{{ formatTimestamp(event.timestamp) }}</div>
                     <Separator orientation="vertical" />
                     <div class="flex-1 text-gray-600">{{ event.name }}</div>
+                    <Separator orientation="vertical" />
+                    <div class="flex-1 text-gray-600">{{ event.phone_number }}</div>
                     <Separator orientation="vertical" />
                     <div class="flex-1 text-gray-600">{{ event.face_distance }}</div>
                     <Separator orientation="vertical" />
