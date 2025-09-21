@@ -14,8 +14,7 @@
             <FormItem class="form-item">
                 <FormLabel>Nickname</FormLabel>
                 <FormControl class="form-control">
-                    <Input type="text" placeholder="Nickname" v-bind="componentField" v-model="localMember.nickname"
-                        :required="props.create" />
+                    <Input type="text" placeholder="Nickname" v-bind="componentField" v-model="localMember.nickname" />
                 </FormControl>
                 <FormMessage />
             </FormItem>
