@@ -16,10 +16,11 @@ const PresencaForm: React.FC<PresencaFormProps> = ({ onBack }) => {
   useEffect(() => {
     if (submitSuccess) {
       setTimeout(() => {
-        onBack?.();
+        window.location.reload();
       }, 2000);
     }
-  }, [submitSuccess, onBack]);
+  }, [submitSuccess]);
+
 
   const handleOpenCamera = () => {
     setShowCamera(true);

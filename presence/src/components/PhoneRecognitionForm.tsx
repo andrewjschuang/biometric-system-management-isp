@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Smartphone } from 'lucide-react';
 import RadioGroup from './RadioGroup';
 import SubmitButton from './SubmitButton';
@@ -14,6 +14,14 @@ const PhoneRecognitionForm: React.FC<PhoneRecognitionFormProps> = ({ onBack }) =
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  useEffect(() => {
+    if (submitSuccess) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
+  }, [submitSuccess]);
 
   const cultoOptions = [
     { id: 'ebd', label: 'EBD' },
@@ -38,10 +46,6 @@ const PhoneRecognitionForm: React.FC<PhoneRecognitionFormProps> = ({ onBack }) =
       setSubmitSuccess(true);
       setPhoneNumber('');
       setEventName('');
-
-      setTimeout(() => {
-        onBack?.();
-      }, 2000);
     } catch (error) {
       console.error('Erro ao enviar formulário:', error);
       setSubmitError(error instanceof Error ? error.message : 'Erro desconhecido');
