@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Camera, ArrowLeft } from 'lucide-react';
 import CameraInput from './CameraInput';
 import RadioGroup from './RadioGroup';
@@ -12,6 +12,14 @@ interface PresencaFormProps {
 const PresencaForm: React.FC<PresencaFormProps> = ({ onBack }) => {
   const { formState, updateFormState, submitForm, isSubmitting, submitError, submitSuccess } = useFormContext();
   const [showCamera, setShowCamera] = useState(false);
+
+  useEffect(() => {
+    if (submitSuccess) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
+  }, [submitSuccess]);
 
 
   const handleOpenCamera = () => {
