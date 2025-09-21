@@ -1,6 +1,6 @@
 # Variables
 MAKEFLAGS += -j3
-VERSION ?= 3.0.7
+VERSION ?= 3.0.8
 DOCKER_USER = andrewjsc
 BACKEND_IMAGE = $(DOCKER_USER)/bmsisp-backend
 FRONTEND_IMAGE = $(DOCKER_USER)/bmsisp-frontend
