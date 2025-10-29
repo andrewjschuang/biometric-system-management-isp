@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Smartphone } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import RadioGroup from './RadioGroup';
 import SubmitButton from './SubmitButton';
 import { submitPresence } from '../services/api';
@@ -71,13 +71,6 @@ const PhoneRecognitionForm: React.FC<PhoneRecognitionFormProps> = ({ onBack }) =
         </div>
       )}
       <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
-        <div className="text-center mb-6">
-          <Smartphone className="w-12 h-12 text-green-500 mx-auto mb-3" />
-          <h2 className="text-xl font-semibold text-gray-900">
-            Reconhecimento por Telefone
-          </h2>
-        </div>
-
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Número do Telefone
