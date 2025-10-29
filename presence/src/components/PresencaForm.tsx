@@ -12,9 +12,11 @@ interface PresencaFormProps {
 const PresencaForm: React.FC<PresencaFormProps> = ({ onBack }) => {
   const { formState, updateFormState, submitForm, isSubmitting, submitError, submitSuccess } = useFormContext();
   const [showCamera, setShowCamera] = useState(false);
+  const [dataConsent, setDataConsent] = useState(false);
 
   useEffect(() => {
     if (submitSuccess) {
+      setDataConsent(false);
       setTimeout(() => {
         window.location.reload();
       }, 2000);
@@ -123,9 +125,22 @@ const PresencaForm: React.FC<PresencaFormProps> = ({ onBack }) => {
           </div>
         )}
 
+        <div className="flex items-start space-x-3 py-3">
+          <input
+            type="checkbox"
+            id="dataConsent"
+            checked={dataConsent}
+            onChange={(e) => setDataConsent(e.target.checked)}
+            className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+          />
+          <label htmlFor="dataConsent" className="text-sm text-gray-700">
+            Autorizo o uso da minha foto para controle de presença
+          </label>
+        </div>
+
         <SubmitButton
           isSubmitting={isSubmitting}
-          isDisabled={!formState.photo || !formState.event_name}
+          isDisabled={!formState.photo || !formState.event_name || !dataConsent}
         />
       </form>
     </div>
