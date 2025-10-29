@@ -14,6 +14,7 @@ const PhoneRecognitionForm: React.FC<PhoneRecognitionFormProps> = ({ onBack }) =
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [dataConsent, setDataConsent] = useState(false);
 
   useEffect(() => {
     if (submitSuccess) {
@@ -46,6 +47,7 @@ const PhoneRecognitionForm: React.FC<PhoneRecognitionFormProps> = ({ onBack }) =
       setSubmitSuccess(true);
       setPhoneNumber('');
       setEventName('');
+      setDataConsent(false);
     } catch (error) {
       console.error('Erro ao enviar formulário:', error);
       setSubmitError(error instanceof Error ? error.message : 'Erro desconhecido');
@@ -116,9 +118,22 @@ const PhoneRecognitionForm: React.FC<PhoneRecognitionFormProps> = ({ onBack }) =
           </div>
         )}
 
+        <div className="flex items-start space-x-3 py-3">
+          <input
+            type="checkbox"
+            id="dataConsent"
+            checked={dataConsent}
+            onChange={(e) => setDataConsent(e.target.checked)}
+            className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+          />
+          <label htmlFor="dataConsent" className="text-sm text-gray-700">
+            Autorizo o uso dos dados preenchidos para controle de presença
+          </label>
+        </div>
+
         <SubmitButton
           isSubmitting={isSubmitting}
-          isDisabled={!phoneNumber.trim() || !eventName}
+          isDisabled={!phoneNumber.trim() || !eventName || !dataConsent}
         />
       </form>
     </div>
