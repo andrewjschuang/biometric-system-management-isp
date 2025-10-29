@@ -134,7 +134,7 @@ const PresencaForm: React.FC<PresencaFormProps> = ({ onBack }) => {
             className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
           />
           <label htmlFor="dataConsent" className="text-sm text-gray-700">
-            Autorizo o uso dos dados preenchidos para controle de presença
+            Autorizo o uso da minha foto para controle de presença
           </label>
         </div>
 
