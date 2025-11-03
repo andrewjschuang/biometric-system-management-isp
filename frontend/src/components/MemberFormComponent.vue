@@ -77,8 +77,9 @@
             <FormItem class="form-item">
                 <FormLabel>Phone Number<span v-if="props.create">*</span></FormLabel>
                 <FormControl class="form-control">
-                    <Input type="text" placeholder="11912345678" v-bind="componentField"
-                        v-model="localMember.phoneNumber" :required="props.create" />
+                    <Input type="tel" placeholder="11912345678" v-bind="componentField"
+                        v-model="localMember.phoneNumber" :required="props.create"
+                        @keypress="onlyNumbers" inputmode="numeric" pattern="[0-9]*" />
                 </FormControl>
                 <FormMessage />
             </FormItem>
@@ -259,6 +260,13 @@ const handlePhotoChange = (event: any, field: 'frontPhoto' | 'leftPhoto' | 'righ
     const file = event.target.files[0];
     if (file) localMember.value[field] = file;
     console.log(localMember.value)
+}
+
+const onlyNumbers = (event: KeyboardEvent) => {
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode < 48 || charCode > 57) {
+        event.preventDefault();
+    }
 }
 
 const handleSubmit = () => {
