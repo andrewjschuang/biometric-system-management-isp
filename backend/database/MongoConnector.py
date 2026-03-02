@@ -77,4 +77,6 @@ class MongoConnector(ABC):
         return self.collection.find_one(_id)
 
     def _find_by_phone_number(self, phone_number):
-        return self.collection.find({"phone_number": phone_number})
+        return self.collection.find({
+            "phone_number": {"$in": [int(phone_number), str(phone_number)]}
+        })
