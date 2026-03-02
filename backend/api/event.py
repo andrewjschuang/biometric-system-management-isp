@@ -10,4 +10,15 @@ def get_events(request):
     confirmed = request.args.get('confirmed')
     events = recognition.events_db.get_events_by_date(
         start_range, end_range, confirmed)
-    return [x.to_dict() for x in events]
+
+    members = recognition.members_db.get_all_members()
+    member_names = {member.id: member.name for member in members}
+
+    result = []
+    for event in events:
+        event_dict = event.to_dict()
+        if event.member_id and event.member_id in member_names:
+            event_dict['name'] = member_names[event.member_id]
+        result.append(event_dict)
+
+    return result
