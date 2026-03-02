@@ -22,7 +22,8 @@ export const submitPresence = async (params: RecognitionParams): Promise<Respons
       });
 
     if (!response.ok) {
-      throw new Error(`Servidor respondeu com status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Servidor respondeu com status: ${response.status}${errorText ? ` - ${errorText}` : ''}`);
     }
 
     return response;
