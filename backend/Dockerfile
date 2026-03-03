@@ -6,7 +6,9 @@ SHELL ["/bin/bash", "-c"]
 ENV PYTHONUNBUFFERED=0
 ENV OPENCV_FFMPEG_CAPTURE_OPTIONS="rtsp_transport;tcp|stimeout;10000000"
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -y update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     gfortran \
@@ -35,7 +37,7 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
     python3-opencv \
     software-properties-common \
     zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY . /app
@@ -45,6 +47,9 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
 
 RUN poetry run pip install --no-cache-dir setuptools wheel
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    poetry run pip install --no-cache-dir dlib
 
 RUN poetry install --no-root
 
