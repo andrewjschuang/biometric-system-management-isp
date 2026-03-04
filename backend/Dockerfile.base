@@ -1,0 +1,35 @@
+FROM python:3.12-slim
+
+SHELL ["/bin/bash", "-c"]
+
+ENV PYTHONUNBUFFERED=1
+ENV OPENCV_FFMPEG_CAPTURE_OPTIONS="rtsp_transport;tcp|stimeout;10000000"
+ENV PATH="/app/.venv/bin:$PATH"
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get -y update && apt-get install -y --no-install-recommends \
+    build-essential cmake gfortran git wget curl graphicsmagick gstreamer1.0-tools \
+    gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+    libgraphicsmagick1-dev libopenblas-dev libavcodec-dev libavformat-dev \
+    libgtk2.0-dev libjpeg-dev liblapack-dev libswscale-dev libopencv-dev \
+    pkg-config python3-dev zip \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Create venv and install tooling
+RUN python -m venv /app/.venv && \
+    /app/.venv/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    /app/.venv/bin/pip install --no-cache-dir poetry
+
+# Layer 1: dlib only (rarely changes — isolated for cache stability)
+RUN /app/.venv/bin/pip install --no-cache-dir "dlib==19.24.8"
+
+# Layer 2: face_recognition packages (depend on dlib)
+RUN /app/.venv/bin/pip install --no-cache-dir "face-recognition==1.3.0" "face-recognition-models==0.3.0" && \
+    /app/.venv/bin/pip install --force-reinstall git+https://github.com/ageitgey/face_recognition_models
+
+# Layer 3: remaining app deps via Poetry (invalidated by pyproject.toml changes, but dlib layers above are cached)
+COPY pyproject.toml poetry.lock* ./
+RUN /app/.venv/bin/poetry install --no-root

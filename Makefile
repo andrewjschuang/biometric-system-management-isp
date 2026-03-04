@@ -5,12 +5,14 @@ DOCKER_USER = andrewjsc
 BACKEND_IMAGE = $(DOCKER_USER)/bmsisp-backend
 FRONTEND_IMAGE = $(DOCKER_USER)/bmsisp-frontend
 PRESENCE_IMAGE = $(DOCKER_USER)/bmsisp-presence
+BASE_IMAGE = $(DOCKER_USER)/bmsisp-base
+BASE_TAG = py3.12-dlib19.24.8
 BACKEND_DIR = ./backend
 FRONTEND_DIR = ./frontend
 PRESENCE_DIR = ./presence
 
 # Phony targets
-.PHONY: build prod presence frontend backend presence-prod frontend-prod backend-prod detect-platform dev kill up
+.PHONY: build prod presence frontend backend presence-prod frontend-prod backend-prod detect-platform dev kill up base-image base-image-prod
 
 up: detect-platform
 	@echo "Starting containers..."
@@ -60,6 +62,17 @@ backend-prod:
 frontend-prod:
 	docker buildx build --platform linux/amd64 \
 	  -t $(FRONTEND_IMAGE):$(VERSION) --push $(FRONTEND_DIR)
+
+# Local build of base image (current arch, no push)
+base-image: detect-platform
+	docker build -t $(BASE_IMAGE):$(BASE_TAG) \
+	  --platform=$(TARGET_PLATFORM) -f $(BACKEND_DIR)/Dockerfile.base $(BACKEND_DIR)
+
+# Production build and push of base image (multi-arch)
+# Run MANUALLY and INFREQUENTLY — only when dlib or system deps change.
+base-image-prod:
+	docker buildx build --platform linux/amd64,linux/arm64 \
+	  -t $(BASE_IMAGE):$(BASE_TAG) --push -f $(BACKEND_DIR)/Dockerfile.base $(BACKEND_DIR)
 
 # Detect architecture and set TARGET_PLATFORM
 detect-platform:
