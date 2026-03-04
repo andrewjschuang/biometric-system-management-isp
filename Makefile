@@ -14,36 +14,39 @@ PRESENCE_DIR = ./presence
 
 up: detect-platform
 	@echo "Starting containers..."
-	VERSION=$(VERSION)-alpha TARGET_PLATFORM=$$TARGET_PLATFORM docker-compose up -d
+	VERSION=$(VERSION)-alpha TARGET_PLATFORM=$(TARGET_PLATFORM) docker-compose up -d
 
 # Start docker-compose using dynamic architecture detection
 dev: build
-	VERSION=$(VERSION)-alpha TARGET_PLATFORM=$$TARGET_PLATFORM docker-compose up -d
+	VERSION=$(VERSION)-alpha TARGET_PLATFORM=$(TARGET_PLATFORM) docker-compose up -d
 
 # Stop docker-compose
 kill:
 	docker-compose down
 
 # Build all services locally for current architecture
-build: presence frontend backend
+build: detect-platform
+	$(MAKE) presence
+	$(MAKE) frontend
+	$(MAKE) backend
 	@echo "✅ All services built locally."
 
 # Build and push all services for production (amd64)
 prod: presence-prod frontend-prod backend-prod
 	@echo "🚀 All production images built and pushed."
 
-# Individual local-build targets\presence:
+# Individual local-build targets
 backend: detect-platform
 	docker build -t $(BACKEND_IMAGE):$(VERSION)-alpha \
-	  --platform=$$TARGET_PLATFORM -f $(BACKEND_DIR)/Dockerfile $(BACKEND_DIR)
+	  --platform=$(TARGET_PLATFORM) -f $(BACKEND_DIR)/Dockerfile $(BACKEND_DIR)
 
 frontend: detect-platform
 	docker build -t $(FRONTEND_IMAGE):$(VERSION)-alpha \
-	  --platform=$$TARGET_PLATFORM -f $(FRONTEND_DIR)/Dockerfile $(FRONTEND_DIR)
+	  --platform=$(TARGET_PLATFORM) -f $(FRONTEND_DIR)/Dockerfile $(FRONTEND_DIR)
 
 presence: detect-platform
 	docker build -t $(PRESENCE_IMAGE):$(VERSION)-alpha \
-	  --platform=$$TARGET_PLATFORM -f $(PRESENCE_DIR)/Dockerfile $(PRESENCE_DIR)
+	  --platform=$(TARGET_PLATFORM) -f $(PRESENCE_DIR)/Dockerfile $(PRESENCE_DIR)
 
 # Individual prod targets
 presence-prod:
@@ -60,12 +63,14 @@ frontend-prod:
 
 # Detect architecture and set TARGET_PLATFORM
 detect-platform:
-	@ARCH=$$(uname -m); \
-	if [ "$$ARCH" = "x86_64" ]; then \
-	  export TARGET_PLATFORM="linux/amd64"; \
-	elif [ "$$ARCH" = "arm64" ]; then \
-	  export TARGET_PLATFORM="linux/arm64"; \
-	else \
-	  echo "Unsupported architecture: $$ARCH"; exit 1; \
-	fi; \
-	echo "Using TARGET_PLATFORM=$$TARGET_PLATFORM";
+	$(eval TARGET_PLATFORM := $(shell \
+		ARCH=$$(uname -m); \
+		if [ "$$ARCH" = "x86_64" ]; then \
+			echo "linux/amd64"; \
+		elif [ "$$ARCH" = "arm64" ]; then \
+			echo "linux/arm64"; \
+		else \
+			echo "Unsupported architecture: $$ARCH" >&2; exit 1; \
+		fi \
+	))
+	@echo "Using TARGET_PLATFORM=$(TARGET_PLATFORM)"

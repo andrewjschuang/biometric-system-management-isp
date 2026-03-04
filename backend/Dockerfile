@@ -1,10 +1,10 @@
-# Contains Python 3.12
-FROM ubuntu:24.04
+FROM python:3.12-slim
 
 SHELL ["/bin/bash", "-c"]
 
-ENV PYTHONUNBUFFERED=0
+ENV PYTHONUNBUFFERED=1
 ENV OPENCV_FFMPEG_CAPTURE_OPTIONS="rtsp_transport;tcp|stimeout;10000000"
+ENV PATH="/app/.venv/bin:$PATH"
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     gstreamer1.0-plugins-bad \
     gstreamer1.0-plugins-ugly \
     libgraphicsmagick1-dev \
-    libatlas-base-dev \
+    libopenblas-dev \
     libavcodec-dev \
     libavformat-dev \
     libgtk2.0-dev \
@@ -30,27 +30,20 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     libswscale-dev \
     libopencv-dev \
     pkg-config \
-    python3-pip \
-    python3.12-venv \
     python3-dev \
-    python3-numpy \
-    python3-opencv \
-    software-properties-common \
     zip \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
+COPY pyproject.toml poetry.lock* ./
+
+RUN python -m venv /app/.venv && \
+    /app/.venv/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    /app/.venv/bin/pip install --no-cache-dir poetry && \
+    /app/.venv/bin/poetry install --no-root && \
+    /app/.venv/bin/pip install --force-reinstall git+https://github.com/ageitgey/face_recognition_models
+
 COPY . /app
-
-# # Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="/root/.local/bin:$PATH"
-
-RUN poetry run pip install --no-cache-dir setuptools wheel
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    poetry run pip install --no-cache-dir dlib
-
-RUN poetry install --no-root
 
 CMD ["poetry", "run", "python", "-m", "server"]
